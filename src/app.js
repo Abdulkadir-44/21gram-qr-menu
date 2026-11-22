@@ -325,22 +325,35 @@ var gl={ok:false};
 
 /* ============ GEÇİŞ (karşılama ⇄ menü) ============ */
 var welcome=$('#welcome'),app=$('#app'),tr={active:false,from:0,to:0,t0:0,dur:1150},Pv=0;
+/* ÖN ISITMA — menü ilk kez görünürken tek karede tüm görselleri çözüp çizmek ~170 ms
+   takılmaya yol açıyordu. Karşılama ekranındayken görseller arka planda çözülür ve
+   menü 0.002 opaklıkla (gözle görülmez, animasyonları durdurulmuş) önceden çizilir. */
+var WARM=.002,warmed=false;
+function warmMenu(){
+  if(warmed)return;warmed=true;
+  var imgs=[].slice.call(grid.querySelectorAll('img'));
+  Promise.all(imgs.map(function(i){return i.decode?i.decode().catch(function(){}):0})).then(function(){
+    if(state.mode!=='welcome'||tr.active)return;
+    app.classList.add('prewarm');app.classList.remove('is-hidden');app.style.opacity=String(WARM);
+  });
+}
 function setP(v){
   Pv=v;if(gl.setP)gl.setP(v);
   welcome.style.opacity=String(1-ss(0,.32,v));
-  app.style.opacity=String(ss(.68,.96,v));
+  app.style.opacity=String(Math.max(warmed?WARM:0,ss(.68,.96,v)));
 }
 function finishMode(){
   var m=Pv>=.5?'menu':'welcome';state.mode=m;
   welcome.classList.toggle('is-hidden',m==='menu');
   app.classList.toggle('is-hidden',m==='welcome');
   document.documentElement.classList.toggle('lock',m==='welcome');
-  if(m==='welcome'){welcome.style.opacity='';app.style.opacity='0'}
+  if(m==='welcome'){welcome.style.opacity='';app.style.opacity=warmed?String(WARM):'0';app.classList.toggle('is-hidden',!warmed);app.classList.toggle('prewarm',warmed)}
   else{welcome.style.opacity='0';app.style.opacity='1'}
+  app.inert=m==='welcome';if(m==='welcome')app.setAttribute('aria-hidden','true');else app.removeAttribute('aria-hidden');
 }
 function goTo(m,instant){
   var to=m==='menu'?1:0;
-  if(m==='menu'){app.classList.remove('is-hidden');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
+  if(m==='menu'){warmMenu();app.classList.remove('is-hidden','prewarm');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
   else{app.classList.remove('is-hidden');welcome.classList.remove('is-hidden')}
   document.documentElement.classList.toggle('lock',false);
   if(instant||RM){setP(to);finishMode();if(m==='menu')dealCards();return}
@@ -1101,6 +1114,7 @@ function goToMenuForHash(id){
   openSheet(id,null,true);
 }
 render({deal:false});setP(0);finishMode();
+setTimeout(function(){(window.requestIdleCallback||function(f){setTimeout(f,1)})(warmMenu,{timeout:1500})},900);
 var h0=location.hash.slice(1);
 if(h0&&BYID[h0])goToMenuForHash(h0);
 })();

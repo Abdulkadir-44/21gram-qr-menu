@@ -8,6 +8,9 @@ img{display:block}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 :focus-visible{outline:3px solid var(--cream);outline-offset:3px;border-radius:6px}
 .is-hidden{visibility:hidden}
+/* ön ısıtma: menü karşılamanın arkasında görünmezce çizilir, animasyonları durur */
+#app.prewarm{pointer-events:none}
+#app.prewarm *{animation-play-state:paused!important}
 
 /* sahne arkası */
 #bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;background:
