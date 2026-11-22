@@ -709,7 +709,7 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
 .stepper button:hover{background:rgba(255,255,255,.14)}
 .stepper output{min-width:24px;text-align:center;color:var(--cream);font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:22px}
 .per{grid-column:1/-1;font-size:14.5px;color:var(--muted)}
-.per b{display:inline-block;color:var(--teal);font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:22px;margin-left:4px}
+.per b{display:inline-block;color:var(--red);font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:22px;margin-left:4px}
 .total-d{display:flex;align-items:baseline;gap:8px;margin-top:12px;padding-top:10px;border-top:2px solid var(--ink)}
 .total-d span:first-child{font-size:12px;font-weight:800;letter-spacing:.18em}
 .total-d .dots{flex:1;border-bottom:2px dotted color-mix(in srgb,var(--ink) 45%,transparent);transform:translateY(-4px)}
