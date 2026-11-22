@@ -2,13 +2,17 @@ import sharp from 'sharp'; import fs from 'node:fs';
 const C = 'scripts/.cache/', OUT = 'public/img/p/';
 fs.mkdirSync(OUT, { recursive: true });
 const downloads = JSON.parse(fs.readFileSync(C + 'downloads.json', 'utf8'));
-const STRICT = { 'americano': 251, 'filtre-kahve': 251 }; // id -> eşik (beyaz ürünler için)
-async function cut(src, LO = 205) {
+const STRICT = { 'americano': 251, 'filtre-kahve': 251 };
+const SOFT_CATS = ['smash-burger', 'tavuk-burger'];
+const SOFT = new Set(JSON.parse(fs.readFileSync('public/menu.json', 'utf8')).groups.flatMap(g => g.cats.filter(c => SOFT_CATS.includes(c.key)).flatMap(c => c.items.map(i => i.id)))); // id -> eşik (beyaz ürünler için)
+async function cut(src, LO = 205, soft = false) {
   const meta0 = await sharp(src).metadata();
   const { data, info } = await sharp(src).extract({ left: 6, top: 6, width: meta0.width - 12, height: meta0.height - 12 }).extend({ top: 4, bottom: 4, left: 4, right: 4, background: '#ffffff' }).resize(900, 900, { fit: 'inside' }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width, H = info.height, N = W * H;
   const out = Buffer.alloc(N * 4), seen = new Uint8Array(N), q = new Int32Array(N);
-  const bgLike = i => { const r = data[i*3], g = data[i*3+1], b = data[i*3+2]; const mn = Math.min(r,g,b), mx = Math.max(r,g,b); return mn > LO && mx - mn < 22; };
+  // soft: tabak/burger gibi ürünlerde alttaki gri-bej gölge de zemin sayılır (gölge olarak yarı saydam kalır)
+  const bgLike = i => { const r = data[i*3], g = data[i*3+1], b = data[i*3+2]; const mn = Math.min(r,g,b), mx = Math.max(r,g,b); return soft ? (mn > 150 && mx - mn < 30) : (mn > LO && mx - mn < 22); };
+  const LOa = soft ? 150 : LO;
   let h = 0, t = 0;
   for (let x = 0; x < W; x++) for (const y of [0, H-1]) { const i = y*W+x; if (!seen[i] && bgLike(i)) { seen[i] = 1; q[t++] = i; } }
   for (let y = 0; y < H; y++) for (const x of [0, W-1]) { const i = y*W+x; if (!seen[i] && bgLike(i)) { seen[i] = 1; q[t++] = i; } }
@@ -27,10 +31,11 @@ async function cut(src, LO = 205) {
     const r = data[i*3], g = data[i*3+1], b = data[i*3+2];
     let a = 255, R = r, G = g, B = b;
     if (bg[i] > 0) {
-      const mn = Math.min(r, g, b), lo = bg[i] === 1 ? LO : 150;
+      const mn = Math.min(r, g, b), lo = bg[i] === 1 ? LOa : 150;
       let af = (255 - mn) / (255 - lo); af = Math.max(0, Math.min(1, af)); af = bg[i] === 1 ? Math.pow(af, 1.6) * 0.85 : Math.pow(af, 1.4);
+      if (bg[i] === 1) { R = 34; G = 8; B = 12; af *= 0.75; } // zemin gölgesi: koyu, yarı saydam gölge
+      else if (af > 0.01) { const un = c => Math.max(0, Math.min(255, Math.round((c - 255 * (1 - af)) / af))); R = un(r); G = un(g); B = un(b); } else R = G = B = 0;
       a = Math.round(af * 255);
-      if (af > 0.01) { const un = c => Math.max(0, Math.min(255, Math.round((c - 255 * (1 - af)) / af))); R = un(r); G = un(g); B = un(b); } else R = G = B = 0;
     }
     out[i*4] = R; out[i*4+1] = G; out[i*4+2] = B; out[i*4+3] = a;
   }
@@ -39,8 +44,8 @@ async function cut(src, LO = 205) {
 let n = 0;
 for (const d of downloads) {
   const dst = OUT + d.id + '.webp';
-  if (d.proto && fs.existsSync(C + 'proto/' + d.id + '.webp')) { fs.copyFileSync(C + 'proto/' + d.id + '.webp', dst); continue; }
-  try { fs.writeFileSync(dst, await cut(C + 'raw/' + d.id + '.jpg', STRICT[d.id] || 205)); n++; } catch (e) { console.log('ERR', d.id, e.message); }
+  if (d.proto && !SOFT.has(d.id) && fs.existsSync(C + 'proto/' + d.id + '.webp')) { fs.copyFileSync(C + 'proto/' + d.id + '.webp', dst); continue; }
+  try { fs.writeFileSync(dst, await cut(C + 'raw/' + d.id + '.jpg', STRICT[d.id] || 205, SOFT.has(d.id))); n++; } catch (e) { console.log('ERR', d.id, e.message); }
 }
 // fotoğrafı simprada olmayıp prototipte olan
 const menu = JSON.parse(fs.readFileSync('public/menu.json', 'utf8'));

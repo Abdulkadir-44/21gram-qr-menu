@@ -10,11 +10,22 @@ const menu = await fetch('/menu.json').then(r => r.json());
 
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
-menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach(it => PRODUCTS.push({
+/* kategori → kart türü (yemeğe göre farklı kart tasarımı). Listede olmayanlar klasik kartı kullanır. */
+const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger' };
+menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
   img: it.img ? '/img/p/' + it.img : '', w: it.w, h: it.h,
+  kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
+
+/* burger kartı: açıklamadaki malzemeleri "kat" rengine eşle */
+const LAYER_COLORS = [
+  [/trüf|truffle/, '#3B2A1E'], [/tavuk|chicken|chick/, '#C9861A'], [/smash|köfte|dana|\bet\b/, '#6B3A22'],
+  [/cheese|cheddar|peynir|parmesan/, '#F2B705'], [/mayo|ranch/, '#E6CF95'], [/ketçap|reçel|dynamite|acı|sos/, '#E4032D'],
+  [/soğan/, '#8E3B7A'], [/gürkens|turşu|marul|jalapeno|biber|salata/, '#5E8C31'], [/patates/, '#E3A33A'],
+];
+const layerColor = s => { const t = s.toLocaleLowerCase('tr'); for (const [re, c] of LAYER_COLORS) if (re.test(t)) return c; return '#B08968'; };
 const LOGO_IMG = '/img/logo.png';
 
 /* tema: renkler theme.css'ten okunur (3D sahne de aynı değerleri kullanır) */
@@ -390,6 +401,28 @@ function moveInd(){
   var tb=tabsEl,l=b.offsetLeft-(tb.clientWidth-b.offsetWidth)/2;if(tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:l,behavior:RM?'auto':'smooth'});
 }
 function cardHTML(p,i){
+  return p.kind==='burger'?burgerCardHTML(p,i):classicCardHTML(p,i);
+}
+/* ——— BURGER KARTI: "ambalaj kâğıdı" ———
+   kareli tepsi kâğıdı şeridi · güneş patlaması rozeti üstünde taşan burger · eğik fiyat etiketi
+   · malzemeler burger katları gibi renk kodlu · alt kenar tırtıklı ambalaj */
+function burgerCardHTML(p,i){
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+                :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
+  var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+  var shown=parts.slice(0,5),rest=parts.length-shown.length;
+  var layers=shown.map(function(s){return '<li style="--c:'+layerColor(s)+'">'+esc(s)+'</li>'}).join('')+(rest>0?'<li class="more-l">+'+rest+'</li>':'');
+  return '<article class="card card--burger" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="gingham" aria-hidden="true"></div><div class="sheen"></div></div>'
+   +'<div class="stage"><svg class="burst" viewBox="0 0 200 200" aria-hidden="true"><use href="#burst"/></svg>'+vis
+   +'<span class="tag" aria-hidden="true"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span></div>'
+   +'<div class="meta"><p class="cat"><span>'+esc(p.category)+'</span><span class="no">No.'+String(p.no).padStart(2,'0')+'</span></p>'
+   +'<h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
+   +(layers?'<ul class="layers" aria-label="Malzemeler">'+layers+'</ul>':'')
+   +'<div class="foot"><span class="cta">Yakından bak</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'</div></div></article>';
+}
+function classicCardHTML(p,i){
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   return '<article class="card" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
