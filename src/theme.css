@@ -1,0 +1,36 @@
+/* ==========================================================
+   TEMA — renk paleti ve fontlar tek yerde.
+   Tasarım değişiklikleri (renk, font) buradan yapılır;
+   hem sayfa (CSS) hem 3D sahne (logo, figürler, sis) bu değerleri okur.
+   ========================================================== */
+
+@font-face{font-family:"Unbounded";src:url(/fonts/unbounded.woff2) format("woff2");font-weight:200 900;font-display:swap}
+@font-face{font-family:"Schibsted Grotesk";src:url(/fonts/schibsted.woff2) format("woff2");font-weight:400 900;font-display:swap}
+
+:root{
+  /* marka renkleri */
+  --red:#E4032D;          /* ana kırmızı: fiyat, kategori yazısı, yer tutucu */
+  --wine:#7B0A1F;         /* bordo */
+  --cream:#FFFCEC;        /* krem: kart kâğıdı, logo yüzü, figürler */
+  --paper2:#F4EAD5;       /* koyu krem: tabak gölgesi */
+  --ink:#1D0A0E;          /* metin */
+  --muted:rgba(29,10,14,.64);
+
+  /* 3D sahne */
+  --logo-side:#2a0a12;    /* 3D logonun yan yüzü */
+  --fig-shadow:#45000f;   /* figürlerin gölge kopyası */
+
+  /* menü gruplarının arka plan renkleri (--g-<grup anahtarı>) */
+  --g-yiyecek:#E4032D;
+  --g-alkollu-icecek:#7B0A1F;
+  --g-icecek:#E4032D;
+
+  /* fontlar */
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  --bg:var(--g-yiyecek);
+}
+html[data-group="yiyecek"]{--bg:var(--g-yiyecek)}
+html[data-group="alkollu-icecek"]{--bg:var(--g-alkollu-icecek)}
+html[data-group="icecek"]{--bg:var(--g-icecek)}
