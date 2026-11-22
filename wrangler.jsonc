@@ -1,8 +1,10 @@
 // Cloudflare: statik site — `npm run build` çıktısı (dist/) olduğu gibi yayınlanır.
+// "previews": master dışındaki dallar (ör. tasarim-v2) ayrı bir önizleme adresine yayınlanır.
 {
   "name": "21gram-qr-menu",
   "compatibility_date": "2025-09-01",
   "assets": {
     "directory": "./dist"
-  }
+  },
+  "previews": {}
 }
