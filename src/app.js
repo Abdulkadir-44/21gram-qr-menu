@@ -1050,8 +1050,9 @@ function step(dir){
   state.sheetId=id;fillSheet(BYID[id]);try{history.replaceState({sheet:id},'','#'+id)}catch(e){}
   if(!RM){
     hp.animate([{opacity:0,transform:'translateX('+(dir*60)+'px) scale(.9)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.9,.2,1)'});
+    /* "translate" ayrı özellik: süslerin kendi transform'unu (ör. ortalama translate(-50%,-50%)) ezmez */
     [].forEach.call(document.querySelectorAll('.info>*:not(.pn),#heroDeco>*'),function(el,n){
-      el.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:360,delay:n*35,easing:'cubic-bezier(.2,.9,.2,1)',fill:'backwards'});
+      el.animate([{opacity:0,translate:'0 10px'},{opacity:1,translate:'0 0'}],{duration:360,delay:n*35,easing:'cubic-bezier(.2,.9,.2,1)',fill:'backwards'});
     });
   }
   var c=cards.find(function(x){return x.el.dataset.id===id});if(c)lastFocus=c.el;
