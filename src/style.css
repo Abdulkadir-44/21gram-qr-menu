@@ -221,3 +221,113 @@ html.no-gl .w-sub{margin-top:18px}
 .card--cocktail:hover .more{transform:translateX(4px) scale(1.06)}
 .card--cocktail:focus-visible{outline-color:var(--cream)}
 @media(prefers-reduced-motion:reduce){.card--cocktail .rays,.card--cocktail .spark{animation:none}}
+
+/* ==========================================================
+   BİRA KARTI — "şişe etiketi" (yatay)
+   ========================================================== */
+.card--beer .card-in{display:grid;grid-template-columns:44% 1fr;min-height:312px}
+.card--beer .shade{position:absolute;left:16px;right:16px;top:24px;bottom:-4px;border-radius:26px;background:rgba(40,0,8,.5);filter:blur(22px);transform:translateY(14px)}
+.card--beer .paper{top:0;border-radius:26px;box-shadow:none;overflow:hidden;background:linear-gradient(90deg,var(--red) 0 44%,var(--cream) 44%)}
+/* etiket çizgileri (sağ taraf) */
+.card--beer .paper::before{content:"";position:absolute;top:0;bottom:0;left:44%;right:0;
+  background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 4%,transparent) 0 2px,transparent 2px 11px)}
+/* köpük ayraç: iki rengin arasında kabarcık tırtılı */
+.card--beer .paper::after{content:"";position:absolute;top:-4px;bottom:-4px;left:calc(44% - 9px);width:18px;
+  background:radial-gradient(circle at 50% 50%,var(--cream) 8px,transparent 8.5px) 0 0/18px 15px repeat-y}
+.card--beer .stage{height:auto;min-height:312px;place-items:end center;padding:22px 0 26px}
+.card--beer .bubbles{position:absolute;inset:0;overflow:hidden;border-radius:26px 0 0 26px}
+.card--beer .bubbles i{position:absolute;bottom:-14px;left:calc(8% + var(--b) * 12%);width:7px;height:7px;border-radius:50%;
+  border:1.5px solid color-mix(in srgb,var(--cream) 60%,transparent);animation:rise 5s linear infinite;animation-delay:calc(var(--b) * -0.75s)}
+.card--beer .bubbles i:nth-child(3n){width:11px;height:11px;animation-duration:6.5s}
+.card--beer .bubbles i:nth-child(4n){width:5px;height:5px;animation-duration:4s}
+@keyframes rise{to{transform:translate(6px,-340px);opacity:0}}
+.card--beer .coaster{position:absolute;width:142px;height:142px;left:50%;top:46%;margin:-71px 0 0 -71px;transform:translateZ(16px);overflow:visible}
+.card--beer .coaster circle{fill:var(--cream)}
+.card--beer .coaster .ring{fill:none;stroke:var(--red);stroke-width:2;stroke-dasharray:4 5}
+.card--beer .coaster text{fill:var(--red);font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px}
+.card--beer .coaster text{transform-box:view-box;transform-origin:100px 100px;animation:spin 36s linear infinite}
+.card--beer .prod{max-width:84%;max-height:244px;transform:translateZ(62px);filter:drop-shadow(0 14px 12px rgba(40,0,8,.45))}
+.card--beer .meta{padding:26px 20px 22px 20px}
+.card--beer .cat{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.12em;margin:0}
+.card--beer .type{background:var(--ink);color:var(--cream);padding:3px 8px 2px;border-radius:4px;letter-spacing:.16em;font-size:11px}
+.card--beer .name{font-size:clamp(28px,8vw,34px);line-height:.92;margin-top:10px}
+.card--beer .vol{display:flex;align-items:baseline;gap:3px;margin-top:14px;color:var(--red)}
+.card--beer .vol b{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:58px;line-height:.8;letter-spacing:-.02em}
+.card--beer .vol span{font-weight:800;font-size:16px;letter-spacing:.12em}
+.card--beer .desc{font-size:13.5px;margin-top:10px}
+.card--beer .foot{margin-top:auto;padding-top:14px;border-top:2px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+.card--beer .price{font-size:26px}
+.card--beer .more{background:var(--red);width:44px;height:44px}
+.card--beer:hover .more{transform:translateX(4px) scale(1.06)}
+
+/* ==========================================================
+   YÜKSEK ALKOL KARTI — "mahzen etiketi"
+   ========================================================== */
+.card--spirit .shade{position:absolute;left:16px;right:16px;top:24px;bottom:-4px;border-radius:20px;background:rgba(40,0,8,.5);filter:blur(22px);transform:translateY(14px)}
+.card--spirit .paper{top:0;border-radius:18px;box-shadow:none;background:radial-gradient(120% 80% at 50% 25%,#fff 0,var(--cream) 55%,var(--paper2))}
+.card--spirit .paper::before,.card--spirit .paper::after{content:"";position:absolute;pointer-events:none}
+.card--spirit .paper::before{inset:9px;border:2px solid var(--ink);border-radius:12px}
+.card--spirit .paper::after{inset:15px;border:1px solid color-mix(in srgb,var(--ink) 55%,transparent);border-radius:8px}
+.card--spirit .orn{position:absolute;z-index:1;font-size:14px;line-height:1;color:var(--red);background:var(--cream);padding:1px}
+.card--spirit .o1{top:3px;left:3px}.card--spirit .o2{top:3px;right:3px}.card--spirit .o3{bottom:3px;left:3px}.card--spirit .o4{bottom:3px;right:3px}
+.card--spirit .stage{height:300px;place-items:end center;padding-bottom:36px}
+.card--spirit .shelf{position:absolute;top:30px;left:0;right:0;text-align:center;font-size:11px;font-weight:700;letter-spacing:.32em;color:color-mix(in srgb,var(--ink) 70%,transparent);transform:translateZ(20px)}
+.card--spirit .plinth{position:absolute;bottom:24px;left:50%;width:176px;height:22px;margin-left:-88px;border-radius:5px 5px 3px 3px;
+  background:linear-gradient(var(--wine),var(--ink));border-top:3px solid var(--red);box-shadow:0 12px 16px rgba(40,0,8,.3);transform:translateZ(30px)}
+.card--spirit .prod{max-width:62%;max-height:212px;transform:translateZ(62px);filter:drop-shadow(0 12px 10px rgba(40,0,8,.3))}
+/* ölçü cetveli (5 cl) */
+.card--spirit .jigger{position:absolute;left:30px;bottom:50px;height:180px;list-style:none;display:flex;flex-direction:column;justify-content:space-between;
+  border-left:2px solid color-mix(in srgb,var(--ink) 30%,transparent);transform:translateZ(26px)}
+.card--spirit .jigger::before{content:"";position:absolute;left:-3px;bottom:0;width:4px;height:100%;border-radius:2px;background:var(--red);transform-origin:bottom;animation:pour 1.4s cubic-bezier(.2,.9,.2,1) both}
+@keyframes pour{from{transform:scaleY(0)}}
+.card--spirit .jigger li{position:relative;width:12px;height:2px;background:color-mix(in srgb,var(--ink) 35%,transparent)}
+.card--spirit .jigger li.on{background:var(--red);width:16px}
+.card--spirit .jigger li span{position:absolute;left:21px;top:-7px;white-space:nowrap;font-size:11px;font-weight:700;color:var(--muted)}
+.card--spirit .jigger li:first-child span::after{content:" cl"}
+.card--spirit .meta{align-items:center;text-align:center;padding:2px 28px 32px}
+.card--spirit .name{margin:0}
+.card--spirit .ribbon{display:inline-block;background:var(--ink);color:var(--cream);padding:9px 30px 7px;font-size:clamp(26px,7.6vw,32px);line-height:1;
+  clip-path:polygon(0 0,100% 0,calc(100% - 14px) 50%,100% 100%,0 100%,14px 50%)}
+.card--spirit .cat{margin:14px 0 0;color:color-mix(in srgb,var(--ink) 75%,transparent);font-size:12px;font-weight:700;letter-spacing:.2em}
+.card--spirit .cat i{font-style:normal;margin:0 8px;color:var(--red)}
+.card--spirit .foot{align-self:stretch;border-top:1px solid color-mix(in srgb,var(--ink) 18%,transparent);padding-top:14px;margin-top:20px}
+.card--spirit .no{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted)}
+.card--spirit .price{font-size:30px}
+.card--spirit .more{width:44px;height:44px}
+.card--spirit:hover .more{transform:translateX(4px) scale(1.06)}
+
+/* ==========================================================
+   SHOT KARTI — "neon tabela"
+   ========================================================== */
+.card--shot{--neon:color-mix(in srgb,var(--red) 78%,#fff)}
+.card--shot .shade{position:absolute;left:16px;right:16px;top:24px;bottom:-4px;border-radius:24px;background:rgba(10,0,4,.65);filter:blur(22px);transform:translateY(14px)}
+.card--shot .paper{top:0;border-radius:22px;box-shadow:none;background:radial-gradient(90% 60% at 50% 32%,color-mix(in srgb,var(--wine) 55%,#000),#0b0204 75%)}
+.card--shot .paper::before{content:"";position:absolute;inset:10px;border-radius:15px;pointer-events:none;border:2px solid var(--neon);
+  box-shadow:0 0 6px var(--red),0 0 18px color-mix(in srgb,var(--red) 60%,transparent),inset 0 0 6px var(--red),inset 0 0 18px color-mix(in srgb,var(--red) 40%,transparent);
+  animation:flicker 7s linear infinite}
+@keyframes flicker{0%,17%,21%,24%,61%,65%,100%{opacity:1}19%,23%,63%{opacity:.3}}
+.card--shot .sheen{mix-blend-mode:screen;opacity:calc(var(--so,0)*.25)}
+.card--shot .stage{height:252px;place-items:end center;padding-bottom:34px}
+.card--shot .floor{position:absolute;bottom:22px;left:50%;width:190px;height:34px;margin-left:-95px;border-radius:50%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--red) 75%,transparent),transparent);filter:blur(3px);transform:translateZ(10px)}
+.card--shot .prod{max-height:188px;max-width:56%;transform:translateZ(62px);filter:drop-shadow(0 0 16px color-mix(in srgb,var(--red) 55%,transparent))}
+.card--shot .sticker{position:absolute;top:38px;right:30px;background:var(--cream);color:var(--red);font-family:var(--display);font-stretch:var(--display-stretch);
+  font-weight:800;font-size:22px;letter-spacing:.02em;padding:7px 12px 5px;border-radius:8px;transform:translateZ(84px) rotate(10deg);box-shadow:0 5px 0 var(--red),0 10px 18px rgba(0,0,0,.4)}
+.card--shot .meta{align-items:center;text-align:center;padding:0;color:var(--cream)}
+.card--shot .cat{display:flex;align-items:center;gap:10px;margin:0 26px;color:color-mix(in srgb,var(--cream) 60%,transparent);font-size:12px;font-weight:700;letter-spacing:.14em}
+.card--shot .type{color:var(--neon);border:1px solid var(--neon);padding:3px 9px 2px;border-radius:999px;font-size:11px;letter-spacing:.16em;
+  box-shadow:0 0 8px color-mix(in srgb,var(--red) 55%,transparent);text-shadow:0 0 6px var(--red)}
+.card--shot .name{margin:10px 26px 0;color:#fff4f2;font-size:clamp(30px,8.6vw,38px);line-height:.95;
+  text-shadow:0 0 3px #fff,0 0 10px var(--red),0 0 22px var(--red),0 0 42px color-mix(in srgb,var(--red) 70%,transparent)}
+/* bilet koçanı */
+.card--shot .foot{position:relative;align-self:stretch;margin-top:22px;padding:16px 28px 28px;border-top:2px dashed color-mix(in srgb,var(--cream) 28%,transparent)}
+.card--shot .foot::before,.card--shot .foot::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--bg)}
+.card--shot .foot::before{left:-11px}.card--shot .foot::after{right:-11px}
+.card--shot .price{color:var(--cream);font-size:30px;text-shadow:0 0 12px color-mix(in srgb,var(--red) 70%,transparent)}
+.card--shot .more{background:var(--red);width:44px;height:44px;box-shadow:0 0 16px color-mix(in srgb,var(--red) 70%,transparent)}
+.card--shot:hover .more{transform:translateX(4px) scale(1.06)}
+.card--shot:focus-visible{outline-color:var(--cream)}
+
+@media(prefers-reduced-motion:reduce){
+  .card--beer .bubbles i,.card--beer .coaster text,.card--spirit .jigger::before,.card--shot .paper::before{animation:none}
+}

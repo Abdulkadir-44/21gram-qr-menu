@@ -11,7 +11,8 @@ const menu = await fetch('/menu.json').then(r => r.json());
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
 /* kategori → kart türü (yemeğe göre farklı kart tasarımı). Listede olmayanlar klasik kartı kullanır. */
-const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-kokteyl': 'cocktail', 'klasik-kokteyl': 'cocktail' };
+const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-kokteyl': 'cocktail', 'klasik-kokteyl': 'cocktail',
+  'bira': 'beer', 'yuksek-alkol': 'spirit', 'shot': 'shot' };
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
@@ -27,9 +28,9 @@ const LAYER_COLORS = [
 ];
 /* kokteyl kartı: isim + tariften baz içkiyi bul */
 const SPIRITS = [
-  [/long island/, 'KARIŞIK İÇKİ'], [/jäger|jager/, 'JÄGERMEISTER BAZLI'], [/negroni|\bgin\b|\bcin\b|beefeat|hendrick|tanqueray/, 'CİN BAZLI'],
+  [/long island/, 'KARIŞIK İÇKİ'], [/jäger|jager/, 'JÄGERMEISTER BAZLI'], [/mezcal/, 'MEZCAL BAZLI'], [/negroni|\bgin\b|\bcin\b|beefeat|hendrick|tanqueray|malfy/, 'CİN BAZLI'],
   [/vodka|votka|absolut/, 'VOTKA BAZLI'], [/whisky|viski|jack daniel|jameson|bourbon/, 'VİSKİ BAZLI'],
-  [/tekila|tequila|margar/, 'TEKİLA BAZLI'], [/\brom\b|\brum\b|bacardi/, 'ROM BAZLI'],
+  [/tekila|tequila|margar|casamigos|olmeca/, 'TEKİLA BAZLI'], [/\brom\b|\brum\b|bacardi/, 'ROM BAZLI'],
 ];
 const spiritOf = p => { const t = (p.name + ' ' + (p.desc || '')).toLocaleLowerCase('tr').replace(/ı/g, 'i'); for (const [re, s] of SPIRITS) if (re.test(t)) return s; return ''; };
 const layerColor = s => { const t = s.toLocaleLowerCase('tr').replace(/ı/g, 'i'); for (const [re, c] of LAYER_COLORS) if (re.test(t)) return c; return '#B08968'; };
@@ -408,7 +409,68 @@ function moveInd(){
   var tb=tabsEl,l=b.offsetLeft-(tb.clientWidth-b.offsetWidth)/2;if(tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:l,behavior:RM?'auto':'smooth'});
 }
 function cardHTML(p,i){
-  return p.kind==='burger'?burgerCardHTML(p,i):p.kind==='cocktail'?cocktailCardHTML(p,i):classicCardHTML(p,i);
+  var T={burger:burgerCardHTML,cocktail:cocktailCardHTML,beer:beerCardHTML,spirit:spiritCardHTML,shot:shotCardHTML}[p.kind];
+  return (T||classicCardHTML)(p,i);
+}
+/* ——— ortak parçalar ——— */
+function prodHTML(p){return p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+                :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>'}
+function cardOpen(p,i,cls){return '<article class="card '+cls+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'}
+var ARROW='<span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
+function noHTML(p){return 'No.'+String(p.no).padStart(2,'0')}
+/* "33cl", "40 cl", "5cl" → {n:"33", u:"CL"} */
+function sizeParts(s){var m=String(s||'').match(/(\d+[.,]?\d*)\s*(cl|ml|lt|l)\b/i);return m?{n:m[1],u:m[2].toLocaleUpperCase('tr')}:null}
+
+/* ——— BİRA KARTI: "şişe etiketi" ———
+   yatay kart · solda kırmızı panel + yükselen kabarcıklar + dönen bira altlığı · köpük ayraç
+   · sağda iri hacim rozeti ve şişe/fıçı etiketi */
+function beerCardHTML(p,i){
+  var sz=sizeParts(p.size)||sizeParts(p.desc),draft=/fıçı|fiçi|fici/.test((p.name+' '+p.desc).toLocaleLowerCase('tr'));
+  var bubbles='';for(var b=0;b<7;b++)bubbles+='<i style="--b:'+b+'"></i>';
+  return cardOpen(p,i,'card--beer')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<div class="stage"><span class="bubbles" aria-hidden="true">'+bubbles+'</span>'
+   +'<svg class="coaster" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96"/><circle class="ring" cx="100" cy="100" r="64"/>'
+   +'<text><textPath href="#coasterRing" textLength="482">SOĞUK SERVİS ✦ 21 GRAM ✦ SOĞUK SERVİS ✦ 21 GRAM ✦</textPath></text></svg>'
+   +prodHTML(p)+'</div>'
+   +'<div class="meta"><p class="cat"><span class="no">'+noHTML(p)+'</span><span class="type">'+(draft?'FIÇI':'ŞİŞE')+'</span></p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +(sz?'<p class="vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')
+   +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— YÜKSEK ALKOL KARTI: "mahzen etiketi" ———
+   krem zemin + süslü çift çerçeve · kaide üstünde kadeh · 5cl'ye dolu ölçü cetveli · kurdele bayrakta isim */
+function spiritCardHTML(p,i){
+  var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI',''),cl=sz?parseFloat(sz.n):5;
+  var ticks='';for(var t=5;t>=1;t--)ticks+='<li'+(t<=cl?' class="on"':'')+'><span>'+t+'</span></li>';
+  return cardOpen(p,i,'card--spirit')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
+   +'<span class="orn o1">✦</span><span class="orn o2">✦</span><span class="orn o3">✦</span><span class="orn o4">✦</span></div>'
+   +'<div class="stage"><p class="shelf" aria-hidden="true">— TOP SHELF —</p>'
+   +'<ol class="jigger" aria-hidden="true">'+ticks+'</ol>'
+   +prodHTML(p)+'<span class="plinth" aria-hidden="true"></span></div>'
+   +'<div class="meta"><h3 class="name"><span class="ribbon">'+esc(p.name)+'</span></h3>'
+   +'<p class="cat">'+[sp,sz?sz.n+' '+sz.u:'','TEK SERVİS'].filter(Boolean).map(esc).join('<i aria-hidden="true">·</i>')+'</p>'
+   +'<div class="foot"><span class="no">'+noHTML(p)+'</span><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— SHOT KARTI: "neon tabela" ———
+   siyah zemin + titreyen kırmızı neon çerçeve · neon isim · eğik SHOT! çıkartması · bilet koçanı fiyat */
+function shotCardHTML(p,i){
+  var sp=spiritOf(p).replace(' BAZLI','');
+  var nm=p.name.replace(/\s*shot$/i,'');
+  return cardOpen(p,i,'card--shot')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<div class="stage"><span class="floor" aria-hidden="true"></span>'+prodHTML(p)
+   +'<span class="sticker" aria-hidden="true">SHOT!</span></div>'
+   +'<div class="meta"><p class="cat"><span class="no">'+noHTML(p)+'</span>'+(sp?'<span class="type">'+esc(sp)+'</span>':'')+'</p>'
+   +'<h3 class="name">'+esc(nm)+'</h3>'
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
 }
 /* ——— KOKTEYL KARTI: "gece barı" ———
    koyu kart + art-deco çerçeve · ışık hüzmeli kemer pencerede bardak · kemer üstünde kavisli kategori adı
