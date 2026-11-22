@@ -771,7 +771,25 @@ var DETAIL={
 };
 
 /* ——— ortak parçalar ——— */
-function prodHTML(p){return p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+/* yükleme silüeti: görselin hemen ardından gelir (img.ld + .sk ile söner) */
+var SK_KINDS={burger:1,cocktail:1,beer:1,spirit:1,shot:1,soft:1,hot:1,share:1};
+function skHTML(p){return '<span class="sk" data-k="'+(SK_KINDS[p.kind]?p.kind:'classic')+'" aria-hidden="true"></span>'}
+/* yüklenme takibi: önbellekten anında gelen görsel efektsiz, geciken görsel yumuşakça belirir */
+function armImgs(root){
+  var now=performance.now();
+  [].forEach.call(root.querySelectorAll('img.prod,#hp'),function(i){
+    if(i.tagName!=='IMG')return;
+    if(i.complete&&i.naturalWidth)i.classList.add('ld');else i._t0=now;
+  });
+}
+document.addEventListener('load',function(e){var i=e.target;
+  if(i.tagName!=='IMG'||!(i.classList.contains('prod')||i.id==='hp'))return;
+  var cd=i.closest('.card');   /* ekran dışındaki kart: sessizce yerleşsin (animasyonu zaten duraklatılmış olurdu) */
+  if(i._t0&&performance.now()-i._t0>150&&!RM&&(!cd||cd.classList.contains('in-view')))i.classList.add('fade');
+  i.classList.add('ld');
+},true);
+document.addEventListener('error',function(e){var i=e.target;if(i.tagName==='IMG'&&i.classList.contains('prod'))i.classList.add('err')},true);
+function prodHTML(p){return p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>'}
 function cardOpen(p,i,cls){return '<article class="card '+cls+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'}
 var ARROW='<span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
@@ -834,7 +852,7 @@ function shotCardHTML(p,i){
    koyu kart + art-deco çerçeve · ışık hüzmeli kemer pencerede bardak · kemer üstünde kavisli kategori adı
    · baz içki rozeti · bar menüsü gibi ortalı tarif satırı */
 function cocktailCardHTML(p,i){
-  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var recipe=parts.length?parts.map(function(s){return '<span>'+esc(s)+'</span>'}).join('<i aria-hidden="true">✦</i>')
@@ -856,7 +874,7 @@ function cocktailCardHTML(p,i){
    kareli tepsi kâğıdı şeridi · güneş patlaması rozeti üstünde taşan burger · eğik fiyat etiketi
    · malzemeler burger katları gibi renk kodlu · alt kenar tırtıklı ambalaj */
 function burgerCardHTML(p,i){
-  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var shown=parts.slice(0,5),rest=parts.length-shown.length;
@@ -872,7 +890,7 @@ function burgerCardHTML(p,i){
    +'</div></div></article>';
 }
 function classicCardHTML(p,i){
-  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   return '<article class="card" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
    +'<div class="card-in"><div class="paper"><div class="sheen"></div></div>'
@@ -905,7 +923,7 @@ function render(opts){
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
   state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
-  grid.innerHTML=html;
+  grid.innerHTML=html;armImgs(grid);
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
   if(gl.setGroup)gl.setGroup(hex,state.group);
@@ -991,10 +1009,10 @@ var sheet=$('#sheet'),hpHost=$('#hpHost'),hero=$('#hero'),hp=null,hpT={rx:0,ry:0
 var lastFocus=null;
 function fillSheet(p){
   var D0=DETAIL[p.kind];
-  var vis=p.img?'<img id="hp" src="'+p.img+'" alt="'+esc(p.name)+'" draggable="false">'
+  var vis=p.img?'<img id="hp" src="'+p.img+'" alt="'+esc(p.name)+'" draggable="false">'+skHTML(p)
     :(D0&&D0.art?'<div id="hp" class="art" role="img" aria-label="'+esc(p.name)+'">'+D0.art(p)+'</div>'
     :'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>');
-  hpHost.innerHTML=vis;hp=$('#hp');
+  hpHost.innerHTML=vis;hp=$('#hp');armImgs(hpHost);
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   $('#sName').innerHTML=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');

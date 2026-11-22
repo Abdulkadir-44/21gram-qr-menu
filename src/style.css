@@ -991,3 +991,37 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
 .hint-d{margin-top:8px;font-size:13px;color:var(--muted)}
 
 @media(prefers-reduced-motion:reduce){.d-drops i,.d-cube,.d-steam path,.d-seal text{animation:none!important}}
+
+/* ==========================================================
+   GÖRSEL YÜKLENİRKEN — türe özel parıldayan silüet
+   Görsel gelene kadar ürünün şekli yerinde bekler; görsel inince
+   silüet söner, görsel yumuşakça belirir. (.ld = yüklendi)
+   ========================================================== */
+.sk{position:absolute;pointer-events:none;--sk-c:var(--ink);
+  background:linear-gradient(100deg,color-mix(in srgb,var(--sk-c) 11%,transparent) 40%,color-mix(in srgb,var(--sk-c) 24%,transparent) 50%,color-mix(in srgb,var(--sk-c) 11%,transparent) 60%) 0 0/300% 100%;
+  -webkit-mask:var(--m) center bottom/contain no-repeat;mask:var(--m) center bottom/contain no-repeat;
+  animation:skShim 1.5s linear infinite;transition:opacity .35s ease}
+@keyframes skShim{from{background-position:100% 0}to{background-position:0 0}}
+.stage>.sk{left:50%;width:var(--sw);height:var(--sh);bottom:var(--sb);transform:translateX(-50%) translateZ(56px)}
+.card:not(.in-view) .sk{animation-play-state:paused}
+img.prod:not(.ld),#hp:not(.ld):not(.ph):not(.art){opacity:0}
+img.ld+.sk{opacity:0;animation:none}
+img.prod.fade,#hp.fade{animation:imgIn .55s cubic-bezier(.2,.9,.2,1) both}
+@keyframes imgIn{from{opacity:0;scale:.9}}
+img.err+.sk{animation:none}
+/* koyu zeminler: açık renk silüet */
+.card--cocktail .sk,.card--shot .sk,.card--beer .sk{--sk-c:var(--cream)}
+/* detay */
+#hpHost>.sk{left:50%;top:50%;width:min(70%,360px);height:var(--hh);transform:translate(-50%,-50%);--sk-c:var(--cream);-webkit-mask-position:center;mask-position:center}
+.panel[data-light="1"] #hpHost>.sk{--sk-c:var(--ink)}
+.panel[data-kind="cocktail"] #hpHost>.sk{top:calc(50% + 8%)}
+@media(prefers-reduced-motion:reduce){.sk{animation:none}img.prod.fade,#hp.fade{animation:none}}
+.sk[data-k="burger"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M14%2050C14%2026%2031%2013%2050%2013S86%2026%2086%2050Z%20M10%2056H90V60C90%2064%2087%2066%2083%2066H17C13%2066%2010%2064%2010%2060Z%20M14%2071H86V79C86%2085%2082%2088%2076%2088H24C18%2088%2014%2085%2014%2079Z'%2F%3E%3C%2Fsvg%3E");--sw:78%;--sh:170px;--sb:calc(50% - 85px);--hh:min(300px,36dvh)}
+.sk[data-k="cocktail"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M12%2014H88C88%2040%2072%2054%2050%2054S12%2040%2012%2014Z%20M47%2054H53V86H47Z%20M28%2086C28%2082%2072%2082%2072%2086V90H28Z'%2F%3E%3C%2Fsvg%3E");--sw:58%;--sh:180px;--sb:34px;--hh:min(230px,28dvh)}
+.sk[data-k="beer"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M42%204H58V20C58%2029%2068%2033%2068%2046V91C68%2094%2066%2096%2062%2096H38C34%2096%2032%2094%2032%2091V46C32%2033%2042%2029%2042%2020Z'%2F%3E%3C%2Fsvg%3E");--sw:100%;--sh:230px;--sb:26px;--hh:min(300px,35dvh)}
+.sk[data-k="spirit"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M43%204H57V18L67%2027V92C67%2095%2065%2096%2062%2096H38C35%2096%2033%2095%2033%2092V27L43%2018Z'%2F%3E%3C%2Fsvg%3E");--sw:42%;--sh:200px;--sb:36px;--hh:min(230px,28dvh)}
+.sk[data-k="shot"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M28%2026H72L65%2092C65%2095%2063%2096%2060%2096H40C37%2096%2035%2095%2035%2092Z'%2F%3E%3C%2Fsvg%3E");--sw:46%;--sh:150px;--sb:34px;--hh:min(220px,27dvh)}
+.sk[data-k="soft"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M44%204H56V15C56%2024%2064%2028%2064%2040V91C64%2094%2062%2096%2058%2096H42C38%2096%2036%2094%2036%2091V40C36%2028%2044%2024%2044%2015Z'%2F%3E%3C%2Fsvg%3E");--sw:50%;--sh:150px;--sb:20px;--hh:min(290px,34dvh)}
+.sk[data-k="hot"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M24%2034H72C72%2062%2063%2076%2048%2076S24%2062%2024%2034Z%20M72%2041A11%2011%200%201%201%2072%2063V57A5%205%200%201%200%2072%2047Z%20M12%2082C12%2078%2088%2078%2088%2082S80%2090%2050%2090%2012%2086%2012%2082Z'%2F%3E%3C%2Fsvg%3E");--sw:72%;--sh:112px;--sb:16px;--hh:min(230px,28dvh)}
+.sk[data-k="share"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M20%2064C22%2042%2036%2030%2050%2030S78%2042%2080%2064Z%20M6%2066C6%2062%2094%2062%2094%2066C94%2076%2074%2084%2050%2084S6%2076%206%2066Z'%2F%3E%3C%2Fsvg%3E");--sw:72%;--sh:170px;--sb:calc(50% - 85px);--hh:min(280px,34dvh)}
+.sk[data-k="classic"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M50%2012A38%2038%200%201%201%2049.9%2012Z'%2F%3E%3C%2Fsvg%3E");--sw:64%;--sh:180px;--sb:calc(50% - 90px);--hh:min(260px,32dvh)}
