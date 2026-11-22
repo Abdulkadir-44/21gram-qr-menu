@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#E4032D">
+<title>21 Gram Gastrobar — Menü</title>
+<link rel="preload" href="/fonts/unbounded.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/schibsted.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/img/logo.png">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="is-intro">
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<!-- yükleniyor -->
+<div id="loader" aria-live="polite">
+  <img src="/img/logo.png" alt="21 Gram Gastrobar" class="ld-logo">
+  <div class="ld-bar"><span id="ldFill"></span></div>
+</div>
+
+<!-- karşılama -->
+<section id="intro" aria-label="Karşılama">
+  <h1 class="sr-only">21 Gram Gastrobar</h1>
+  <p class="in-sub" aria-hidden="true">Gastrobar</p>
+  <button class="enter" id="enter" type="button">Menüyü aç
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
+  <p class="in-hint" id="inHint">Logoyu sürükleyerek çevir</p>
+</section>
+
+<!-- menü arayüzü -->
+<main id="hud" aria-label="Menü" inert>
+  <header class="top">
+    <button class="brand" id="home" type="button" aria-label="Açılış ekranına dön"><img src="/img/logo.png" alt=""></button>
+    <div class="tabs" role="tablist" aria-label="Menü bölümleri" id="tabs"></div>
+    <button class="icon-btn" id="searchBtn" type="button" aria-label="Menüde ara">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+    </button>
+  </header>
+  <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
+
+  <div class="tier-rail" id="rail" aria-hidden="true"></div>
+
+  <button class="tier-nav up" id="tierUp" type="button" aria-label="Önceki kategori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span id="tierUpName"></span></button>
+
+  <section class="info" id="info" aria-live="polite">
+    <div class="info-row">
+      <button class="arrow" id="prev" type="button" aria-label="Önceki ürün"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="info-txt" id="infoTxt">
+        <p class="i-cat"><span id="iCat"></span><span class="i-count" id="iCount"></span></p>
+        <h2 class="i-name" id="iName"></h2>
+        <p class="i-price" id="iPrice"></p>
+      </div>
+      <button class="arrow" id="next" type="button" aria-label="Sonraki ürün"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <p class="i-desc" id="iDesc"></p>
+    <button class="i-open" id="iOpen" type="button">Tabağa yakından bak</button>
+  </section>
+
+  <button class="tier-nav down" id="tierDown" type="button" aria-label="Sonraki kategori"><span id="tierDownName"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+  <p class="gesture" id="gesture" aria-hidden="true"><span>← → tablayı çevir</span><span>↑ ↓ kategori değiştir</span></p>
+</main>
+
+<!-- ürün detayı -->
+<section id="detail" role="dialog" aria-modal="true" aria-labelledby="dName" inert>
+  <button class="close" id="dClose" type="button" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <p class="d-hint" aria-hidden="true">Tabağı parmağınla çevir</p>
+  <div class="d-card">
+    <p class="d-cat" id="dCat"></p>
+    <h2 class="d-name" id="dName"></h2>
+    <p class="d-desc" id="dDesc"></p>
+    <div class="d-foot">
+      <p class="d-price" id="dPrice"></p>
+      <div class="d-pn">
+        <button type="button" id="dPrev" aria-label="Önceki ürün"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button type="button" id="dNext" aria-label="Sonraki ürün"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- arama / düz liste -->
+<section id="search" role="dialog" aria-modal="true" aria-label="Menüde ara" inert>
+  <div class="s-top">
+    <label class="sr-only" for="q">Menüde ara</label>
+    <input id="q" type="search" placeholder="Burger, kokteyl, bira…" autocomplete="off" enterkeyhint="search">
+    <button class="s-close" id="sClose" type="button">Kapat</button>
+  </div>
+  <div class="s-list" id="sList"></div>
+</section>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

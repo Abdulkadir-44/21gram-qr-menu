@@ -1,0 +1,819 @@
+{
+ "groups": [
+  {
+   "key": "yiyecek",
+   "name": "Yiyecek",
+   "cats": [
+    {
+     "key": "smash-burger",
+     "name": "Smash Burger",
+     "color": "#E4032D",
+     "items": [
+      {
+       "id": "kid-s-smash",
+       "name": "Kıd's Smash",
+       "size": "",
+       "price": 520,
+       "desc": "smash et, american cheese, ketçap, patates kızartması",
+       "img": "kid-s-smash.webp",
+       "w": 640,
+       "h": 544
+      },
+      {
+       "id": "local-smash",
+       "name": "Local Smash",
+       "size": "",
+       "price": 570,
+       "desc": "smash et, american cheese, local sos, gürkens, mor soğan, patates kızartması",
+       "img": "local-smash.webp",
+       "w": 640,
+       "h": 445
+      },
+      {
+       "id": "acisiyla-tatlisiyla-smash",
+       "name": "Acısıyla Tatlısıyla Smash",
+       "size": "",
+       "price": 590,
+       "desc": "smash et, american cheese, baş biber mayo, baş biber reçeli, gürkens, patates kızartması",
+       "img": "acisiyla-tatlisiyla-smash.webp",
+       "w": 640,
+       "h": 541
+      },
+      {
+       "id": "fake-mac-smash",
+       "name": "Fake Mac Smash",
+       "size": "",
+       "price": 560,
+       "desc": "smash et, american cheese, fake mac sos, gürkens, marul, domates, mor soğan, patates kızartması",
+       "img": "fake-mac-smash.webp",
+       "w": 640,
+       "h": 536
+      },
+      {
+       "id": "truffle-smash",
+       "name": "TRUFFLE SMASH",
+       "size": "",
+       "price": 580,
+       "desc": "smash et, american cheese, truffle sos, gürkens, mor soğan turşusu, patates kızartması",
+       "img": "truffle-smash.webp",
+       "w": 640,
+       "h": 418
+      },
+      {
+       "id": "aci-gercek-smash",
+       "name": "Acı Gerçek Smash",
+       "size": "",
+       "price": 590,
+       "desc": "smash et, american cheese, köz biber sos, mor soğan, gürkens, patates kızartması",
+       "img": "aci-gercek-smash.webp",
+       "w": 640,
+       "h": 562
+      }
+     ]
+    },
+    {
+     "key": "tavuk-burger",
+     "name": "Tavuk Burger",
+     "color": "#D9930B",
+     "items": [
+      {
+       "id": "dynamite-chicken-burger",
+       "name": "DYNAMITE CHICKEN BURGER",
+       "size": "",
+       "price": 540,
+       "desc": "altın çıtır tavuk, dinamite sos, gürkens, mor soğan turşusu, patates kızartması",
+       "img": "dynamite-chicken-burger.webp",
+       "w": 640,
+       "h": 477
+      },
+      {
+       "id": "just-chicken-burger",
+       "name": "Just Chıcken Burger",
+       "size": "",
+       "price": 520,
+       "desc": "altın çıtır tavuk, gürkens, mayonez, mor soğan turşusu, mor soğan, patates kızartması",
+       "img": "just-chicken-burger.webp",
+       "w": 640,
+       "h": 600
+      }
+     ]
+    },
+    {
+     "key": "paylasimlik",
+     "name": "Paylaşımlık",
+     "color": "#E2601C",
+     "items": [
+      {
+       "id": "truflu-parmesanli-patates-kizartmasi",
+       "name": "Trüflü Parmesanlı Patates Kızartması",
+       "size": "",
+       "price": 340,
+       "desc": "",
+       "img": "truflu-parmesanli-patates-kizartmasi.webp",
+       "w": 447,
+       "h": 640
+      },
+      {
+       "id": "tursu-tabagi",
+       "name": "Turşu Tabağı",
+       "size": "",
+       "price": 320,
+       "desc": "",
+       "img": "tursu-tabagi.webp",
+       "w": 623,
+       "h": 640
+      },
+      {
+       "id": "patates-kizartmasi",
+       "name": "Patates Kızartması",
+       "size": "",
+       "price": 280,
+       "desc": "",
+       "img": "patates-kizartmasi.webp",
+       "w": 461,
+       "h": 640
+      },
+      {
+       "id": "zahter-dip",
+       "name": "Zahter Dıp",
+       "size": "",
+       "price": 320,
+       "desc": "tuzlu yoğurt, labne, taze zahter, kuru zahter, lavaş cipsi",
+       "img": "zahter-dip.webp",
+       "w": 593,
+       "h": 640
+      },
+      {
+       "id": "halhali-zeytin",
+       "name": "Halhalı Zeytin",
+       "size": "",
+       "price": 320,
+       "desc": "",
+       "img": "halhali-zeytin.webp",
+       "w": 594,
+       "h": 640
+      },
+      {
+       "id": "holy-chick",
+       "name": "HOLY CHICK",
+       "size": "",
+       "price": 520,
+       "desc": "altın çıtır tavuk, baş biber mayo, frenk soğan, patates kızartması, baş biber reçeli ile",
+       "img": "holy-chick.webp",
+       "w": 560,
+       "h": 640
+      },
+      {
+       "id": "golden-chick",
+       "name": "Golden Chıck",
+       "size": "",
+       "price": 480,
+       "desc": "altın çıtır tavuk, patates kızartması",
+       "img": "golden-chick.webp",
+       "w": 504,
+       "h": 640
+      },
+      {
+       "id": "cerez",
+       "name": "Çerez",
+       "size": "",
+       "price": 240,
+       "desc": "",
+       "img": "cerez.webp",
+       "w": 583,
+       "h": 640
+      },
+      {
+       "id": "elek-alti-fistik",
+       "name": "Elek Altı Fıstık",
+       "size": "",
+       "price": 180,
+       "desc": "",
+       "img": "elek-alti-fistik.webp",
+       "w": 567,
+       "h": 640
+      }
+     ]
+    },
+    {
+     "key": "soslar",
+     "name": "Soslar",
+     "color": "#B8261A",
+     "items": [
+      {
+       "id": "bas-biber-sos",
+       "name": "Baş Biber Sos",
+       "size": "",
+       "price": 35,
+       "desc": ""
+      },
+      {
+       "id": "bas-biber-recel-sos",
+       "name": "Baş Biber Reçel Sos",
+       "size": "",
+       "price": 35,
+       "desc": ""
+      },
+      {
+       "id": "dynamite-sos",
+       "name": "DYNAMITE SOS",
+       "size": "",
+       "price": 35,
+       "desc": ""
+      },
+      {
+       "id": "truffle-sos",
+       "name": "Truffle Sos",
+       "size": "",
+       "price": 35,
+       "desc": ""
+      },
+      {
+       "id": "fake-mac-sos",
+       "name": "Fake Mac Sos",
+       "size": "",
+       "price": 35,
+       "desc": ""
+      }
+     ]
+    },
+    {
+     "key": "tatli",
+     "name": "Tatlı",
+     "color": "#5A2A1E",
+     "items": [
+      {
+       "id": "tiramisu",
+       "name": "TİRAMİSU",
+       "size": "",
+       "price": 420,
+       "desc": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "alkollu-icecek",
+   "name": "Alkollü İçecek",
+   "cats": [
+    {
+     "key": "house-kokteyl",
+     "name": "House Kokteyl",
+     "color": "#7B0A1F",
+     "items": [
+      {
+       "id": "haspresso-martini",
+       "name": "HASPRESSO MARTINI",
+       "size": "",
+       "price": 680,
+       "desc": "absolut vanilia, kahlua, Hatay kahvesi",
+       "img": "haspresso-martini.webp",
+       "w": 468,
+       "h": 640
+      },
+      {
+       "id": "sefin-kulagi",
+       "name": "Şefin Kulağı",
+       "size": "",
+       "price": 760,
+       "desc": "beefeather gin, st. germain (mürver çiçeği likörü), apple sour, lime suyu, kivi püresi, şeker şurubu",
+       "img": "sefin-kulagi.webp",
+       "w": 488,
+       "h": 640
+      },
+      {
+       "id": "manifest-o",
+       "name": "Manıfest'o",
+       "size": "",
+       "price": 660,
+       "desc": "Jägermeister Manifest, Orange Liqueur (Cointreau)",
+       "img": "manifest-o.webp",
+       "w": 464,
+       "h": 640
+      },
+      {
+       "id": "jack-safe",
+       "name": "Jack Safe",
+       "size": "",
+       "price": 680,
+       "desc": "Jack Daniel's single barrel select, safari",
+       "img": "jack-safe.webp",
+       "w": 508,
+       "h": 640
+      },
+      {
+       "id": "aynen-oyle",
+       "name": "Aynen Öyle",
+       "size": "",
+       "price": 720,
+       "desc": "beefeather pink gin, archers, triple sour, lime suyu, raspberry sos, esmer şeker şurubu, salatalık, nane, redbull pomelo",
+       "img": "aynen-oyle.webp",
+       "w": 472,
+       "h": 640
+      },
+      {
+       "id": "alcohol-you-later",
+       "name": "Alcohol You Later",
+       "size": "",
+       "price": 860,
+       "desc": "mevsim meyveleri ve karanfil ile infüze edilmiş vodka, hot shot, safari, limon suyu, esmer şeker şurubu, nar ekşisi, hibisküs çayı",
+       "img": "alcohol-you-later.webp",
+       "w": 396,
+       "h": 640
+      }
+     ]
+    },
+    {
+     "key": "klasik-kokteyl",
+     "name": "Klasik Kokteyl",
+     "color": "#4B1D52",
+     "items": [
+      {
+       "id": "margarita",
+       "name": "Margarıta",
+       "size": "",
+       "price": 680,
+       "desc": "",
+       "img": "margarita.webp",
+       "w": 442,
+       "h": 640
+      },
+      {
+       "id": "negroni",
+       "name": "NEGRONI",
+       "size": "",
+       "price": 740,
+       "desc": "",
+       "img": "negroni.webp",
+       "w": 498,
+       "h": 640
+      },
+      {
+       "id": "long-island",
+       "name": "Long Island",
+       "size": "",
+       "price": 740,
+       "desc": "",
+       "img": "long-island.webp",
+       "w": 397,
+       "h": 640
+      },
+      {
+       "id": "whisky-sour",
+       "name": "Whısky Sour",
+       "size": "",
+       "price": 760,
+       "desc": "",
+       "img": "whisky-sour.webp",
+       "w": 475,
+       "h": 640
+      }
+     ]
+    },
+    {
+     "key": "bira",
+     "name": "Bira",
+     "color": "#C27A0E",
+     "items": [
+      {
+       "id": "serce-33cl",
+       "name": "Serçe",
+       "size": "33cl",
+       "price": 280,
+       "desc": "",
+       "img": "serce-33cl.webp",
+       "w": 258,
+       "h": 640
+      },
+      {
+       "id": "efes-green-50cl",
+       "name": "Efes Green",
+       "size": "50cl",
+       "price": 300,
+       "desc": "",
+       "img": "efes-green-50cl.webp",
+       "w": 198,
+       "h": 640
+      },
+      {
+       "id": "efes-glutensiz-50cl",
+       "name": "Efes Glutensiz",
+       "size": "50cl",
+       "price": 340,
+       "desc": "",
+       "img": "efes-glutensiz-50cl.webp",
+       "w": 201,
+       "h": 640
+      },
+      {
+       "id": "stella-artios-beglium-44cl",
+       "name": "Stella Artıos Beglıum",
+       "size": "44cl",
+       "price": 330,
+       "desc": "",
+       "img": "stella-artios-beglium-44cl.webp",
+       "w": 201,
+       "h": 640
+      },
+      {
+       "id": "corona-33cl",
+       "name": "Corona",
+       "size": "33cl",
+       "price": 320,
+       "desc": "",
+       "img": "corona-33cl.webp",
+       "w": 196,
+       "h": 640
+      },
+      {
+       "id": "deer-beer",
+       "name": "Deer & Beer",
+       "size": "",
+       "price": 460,
+       "desc": "Stella Artios Fıçı 40CL yanında Jägermeister shot ile",
+       "img": "deer-beer.webp",
+       "w": 446,
+       "h": 640
+      },
+      {
+       "id": "stella-fici-40cl",
+       "name": "STELLA FIÇI",
+       "size": "40 cl",
+       "price": 280,
+       "desc": "",
+       "img": "stella-fici-40cl.webp",
+       "w": 290,
+       "h": 640
+      }
+     ]
+    },
+    {
+     "key": "yuksek-alkol",
+     "name": "Yüksek Alkol",
+     "color": "#2D2440",
+     "items": [
+      {
+       "id": "tanqueray-5cl",
+       "name": "Tanqueray",
+       "size": "5cl",
+       "price": 590,
+       "desc": "",
+       "img": "tanqueray-5cl.webp",
+       "w": 428,
+       "h": 640
+      },
+      {
+       "id": "hendrick-s-5cl",
+       "name": "HENDRICK'S",
+       "size": "5 cl",
+       "price": 590,
+       "desc": "",
+       "img": "hendrick-s-5cl.webp",
+       "w": 481,
+       "h": 640
+      },
+      {
+       "id": "absolut-5cl",
+       "name": "Absolut",
+       "size": "5cl",
+       "price": 380,
+       "desc": "",
+       "img": "absolut-5cl.webp",
+       "w": 478,
+       "h": 640
+      },
+      {
+       "id": "malfy-5cl",
+       "name": "Malfy",
+       "size": "5cl",
+       "price": 440,
+       "desc": "",
+       "img": "malfy-5cl.webp",
+       "w": 428,
+       "h": 640
+      },
+      {
+       "id": "beefeather-5cl",
+       "name": "Beefeather",
+       "size": "5cl",
+       "price": 380,
+       "desc": "",
+       "img": "beefeather-5cl.webp",
+       "w": 428,
+       "h": 640
+      }
+     ]
+    },
+    {
+     "key": "shot",
+     "name": "Shot",
+     "color": "#9C1238",
+     "items": [
+      {
+       "id": "casamigos-blanco-shot",
+       "name": "CASAMIGOS BLANCO SHOT",
+       "size": "",
+       "price": 290,
+       "desc": "",
+       "img": "casamigos-blanco-shot.webp",
+       "w": 424,
+       "h": 640
+      },
+      {
+       "id": "jagermeister-orange-shot",
+       "name": "Jägermeıster Orange Shot",
+       "size": "",
+       "price": 240,
+       "desc": "",
+       "img": "jagermeister-orange-shot.webp",
+       "w": 401,
+       "h": 640
+      },
+      {
+       "id": "jagermeister-shot",
+       "name": "Jägermeıster Shot",
+       "size": "",
+       "price": 240,
+       "desc": "",
+       "img": "jagermeister-shot.webp",
+       "w": 401,
+       "h": 640
+      },
+      {
+       "id": "olmeca-gold-shot",
+       "name": "Olmeca Gold Shot",
+       "size": "",
+       "price": 280,
+       "desc": "",
+       "img": "olmeca-gold-shot.webp",
+       "w": 401,
+       "h": 640
+      },
+      {
+       "id": "olmeca-silver-shot",
+       "name": "Olmeca Sılver Shot",
+       "size": "",
+       "price": 260,
+       "desc": "",
+       "img": "olmeca-silver-shot.webp",
+       "w": 401,
+       "h": 640
+      },
+      {
+       "id": "casamigos-mezcal-shot",
+       "name": "Casamıgos Mezcal Shot",
+       "size": "",
+       "price": 320,
+       "desc": "",
+       "img": "casamigos-mezcal-shot.webp",
+       "w": 401,
+       "h": 640
+      },
+      {
+       "id": "jagermeister-manifest-shot",
+       "name": "Jägermeıster Manıfest Shot",
+       "size": "",
+       "price": 240,
+       "desc": "",
+       "img": "jagermeister-manifest-shot.webp",
+       "w": 401,
+       "h": 640
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "icecek",
+   "name": "İçecek",
+   "cats": [
+    {
+     "key": "soguk-icecek",
+     "name": "Soğuk İçecek",
+     "color": "#1F8A84",
+     "items": [
+      {
+       "id": "fuse-tea-mango-ananas",
+       "name": "Fuse Tea Mango & Ananas",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "fuse-tea-mango-ananas.webp",
+       "w": 256,
+       "h": 640
+      },
+      {
+       "id": "fanta",
+       "name": "Fanta",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "fanta.webp",
+       "w": 197,
+       "h": 640
+      },
+      {
+       "id": "red-bull-sugarfree",
+       "name": "Red Bull Sugarfree",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "red-bull-sugarfree.webp",
+       "w": 259,
+       "h": 640
+      },
+      {
+       "id": "soda",
+       "name": "Soda",
+       "size": "",
+       "price": 90,
+       "desc": "",
+       "img": "soda.webp",
+       "w": 214,
+       "h": 640
+      },
+      {
+       "id": "fuse-tea-limon",
+       "name": "Fuse Tea Limon",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "fuse-tea-limon.webp",
+       "w": 262,
+       "h": 640
+      },
+      {
+       "id": "coca-cola-zero",
+       "name": "Coca Cola Zero",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "coca-cola-zero.webp",
+       "w": 205,
+       "h": 640
+      },
+      {
+       "id": "iced-americano",
+       "name": "ICED AMERICANO",
+       "size": "",
+       "price": 180,
+       "desc": "",
+       "img": "iced-americano.webp",
+       "w": 519,
+       "h": 640
+      },
+      {
+       "id": "red-bull",
+       "name": "Red Bull",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "red-bull.webp",
+       "w": 254,
+       "h": 640
+      },
+      {
+       "id": "churchill",
+       "name": "Churchıll",
+       "size": "",
+       "price": 180,
+       "desc": "limon suyu, deniz tuzu, soda",
+       "img": "churchill.webp",
+       "w": 456,
+       "h": 640
+      },
+      {
+       "id": "fuse-tea-seftali-hibiskus",
+       "name": "Fuse Tea Şeftali & Hibiskus",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "fuse-tea-seftali-hibiskus.webp",
+       "w": 255,
+       "h": 640
+      },
+      {
+       "id": "su",
+       "name": "Su",
+       "size": "",
+       "price": 80,
+       "desc": "",
+       "img": "su.webp",
+       "w": 202,
+       "h": 640
+      },
+      {
+       "id": "sprite",
+       "name": "Sprıte",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "sprite.webp",
+       "w": 193,
+       "h": 640
+      },
+      {
+       "id": "ozerhisar-ayran",
+       "name": "Özerhisar Ayran",
+       "size": "",
+       "price": 140,
+       "desc": "",
+       "img": "ozerhisar-ayran.webp",
+       "w": 283,
+       "h": 640
+      },
+      {
+       "id": "yok-yaa",
+       "name": "Yok Yaa",
+       "size": "",
+       "price": 520,
+       "desc": "yeşil elmalı alkolsüz kokteyl (yeşil elma, semiz otu, limon suyu, şeker, redbull pomelo top up)"
+      },
+      {
+       "id": "coca-cola",
+       "name": "Coca Cola",
+       "size": "",
+       "price": 110,
+       "desc": "",
+       "img": "coca-cola.webp",
+       "w": 210,
+       "h": 640
+      },
+      {
+       "id": "iced-filtre",
+       "name": "Iced Filtre",
+       "size": "",
+       "price": 180,
+       "desc": "",
+       "img": "iced-filtre.webp",
+       "w": 479,
+       "h": 640
+      },
+      {
+       "id": "red-bull-zero",
+       "name": "Red Bull Zero",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "red-bull-zero.webp",
+       "w": 257,
+       "h": 640
+      },
+      {
+       "id": "yok-oyle",
+       "name": "Yok Öyle",
+       "size": "",
+       "price": 520,
+       "desc": "orman meyveli alkolsüz kokteyl (frambuaz, limon suyu, hibiskus, triple sour, şeker, redbull pomelo top up)"
+      }
+     ]
+    },
+    {
+     "key": "sicak-icecek",
+     "name": "Sıcak İçecek",
+     "color": "#6B3A22",
+     "items": [
+      {
+       "id": "turk-kahvesi",
+       "name": "TÜRK KAHVESİ",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "turk-kahvesi.webp",
+       "w": 640,
+       "h": 432
+      },
+      {
+       "id": "americano",
+       "name": "Amerıcano",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "americano.webp",
+       "w": 640,
+       "h": 527
+      },
+      {
+       "id": "double-espresso",
+       "name": "Double Espresso",
+       "size": "",
+       "price": 220,
+       "desc": ""
+      },
+      {
+       "id": "filtre-kahve",
+       "name": "Filtre Kahve",
+       "size": "",
+       "price": 220,
+       "desc": "",
+       "img": "filtre-kahve.webp",
+       "w": 640,
+       "h": 512
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
