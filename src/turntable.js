@@ -124,7 +124,7 @@ export function createTurntables(stage, menu, loader) {
       const bill = new THREE.Group(); bill.position.y = PLATE_TOP; lift.add(bill);
       let prod = null, w = 1, h = 1;
       if (it.img) {
-        const asp = it.w / it.h, max = 1.62;
+        const asp = it.w / it.h, max = asp < 0.55 ? 2.05 : 1.62;
         w = asp >= 1 ? max * 1.08 : max * asp; h = asp >= 1 ? (max * 1.08) / asp : max;
         prod = new THREE.Mesh(quad, new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.02, depthWrite: true, fog: true, toneMapped: false, opacity: 1 }));
         prod.scale.set(w, h, 1); prod.position.y = h / 2 - 0.1;
@@ -167,8 +167,8 @@ export function createTurntables(stage, menu, loader) {
       out.pos.set(0, t.y + (port ? 2.0 : 1.7), t.R * 1 + (port ? 5.4 : 3.6));
       out.look.set(port ? 0 : 0.75, t.y + (port ? 0.3 : 0.75), t.R - 0.2);
     } else {
-      out.pos.set(0, t.y + (port ? 4.6 : 3.6) - ex * 0.3, t.R + (port ? 7.4 : 5.6) + ex * 1.1);
-      out.look.set(0, t.y + (port ? -0.95 : -0.2) + ex * 0.22, t.R - 1.35);
+      out.pos.set(0, t.y + (port ? 4.6 : 5.4) - ex * 0.3, t.R + (port ? 7.4 : 9.2) + ex * 1.1);
+      out.look.set(0, t.y + (port ? -0.55 : -0.7) + ex * 0.22, t.R - 1.35);
     }
     return out;
   }

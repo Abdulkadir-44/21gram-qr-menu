@@ -45,7 +45,7 @@ export function createStage(canvas) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.fov = w / h < 0.8 ? 44 : 34;
+    camera.fov = w / h < 0.6 ? 50 : w / h < 0.8 ? 46 : 34;
     camera.updateProjectionMatrix();
     size.w = w; size.h = h; size.portrait = h > w;
   }
