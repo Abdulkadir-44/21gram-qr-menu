@@ -572,7 +572,47 @@ function layerType(s){var t=s.toLocaleLowerCase('tr').replace(/ı/g,'i');
   return 'other';}
 var STACK_ORDER=['veg','onion','sauce','other','cheese','chicken','patty'];
 function isLight(hex){var n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>160}
+/* öneri çipi: dokununca o ürüne geç */
+function goChip(p){return '<button type="button" class="go" data-go="'+p.id+'">'+(p.img?'<img src="'+p.img+'" alt="" loading="lazy">':'<i class="go-ph" aria-hidden="true"></i>')+'<span>'+esc(p.name)+'</span><b>'+money(p.price)+'</b></button>'}
+function sauceBase(p){return p.name.toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/\s*sos$/,'').trim()}
+var SPLIT={n:2};
+/* iki hex rengi karıştır (t: b oranı) */
+function mixHex(a,b,t){var x=parseInt(a.slice(1),16),y=parseInt(b.slice(1),16),c=function(sh){return Math.round(((x>>sh)&255)*(1-t)+((y>>sh)&255)*t)};return "#"+((1<<24)|(c(16)<<16)|(c(8)<<8)|c(0)).toString(16).slice(1)}
+function splitHTML(p){var per=Math.ceil(p.price/SPLIT.n);
+  return '<div class="split"><p class="split-q">Kaç kişi paylaşacaksınız?</p><div class="stepper"><button type="button" data-split="-1" aria-label="Azalt">−</button>'
+   +'<output aria-live="polite">'+SPLIT.n+'</output><button type="button" data-split="1" aria-label="Artır">+</button></div>'
+   +'<p class="per">Kişi başı <b>'+money(per)+'</b></p></div>'}
 var DETAIL={
+  share:{
+    hero:function(p){return '<span class="d-dots"></span><span class="d-stamp">PAYLAŞ</span><span class="d-no">'+noHTML(p)+'</span>'},
+    extra:function(p){
+      SPLIT.n=2;
+      var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean);
+      return '<div class="slip-d"><p class="slip-h"><span>SİPARİŞ FİŞİ</span><span>'+noHTML(p)+'</span></p>'
+        +(parts.length?'<ul class="checks-d">'+parts.map(function(x,k){return '<li style="--k:'+k+'"><i aria-hidden="true"></i>'+esc(x)+'</li>'}).join('')+'</ul>':'')
+        +splitHTML(p)
+        +'<p class="total-d"><span>TOPLAM</span><span class="dots" aria-hidden="true"></span><b>'+money(p.price)+'</b></p></div>';
+    }
+  },
+  sauce:{
+    heroColor:function(p){return mixHex(SAUCE_COLORS[p.id]||'#E4032D','#FFFCEC',.78)},
+    hero:function(p){return '<svg class="d-drip" style="fill:'+(SAUCE_COLORS[p.id]||'#E4032D')+'" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg>'},
+    art:function(p){return '<div style="--sauce:'+(SAUCE_COLORS[p.id]||'#E4032D')+'">'+ramekinSVG()+'</div>'},
+    extra:function(p){
+      var base=sauceBase(p);
+      var used=PRODUCTS.filter(function(x){return x.kind!=='sauce'&&(x.desc||'').toLocaleLowerCase('tr').replace(/ı/g,'i').indexOf(base)>-1});
+      return '<div class="pair"><p class="pair-h">'+(used.length?'BU SOS ŞUNLARDA VAR':'HER BURGERİN YANINA')+'</p>'
+        +(used.length?'<div class="pair-l">'+used.map(goChip).join('')+'</div>':'')+'</div>';
+    }
+  },
+  dessert:{
+    hero:function(p){return '<span class="d-stripes"></span><span class="d-lid"><span class="lid-rb"></span><span class="bow"><i></i><i></i><b></b></span></span>'},
+    art:function(p){return tiramisuSVG()},
+    extra:function(p){
+      var hot=PRODUCTS.filter(function(x){return x.kind==='hot'});
+      return hot.length?'<div class="pair"><p class="pair-h">YANINA BİR KAHVE?</p><div class="pair-l">'+hot.map(goChip).join('')+'</div></div>':'';
+    }
+  },
   burger:{
     hero:function(p){
       return '<span class="d-gingham"></span><svg class="d-burst" viewBox="0 0 200 200"><use href="#burst"/></svg>'
@@ -733,7 +773,7 @@ function render(opts){
     });
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
-  state.order=list.map(function(p){return p.id});
+  state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
   grid.innerHTML=html;
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
@@ -819,13 +859,16 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(moveInd);
 var sheet=$('#sheet'),hpHost=$('#hpHost'),hero=$('#hero'),hp=null,hpT={rx:0,ry:0,x:0,y:0,on:false};
 var lastFocus=null;
 function fillSheet(p){
-  var vis=p.img?'<img id="hp" src="'+p.img+'" alt="'+esc(p.name)+'" draggable="false">':'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>';
+  var D0=DETAIL[p.kind];
+  var vis=p.img?'<img id="hp" src="'+p.img+'" alt="'+esc(p.name)+'" draggable="false">'
+    :(D0&&D0.art?'<div id="hp" class="art" role="img" aria-label="'+esc(p.name)+'">'+D0.art(p)+'</div>'
+    :'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>');
   hpHost.innerHTML=vis;hp=$('#hp');
   $('#sCat').textContent=p.category;
   $('#sName').innerHTML=esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'');
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
-  var heroC=cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
+  var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
   $('#panel').style.setProperty('--hero',heroC);
   $('#panel').dataset.light=/^#[0-9a-f]{6}$/i.test(heroC)&&isLight(heroC)?'1':'';
   var D=DETAIL[p.kind];
@@ -840,7 +883,7 @@ function openSheet(id,fromEl,fromHash){
   var p=BYID[id];if(!p)return;
   lastFocus=fromEl||document.activeElement;
   var r0=null;
-  if(fromEl){var im=fromEl.querySelector('.prod,.ph');if(im)r0=im.getBoundingClientRect()}
+  if(fromEl){var im=fromEl.querySelector('.prod,.ph,.ramekin,.slice');if(im)r0=im.getBoundingClientRect()}
   state.sheetId=id;fillSheet(p);
   sheet.classList.add('open');document.documentElement.classList.add('lock');
   app.inert=true;app.setAttribute('aria-hidden','true');gl.render=false;
@@ -859,6 +902,7 @@ function openSheet(id,fromEl,fromHash){
 }
 function closeSheet(fromPop){
   if(!state.sheetId)return;
+  if(state.gridOrder)state.order=state.gridOrder;
   sheet.classList.remove('open');state.sheetId=null;
   document.documentElement.classList.toggle('lock',state.mode==='welcome');
   app.inert=false;app.removeAttribute('aria-hidden');gl.render=true;
@@ -880,6 +924,18 @@ function step(dir){
   }
   var c=cards.find(function(x){return x.el.dataset.id===id});if(c)lastFocus=c.el;
 }
+$('#sExtra').addEventListener('click',function(e){
+  var b=e.target.closest('[data-split]');
+  if(b){var p=BYID[state.sheetId];SPLIT.n=clamp(SPLIT.n+(+b.dataset.split),1,12);
+    var sp=$('#sExtra .split');if(sp){sp.outerHTML=splitHTML(p);var o=$('#sExtra .per b');if(o&&!RM)o.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.9,.2,1.4)'})}
+    return}
+  var g=e.target.closest('[data-go]');
+  if(g){var q=BYID[g.dataset.go];if(!q)return;
+    state.order=PRODUCTS.filter(function(x){return x.catKey===q.catKey}).map(function(x){return x.id});
+    state.sheetId=q.id;fillSheet(q);try{history.replaceState({sheet:q.id},'','#'+q.id)}catch(_){}
+    if(!RM)hp.animate([{opacity:0,transform:'translateY(30px) scale(.85)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.2,.9,.2,1)'});
+    $('.info').scrollTop=0}
+});
 $('#close').addEventListener('click',function(){closeSheet(false)});
 $('#scrim').addEventListener('click',function(){closeSheet(false)});
 $('#prev').addEventListener('click',function(){step(-1)});
