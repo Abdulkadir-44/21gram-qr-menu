@@ -559,6 +559,46 @@ function dessertCardHTML(p,i){
    +'</div></div></article>';
 }
 
+/* ============ DETAY (açılır pencere) — türe özel ============ */
+/* burger: malzemeyi kat tipine ayır */
+function layerType(s){var t=s.toLocaleLowerCase('tr').replace(/ı/g,'i');
+  if(/patates/.test(t))return 'side';
+  if(/tavuk|chicken|chick/.test(t))return 'chicken';
+  if(/smash|köfte|dana|\bet\b/.test(t))return 'patty';
+  if(/cheese|cheddar|peynir|parmesan/.test(t))return 'cheese';
+  if(/soğan/.test(t))return 'onion';
+  if(/gürkens|turşu|marul|jalapeno|biber$|salata/.test(t))return 'veg';
+  if(/mayo|ketçap|reçel|sos|dynamite|ranch/.test(t))return 'sauce';
+  return 'other';}
+var STACK_ORDER=['veg','onion','sauce','other','cheese','chicken','patty'];
+function isLight(hex){var n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>160}
+var DETAIL={
+  burger:{
+    hero:function(p){
+      return '<span class="d-gingham"></span><svg class="d-burst" viewBox="0 0 200 200"><use href="#burst"/></svg>'
+        +'<span class="d-tag"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'
+        +'<span class="d-no">'+noHTML(p)+'</span>';
+    },
+    extra:function(p){
+      var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean);
+      if(!parts.length)return '';
+      var sides=parts.filter(function(x){return layerType(x)==='side'});
+      var layers=parts.filter(function(x){return layerType(x)!=='side'})
+        .map(function(x,i){return {t:x,type:layerType(x),i:i}})
+        .sort(function(a,b){return STACK_ORDER.indexOf(a.type)-STACK_ORDER.indexOf(b.type)||a.i-b.i});
+      var n=layers.length+2,li=function(cls,label,k,col){
+        var st='--k:'+k+(col?';--c:'+col:'');
+        return '<li class="ly '+cls+(col&&isLight(col)?' light':'')+'" style="'+st+'"><span>'+label+'</span></li>'};
+      var html='<div class="stack"><p class="stack-h"><span>İÇİNDEKİLER</span><span>'+layers.length+' kat</span></p><ol class="stack-l">';
+      html+=li('bun bun-top','',n-1);
+      layers.forEach(function(l,idx){html+=li(l.type,esc(l.t),n-2-idx,layerColor(l.t))});
+      html+=li('bun bun-bottom','',0)+'</ol>';
+      if(sides.length)html+='<p class="stack-side"><b>Yanında</b> '+sides.map(esc).join(', ')+'</p>';
+      return html+'</div>';
+    }
+  }
+};
+
 /* ——— ortak parçalar ——— */
 function prodHTML(p){return p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>'}
@@ -704,7 +744,7 @@ function render(opts){
 }
 function collectCards(){
   if(io)io.disconnect();
-  io=new IntersectionObserver(function(es){es.forEach(function(e){var c=cards.find(function(x){return x.el===e.target});if(c)c.vis=e.isIntersecting})},{rootMargin:'160px 0px'});
+  io=new IntersectionObserver(function(es){es.forEach(function(e){var c=cards.find(function(x){return x.el===e.target});if(c){c.vis=e.isIntersecting;c.el.classList.toggle('in-view',e.isIntersecting)}})},{rootMargin:'160px 0px'});
   cards=[].map.call(grid.querySelectorAll('.card'),function(el){
     var c={el:el,inner:el.querySelector('.card-in'),sheen:el.querySelector('.sheen'),px:0,py:0,on:false,rx:0,ry:0,vis:false};
     el.addEventListener('pointermove',function(e){
@@ -724,20 +764,24 @@ function dealCards(){
   setTimeout(function(){grid.querySelectorAll('.card.deal').forEach(function(el){el.classList.remove('deal')})},1600);
 }
 function tickCards(dt){
-  var vh=window.innerHeight,k=1-Math.exp(-dt*10);
-  for(var i=0;i<cards.length;i++){
-    var c=cards[i];if(!c.vis)continue;
-    var r=c.el.getBoundingClientRect();
+  var vh=window.innerHeight,k=1-Math.exp(-dt*10),vis=[],i,c;
+  /* 1) okuma: yalnız görünür kartlar (layout thrashing yok) */
+  for(i=0;i<cards.length;i++){c=cards[i];if(c.vis){c.r=c.el.getBoundingClientRect();vis.push(c)}}
+  /* 2) yazma */
+  for(i=0;i<vis.length;i++){
+    c=vis[i];var r=c.r;
     var s=RM?0:clamp(((r.top+r.height/2)-vh/2)/(vh*.6),-1,1);
     var trx=-s*6+(c.on?-c.py*12:-aim.y*2.5),try_=c.on?c.px*15:aim.x*4.5;
     c.rx+=(trx-c.rx)*k;c.ry+=(try_-c.ry)*k;
-    c.inner.style.transform='perspective(1100px) rotateX('+c.rx.toFixed(2)+'deg) rotateY('+c.ry.toFixed(2)+'deg)';
+    var tf='perspective(1100px) rotateX('+c.rx.toFixed(2)+'deg) rotateY('+c.ry.toFixed(2)+'deg)';
+    if(tf!==c.tf){c.tf=tf;c.inner.style.transform=tf}
   }
-  /* aktif kategori çipi */
-  if(state.mode==='menu'&&!state.q&&chipsEl.children.length){
-    var cur=null,line=window.innerHeight*.42,bt=-1e9;
-    for(var j=0;j<cards.length;j++){var rr=cards[j].el.getBoundingClientRect();if(rr.top<line&&rr.top>bt+30){bt=rr.top;cur=cards[j].el.dataset.cat}}
-    if(!cur&&cards[0])cur=cards[0].el.dataset.cat;
+  /* aktif kategori çipi: 6 karede bir, görünür kartların ölçüsüyle */
+  tickCards.n=(tickCards.n||0)+1;
+  if(tickCards.n%6===0&&state.mode==='menu'&&!state.q&&chipsEl.children.length&&vis.length){
+    var cur=null,line=vh*.42,bt=-1e9;
+    for(i=0;i<vis.length;i++){var rr=vis[i].r;if(rr.top<line&&rr.top>bt+30){bt=rr.top;cur=vis[i].el.dataset.cat}}
+    if(!cur)cur=vis[0].el.dataset.cat;
     if(cur!==tickCards.cur){tickCards.cur=cur;[].forEach.call(chipsEl.children,function(ch){ch.setAttribute('aria-current',ch.dataset.cat===cur)})}
   }
 }
@@ -782,6 +826,10 @@ function fillSheet(p){
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   $('#panel').style.setProperty('--hero',groupColor(p.groupKey));
+  var D=DETAIL[p.kind];
+  $('#panel').dataset.kind=D?p.kind:'';
+  $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
+  $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';
   hpT.rx=hpT.ry=0;
   var i=state.order.indexOf(p.id),many=state.order.length>1;
   $('.pn').style.display=many?'':'none';
@@ -822,7 +870,12 @@ function step(dir){
   var i=state.order.indexOf(state.sheetId);if(i<0)return;
   var id=state.order[(i+dir+state.order.length)%state.order.length];
   state.sheetId=id;fillSheet(BYID[id]);try{history.replaceState({sheet:id},'','#'+id)}catch(e){}
-  if(!RM)hp.animate([{opacity:0,transform:'translateX('+(dir*60)+'px) scale(.9)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.9,.2,1)'});
+  if(!RM){
+    hp.animate([{opacity:0,transform:'translateX('+(dir*60)+'px) scale(.9)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.9,.2,1)'});
+    [].forEach.call(document.querySelectorAll('.info>*:not(.pn),#heroDeco>*'),function(el,n){
+      el.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:360,delay:n*35,easing:'cubic-bezier(.2,.9,.2,1)',fill:'backwards'});
+    });
+  }
   var c=cards.find(function(x){return x.el.dataset.id===id});if(c)lastFocus=c.el;
 }
 $('#close').addEventListener('click',function(){closeSheet(false)});

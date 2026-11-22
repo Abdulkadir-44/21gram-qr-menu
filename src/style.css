@@ -533,3 +533,111 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
 .card--dessert .price{font-size:28px}
 .card--dessert .more{width:46px;height:46px;background:var(--red)}
 .card--dessert:hover .more{transform:translateX(4px) scale(1.06)}
+
+/* ==========================================================
+   AKICILIK — performans ve hareket ayarları
+   ========================================================== */
+/* ekran dışındaki kartların animasyonları durur, katman yalnız görünür kartlarda */
+.card-in{will-change:auto}
+.card.in-view .card-in{will-change:transform}
+.card:not(.in-view) *{animation-play-state:paused!important}
+/* telefonda pahalı bulanıklık yerine koyu perde */
+@media(max-width:859px){.scrim{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(20,0,6,.72)}}
+/* kapanırken panel görünür kalsın (önceden anında kayboluyordu) ve çıkış girişten çevik olsun */
+.sheet{transition:visibility 0s linear .42s}
+.sheet.open{transition:visibility 0s}
+.sheet:not(.open) .panel{transition:transform .38s cubic-bezier(.55,0,.75,.2),opacity .3s ease}
+.sheet:not(.open) .scrim{transition:opacity .3s ease}
+/* bilgi alanı: açılışta sırayla yükselir */
+.info>*{opacity:0;transform:translateY(14px);transition:opacity .35s ease,transform .5s cubic-bezier(.2,.9,.2,1)}
+.sheet.open .info>*{opacity:1;transform:none}
+.sheet.open .info>:nth-child(1){transition-delay:.12s}
+.sheet.open .info>:nth-child(2){transition-delay:.16s}
+.sheet.open .info>:nth-child(3){transition-delay:.2s}
+.sheet.open .info>:nth-child(4){transition-delay:.24s}
+.sheet.open .info>:nth-child(5){transition-delay:.28s}
+.sheet.open .info>:nth-child(6){transition-delay:.32s}
+.sheet:not(.open) .info>*{transition-duration:.15s;transition-delay:0s}
+.s-extra:empty{display:none}
+.hero-deco{position:absolute;inset:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.info>*{opacity:1;transform:none}}
+
+/* ==========================================================
+   BURGER DETAYI — "burgeri kur"
+   ========================================================== */
+.panel[data-kind="burger"]{background:var(--cream)}
+.panel[data-kind="burger"] .plate{display:none}
+.panel[data-kind="burger"] .hero{background:var(--red)}
+.d-gingham{position:absolute;inset:0;opacity:.5;
+  background:
+    repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 18px,transparent 18px 36px),
+    repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 18px,transparent 18px 36px);
+  -webkit-mask:radial-gradient(75% 70% at 50% 55%,transparent 30%,#000 80%);mask:radial-gradient(75% 70% at 50% 55%,transparent 30%,#000 80%)}
+.d-burst{position:absolute;left:50%;top:52%;width:min(92vw,470px);aspect-ratio:1;transform:translate(-50%,-50%);color:color-mix(in srgb,var(--red) 55%,var(--ink));
+  filter:drop-shadow(0 16px 26px rgba(40,0,8,.35))}
+.d-burst use{transform-origin:100px 100px;animation:spin 50s linear infinite}
+.sheet.open .d-burst{animation:burstIn .8s cubic-bezier(.2,.9,.2,1.15) both}
+@keyframes burstIn{from{transform:translate(-50%,-50%) scale(.6) rotate(-40deg);opacity:0}}
+.d-tag{position:absolute;left:18px;top:18px;width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;
+  background:var(--ink);color:var(--cream);font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:31px;letter-spacing:-.01em;
+  transform:rotate(-10deg);box-shadow:0 10px 18px rgba(20,0,6,.4),inset 0 0 0 4px var(--ink),inset 0 0 0 5.5px color-mix(in srgb,var(--cream) 55%,transparent)}
+.d-tag small{font-size:17px;align-self:flex-start;margin-top:26px;margin-right:1px}
+.sheet.open .d-tag{animation:tagIn .6s .25s cubic-bezier(.2,.9,.25,1.5) both}
+@keyframes tagIn{from{transform:rotate(-40deg) scale(0)}}
+.d-no{position:absolute;right:76px;top:30px;color:var(--cream);font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.85}
+.panel[data-kind="burger"] #hp{max-width:80%;max-height:74%;filter:drop-shadow(0 28px 22px rgba(40,0,8,.45))}
+.panel[data-kind="burger"] .hero-hint{color:var(--cream)}
+
+/* ambalaj kâğıdı: üst kenarı tırtıklı, hero'nun üstüne biner */
+.panel[data-kind="burger"] .info{position:relative;z-index:2;margin-top:-12px;padding-top:30px;background:
+    linear-gradient(var(--cream),var(--cream)) 0 12px/100% 100% no-repeat,
+    radial-gradient(circle at 50% 100%,var(--cream) 6.5px,transparent 7px) 0 0/17px 12px repeat-x}
+.panel[data-kind="burger"] .info .cat{font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.panel[data-kind="burger"] .info .name{font-size:clamp(40px,11.5vw,56px);line-height:.88;margin-top:4px}
+.panel[data-kind="burger"] #sDesc{display:none}
+.panel[data-kind="burger"] .price.big{display:none}
+
+/* burger kesiti */
+.stack{margin-top:18px}
+.stack-h{display:flex;justify-content:space-between;font-size:11.5px;font-weight:800;letter-spacing:.18em;color:var(--muted);margin-bottom:10px}
+.stack-l{list-style:none;display:flex;flex-direction:column;align-items:center;gap:3px;max-width:420px}
+.ly{--c:#B08968;position:relative;width:100%;display:flex;align-items:center;min-height:30px;padding:0 16px;border-radius:10px;background:var(--c);color:var(--cream);
+  font-weight:700;font-size:14.5px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.14),0 2px 0 rgba(40,0,8,.06)}
+.ly.light{color:var(--ink)}
+.ly span{position:relative;z-index:1}
+/* ekmekler */
+.ly.bun{--c:#E3A65A;background:linear-gradient(180deg,#F0BC6E,#D99447);min-height:34px;width:96%}
+.ly.bun-top{min-height:52px;border-radius:52px 52px 12px 12px;
+  background:radial-gradient(circle at 30% 40%,#fff6 0 2px,transparent 3px) 0 0/22px 14px,radial-gradient(circle at 70% 70%,#fff5 0 1.6px,transparent 2.6px) 0 0/18px 12px,linear-gradient(180deg,#F4C67B,#D99447)}
+.ly.bun-bottom{border-radius:10px 10px 22px 22px;min-height:30px}
+/* katlar */
+.ly.patty{min-height:40px;border-radius:14px;width:102%;background:radial-gradient(circle,#0003 0 1.4px,transparent 2px) 0 0/9px 8px,var(--c)}
+.ly.chicken{min-height:40px;border-radius:18px;width:103%;background:radial-gradient(circle,#fff3 0 2px,transparent 3px) 0 0/10px 9px,var(--c)}
+.ly.cheese{min-height:26px;width:104%;border-radius:4px}
+.ly.cheese::after{content:"";position:absolute;left:12%;right:12%;top:100%;height:12px;
+  background:linear-gradient(135deg,var(--c) 25%,transparent 25%) -6px 0/24px 12px,linear-gradient(225deg,var(--c) 25%,transparent 25%) -6px 0/24px 12px}
+.ly.sauce{min-height:24px;border-radius:999px;width:99%}
+.ly.veg{min-height:26px;width:101%;border-radius:8px;
+  -webkit-mask:radial-gradient(circle at 50% 100%,transparent 4px,#000 4.5px) 0 0/12px 100%;mask:radial-gradient(circle at 50% 100%,transparent 4px,#000 4.5px) 0 0/12px 100%}
+.ly.onion{min-height:24px;width:98%;border-radius:999px;background:repeating-radial-gradient(circle at 20% 50%,var(--c) 0 5px,color-mix(in srgb,var(--c) 70%,#fff) 5px 7px)}
+/* kurma animasyonu: katlar alttan üste sırayla düşer */
+.sheet.open .ly{animation:layerDrop .55s cubic-bezier(.25,.9,.3,1.25) both;animation-delay:calc(.28s + var(--k) * 75ms)}
+@keyframes layerDrop{0%{opacity:0;transform:translateY(-46px) scaleY(.8)}60%{opacity:1}100%{transform:none}}
+.stack-side{margin-top:14px;font-size:15px;color:var(--muted)}
+.stack-side b{color:var(--ink);font-weight:800;margin-right:4px}
+.stack-side b::before{content:"+ ";color:var(--red)}
+
+/* fiyat satırı yerine: önceki/sonraki butonları burger kartı tarzında */
+.panel[data-kind="burger"] .pn button{border-color:var(--ink)}
+.panel[data-kind="burger"] .pn button:hover{background:var(--red);border-color:var(--red);color:var(--cream)}
+@media(min-width:860px){
+  .panel[data-kind="burger"] .info{margin-top:0;margin-left:-12px;padding-left:46px;background:
+    linear-gradient(var(--cream),var(--cream)) 12px 0/100% 100% no-repeat,
+    radial-gradient(circle at 100% 50%,var(--cream) 6.5px,transparent 7px) 0 0/12px 17px repeat-y}
+  .d-burst{width:min(44vw,520px)}
+}
+@media(prefers-reduced-motion:reduce){.d-burst use{animation:none}}
+@media(min-width:860px){
+  .panel[data-kind="burger"] .close{right:30px;top:18px}
+  .panel[data-kind="burger"] .d-no{right:94px}
+}
