@@ -431,3 +431,105 @@ html[data-group="icecek"] .card--mock{grid-column:span 2}
 
 .card--soft:hover .more,.card--hot:hover .more{transform:translateX(3px) scale(1.06)}
 @media(prefers-reduced-motion:reduce){.mock .bb,.card--hot .steam path{animation:none}.card--hot .steam path{opacity:.5}}
+
+/* ==========================================================
+   YİYECEK GRUBU — normal kartlar tam, sos kartları yarım genişlik
+   ========================================================== */
+html[data-group="yiyecek"] .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html[data-group="yiyecek"] .grid>.card{grid-column:span 2}
+html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
+@media(min-width:700px){html[data-group="yiyecek"] .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1040px){html[data-group="yiyecek"] .grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* ==========================================================
+   PAYLAŞIMLIK KARTI — "sipariş fişi"
+   ========================================================== */
+.card--share .shade{position:absolute;left:16px;right:16px;top:24px;bottom:-4px;border-radius:8px;background:rgba(40,0,8,.5);filter:blur(22px);transform:translateY(14px)}
+.card--share .paper{top:0;border-radius:4px;box-shadow:none;
+  background:
+    linear-gradient(90deg,transparent 46px,color-mix(in srgb,var(--red) 35%,transparent) 46px 47.5px,transparent 47.5px),
+    repeating-linear-gradient(180deg,transparent 0 27px,color-mix(in srgb,#2b6cb0 16%,transparent) 27px 28px),
+    #fffdf6;
+  /* yırtık üst ve alt kenar (testere dişi) */
+  -webkit-mask:linear-gradient(to bottom right,transparent 50%,#000 50%) top/12px 8px repeat-x,linear-gradient(to top right,transparent 50%,#000 50%) bottom/12px 8px repeat-x,linear-gradient(#000,#000) center/100% calc(100% - 14px) no-repeat;
+          mask:linear-gradient(to bottom right,transparent 50%,#000 50%) top/12px 8px repeat-x,linear-gradient(to top right,transparent 50%,#000 50%) bottom/12px 8px repeat-x,linear-gradient(#000,#000) center/100% calc(100% - 14px) no-repeat}
+.card--share .slip{position:relative;display:flex;justify-content:space-between;margin:0;padding:22px 22px 0 60px;color:var(--red);
+  font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px;letter-spacing:.14em;transform:translateZ(20px)}
+.card--share .stage{height:258px;padding:8px 0 6px}
+.card--share .plate{position:absolute;left:50%;top:50%;width:228px;height:228px;margin:-112px 0 0 -114px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 58%,#f4efe4 59% 66%,#fff 67%);border:2px dashed color-mix(in srgb,var(--red) 45%,transparent);
+  box-shadow:0 14px 24px rgba(40,0,8,.18),inset 0 0 0 10px #fff;transform:translateZ(14px)}
+.card--share .prod{max-width:72%;max-height:206px;transform:translateZ(58px);filter:drop-shadow(0 14px 12px rgba(40,0,8,.28))}
+.card--share .tag-share{position:absolute;right:22px;top:26px;padding:6px 10px 5px;border:2px solid var(--red);border-radius:6px;color:var(--red);
+  font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px;letter-spacing:.12em;transform:translateZ(70px) rotate(12deg);
+  background:color-mix(in srgb,#fffdf6 85%,transparent)}
+.card--share .meta{padding:2px 24px 32px 60px}
+.card--share .cat{font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#2b6cb0;margin-bottom:4px}
+.card--share .name{font-size:clamp(28px,8.4vw,36px);line-height:.95}
+.card--share .checks{list-style:none;margin-top:10px;display:grid;gap:2px}
+.card--share .checks li{position:relative;padding-left:22px;font-size:14.5px;line-height:1.6;color:var(--ink)}
+.card--share .checks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--red);font-weight:800}
+.card--share .foot{align-items:baseline;gap:8px;margin-top:18px;padding-top:12px;border-top:2px solid var(--ink)}
+.card--share .total{font-size:12px;font-weight:800;letter-spacing:.18em}
+.card--share .dots{flex:1;border-bottom:2px dotted color-mix(in srgb,var(--ink) 45%,transparent);transform:translateY(-4px)}
+.card--share .price{font-size:28px}
+.card--share .more{align-self:center;width:44px;height:44px;background:var(--red)}
+.card--share:hover .more{transform:translateX(4px) scale(1.06)}
+
+/* ==========================================================
+   SOS KARTI — "sos barı" (yarım genişlik)
+   ========================================================== */
+.card--sauce .shade{position:absolute;left:10px;right:10px;top:20px;bottom:-4px;border-radius:20px;background:rgba(40,0,8,.45);filter:blur(16px);transform:translateY(10px)}
+.card--sauce .paper{top:0;border-radius:20px;box-shadow:none;overflow:hidden;background:var(--cream)}
+.card--sauce .drip{position:absolute;left:0;top:0;width:100%;height:74px;fill:var(--sauce)}
+.card--sauce .stage{height:150px;place-items:end center;padding-bottom:6px}
+.ramekin{width:128px;transform:translateZ(46px);overflow:visible}
+.ramekin .shadow{fill:rgba(40,0,8,.18)}
+.ramekin .pot,.ramekin .lip{fill:#fff;stroke:color-mix(in srgb,var(--ink) 22%,transparent);stroke-width:2}
+.ramekin .ridges line{stroke:color-mix(in srgb,var(--ink) 9%,transparent);stroke-width:2}
+.ramekin .sauce{fill:var(--sauce)}
+.ramekin .swirl{fill:none;stroke:color-mix(in srgb,var(--sauce) 55%,#fff);stroke-width:3;stroke-linecap:round}
+.card--sauce .meta{padding:4px 14px 14px}
+.card--sauce .cat{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--sauce);margin-bottom:2px;filter:brightness(.8)}
+.card--sauce .name{font-size:clamp(20px,5.8vw,25px);line-height:.95}
+.card--sauce .foot{padding-top:10px}
+.card--sauce .price{font-size:20px;color:var(--ink)}
+.card--sauce .more{width:36px;height:36px;background:var(--sauce)}
+.card--sauce .more svg{width:17px;height:17px}
+.card--sauce:hover .more{transform:translateX(3px) scale(1.06)}
+
+/* ==========================================================
+   TATLI KARTI — "pastane kutusu"
+   ========================================================== */
+.card--dessert .shade{position:absolute;left:16px;right:16px;top:24px;bottom:-4px;border-radius:16px;background:rgba(40,0,8,.5);filter:blur(22px);transform:translateY(14px)}
+.card--dessert .paper{top:0;border-radius:14px;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden;
+  background:repeating-linear-gradient(90deg,#fff7f4 0 18px,#fdeee9 18px 36px)}
+.card--dessert .ribbon-v{position:absolute;top:0;bottom:0;left:34px;width:26px;background:var(--red);box-shadow:inset 3px 0 0 rgba(255,255,255,.25),inset -3px 0 0 rgba(0,0,0,.12)}
+.card--dessert .ribbon-h{position:absolute;left:0;right:0;top:34px;height:26px;background:var(--red);box-shadow:inset 0 3px 0 rgba(255,255,255,.25),inset 0 -3px 0 rgba(0,0,0,.12)}
+/* fiyonk */
+.card--dessert .bow{position:absolute;left:47px;top:47px;width:0;height:0;transform:translateZ(60px);z-index:2}
+.card--dessert .bow i{position:absolute;top:-22px;width:40px;height:44px;border:9px solid var(--red);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow:0 6px 10px rgba(40,0,8,.25)}
+.card--dessert .bow i:first-child{right:2px;transform:rotate(-28deg)}
+.card--dessert .bow i:nth-child(2){left:2px;transform:rotate(28deg)}
+.card--dessert .bow b{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:7px;background:var(--red);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--red) 70%,#000)}
+.card--dessert .stage{height:270px;place-items:end center;padding-bottom:18px}
+.slice{width:236px;transform:translateZ(56px);overflow:visible;filter:drop-shadow(0 16px 14px rgba(40,0,8,.25))}
+.slice .plate{fill:#fff;stroke:color-mix(in srgb,var(--ink) 12%,transparent);stroke-width:2}
+.slice .top{fill:#5a2d14}
+.slice .cocoa circle{fill:#2e1406;opacity:.7}
+.slice .side{fill:#c9a27a}
+.slice .l-cream{fill:#f7ecd5}
+.slice .l-soak{fill:#8a5530}
+.slice .l-biscuit{fill:#d6a466}
+.slice .l-cocoa{fill:#4a2412}
+.slice .edge{fill:none;stroke:rgba(60,25,5,.18);stroke-width:1.5}
+.card--dessert .meta{padding:4px 24px 26px 76px}
+.card--dessert .cat{display:flex;justify-content:space-between;font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--red);margin-bottom:6px}
+.card--dessert .no{color:var(--muted)}
+.card--dessert .name{font-size:clamp(34px,10vw,44px);line-height:.9}
+.card--dessert .sub{margin-top:8px;font-size:15px;color:var(--muted)}
+.card--dessert .foot{padding-top:16px;border-top:1.5px dashed color-mix(in srgb,var(--red) 35%,transparent);margin-top:18px}
+.card--dessert .price{font-size:28px}
+.card--dessert .more{width:46px;height:46px;background:var(--red)}
+.card--dessert:hover .more{transform:translateX(4px) scale(1.06)}

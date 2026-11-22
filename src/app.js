@@ -15,7 +15,8 @@ const PRODUCTS = [];
 /* kategori → kart türü (yemeğe göre farklı kart tasarımı). Listede olmayanlar klasik kartı kullanır. */
 const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-kokteyl': 'cocktail', 'klasik-kokteyl': 'cocktail',
   'bira': 'beer', 'yuksek-alkol': 'spirit', 'shot': 'shot',
-  'soguk-icecek': 'soft', 'sicak-icecek': 'hot' };
+  'soguk-icecek': 'soft', 'sicak-icecek': 'hot',
+  'paylasimlik': 'share', 'soslar': 'sauce', 'tatli': 'dessert' };
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
@@ -412,7 +413,7 @@ function moveInd(){
   var tb=tabsEl,l=b.offsetLeft-(tb.clientWidth-b.offsetWidth)/2;if(tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:l,behavior:RM?'auto':'smooth'});
 }
 function cardHTML(p,i){
-  var T={burger:burgerCardHTML,cocktail:cocktailCardHTML,beer:beerCardHTML,spirit:spiritCardHTML,shot:shotCardHTML,soft:softCardHTML,hot:hotCardHTML}[p.kind];
+  var T={burger:burgerCardHTML,cocktail:cocktailCardHTML,beer:beerCardHTML,spirit:spiritCardHTML,shot:shotCardHTML,soft:softCardHTML,hot:hotCardHTML,share:shareCardHTML,sauce:sauceCardHTML,dessert:dessertCardHTML}[p.kind];
   return (T||classicCardHTML)(p,i);
 }
 /* ——— SOĞUK İÇECEK KARTI: "soğuk dolap" ———
@@ -482,6 +483,78 @@ function hotCardHTML(p,i){
    +'<span class="stamp" aria-hidden="true"><b>TAZE</b><span>DEMLEME</span></span></div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— PAYLAŞIMLIK KARTI: "sipariş fişi" ———
+   yırtık kenarlı çizgili fiş · kırmızı başlık · kesik çizgili tabakta ürün · ✓ işaretli içerik · noktalı TOPLAM satırı */
+function shareCardHTML(p,i){
+  var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+  var list=parts.length?'<ul class="checks">'+parts.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>':'';
+  return cardOpen(p,i,'card--share')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<p class="slip" aria-hidden="true"><span>SİPARİŞ FİŞİ</span><span>'+noHTML(p)+'</span></p>'
+   +'<div class="stage"><span class="plate" aria-hidden="true"></span>'+prodHTML(p)+'<span class="tag-share" aria-hidden="true">PAYLAŞ</span></div>'
+   +'<div class="meta"><p class="cat">'+esc(p.category)+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'+list
+   +'<div class="foot"><span class="total">TOPLAM</span><span class="dots" aria-hidden="true"></span><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— SOS KARTI: "sos barı" ———
+   yarım genişlikte küçük kart · sosun renginde üstten damlama · çizilmiş sos kâsesi */
+var SAUCE_COLORS={'bas-biber-sos':'#D8642A','bas-biber-recel-sos':'#9E1B14','dynamite-sos':'#F08A3C','truffle-sos':'#5B3B22','fake-mac-sos':'#F2A27A'};
+function ramekinSVG(){
+  var ridges='';for(var r=0;r<9;r++){var x=34+r*11.5;ridges+='<line x1="'+x+'" y1="58" x2="'+(x+(r-4)*0.8)+'" y2="98"/>';}
+  return '<svg class="ramekin" viewBox="0 0 160 120" aria-hidden="true">'
+   +'<ellipse cx="80" cy="106" rx="60" ry="9" class="shadow"/>'
+   +'<path d="M28 52 L132 52 L124 98 Q123 104 116 104 L44 104 Q37 104 36 98 Z" class="pot"/>'
+   +'<g class="ridges">'+ridges+'</g>'
+   +'<ellipse cx="80" cy="52" rx="52" ry="12" class="lip"/>'
+   +'<ellipse cx="80" cy="53" rx="45" ry="9" class="sauce"/>'
+   +'<path d="M58 51 Q72 46 84 52 Q96 58 106 51" class="swirl"/>'
+   +'</svg>';
+}
+function sauceCardHTML(p,i){
+  var col=SAUCE_COLORS[p.id]||'#E4032D';
+  var nm=p.name.replace(/\s*sos$/i,'');
+  return cardOpen(p,i,'card--sauce').replace('style="','style="--sauce:'+col+';')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
+   +'<svg class="drip" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg></div>'
+   +'<div class="stage">'+ramekinSVG()+'</div>'
+   +'<div class="meta"><p class="cat">EKSTRA SOS</p>'
+   +'<h3 class="name">'+esc(nm)+'</h3>'
+   +'<div class="foot"><span class="price">+'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— TATLI KARTI: "pastane kutusu" ———
+   kurdele ile bağlı kutu + fiyonk · fotoğrafsız tatlı için katmanlı dilim çizimi */
+function tiramisuSVG(){
+  var dust='';for(var d=0;d<26;d++){dust+='<circle cx="'+(44+((d*37)%130))+'" cy="'+(50+((d*13)%18))+'" r="'+(1+d%2)+'"/>';}
+  return '<svg class="slice" viewBox="0 0 220 170" aria-hidden="true">'
+   +'<ellipse cx="110" cy="150" rx="100" ry="16" class="plate"/>'
+   +'<path d="M40 70 L150 70 L182 46 L72 46 Z" class="top"/>'
+   +'<clipPath id="tiraTop"><path d="M40 70 L150 70 L182 46 L72 46 Z"/></clipPath><g class="cocoa" clip-path="url(#tiraTop)">'+dust+'</g>'
+   +'<path d="M150 70 L182 46 L182 128 L150 146 Z" class="side"/>'
+   +'<rect x="40" y="70" width="110" height="18" class="l-cream"/>'
+   +'<rect x="40" y="88" width="110" height="16" class="l-soak"/>'
+   +'<rect x="40" y="104" width="110" height="16" class="l-cream"/>'
+   +'<rect x="40" y="120" width="110" height="26" class="l-biscuit"/>'
+   +'<path d="M40 70 H150 V146 H40 Z" class="edge"/>'
+   +'<rect x="40" y="66" width="110" height="6" class="l-cocoa"/>'
+   +'</svg>';
+}
+function dessertCardHTML(p,i){
+  return cardOpen(p,i,'card--dessert')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
+   +'<span class="ribbon-v" aria-hidden="true"></span><span class="ribbon-h" aria-hidden="true"></span></div>'
+   +'<span class="bow" aria-hidden="true"><i></i><i></i><b></b></span>'
+   +'<div class="stage">'+(p.img?prodHTML(p):tiramisuSVG())+'</div>'
+   +'<div class="meta"><p class="cat"><span>TATLI KÖŞESİ</span><span class="no">'+noHTML(p)+'</span></p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<p class="sub">Günün tatlı finali</p>'
    +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
    +'</div></div></article>';
 }
