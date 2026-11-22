@@ -6,17 +6,20 @@
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
 
+/* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
+const IMG_V = 5;
 const menu = await fetch('/menu.json').then(r => r.json());
 
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
 /* kategori → kart türü (yemeğe göre farklı kart tasarımı). Listede olmayanlar klasik kartı kullanır. */
 const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-kokteyl': 'cocktail', 'klasik-kokteyl': 'cocktail',
-  'bira': 'beer', 'yuksek-alkol': 'spirit', 'shot': 'shot' };
+  'bira': 'beer', 'yuksek-alkol': 'spirit', 'shot': 'shot',
+  'soguk-icecek': 'soft', 'sicak-icecek': 'hot' };
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
-  img: it.img ? '/img/p/' + it.img : '', w: it.w, h: it.h,
+  img: it.img ? '/img/p/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
@@ -409,9 +412,80 @@ function moveInd(){
   var tb=tabsEl,l=b.offsetLeft-(tb.clientWidth-b.offsetWidth)/2;if(tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:l,behavior:RM?'auto':'smooth'});
 }
 function cardHTML(p,i){
-  var T={burger:burgerCardHTML,cocktail:cocktailCardHTML,beer:beerCardHTML,spirit:spiritCardHTML,shot:shotCardHTML}[p.kind];
+  var T={burger:burgerCardHTML,cocktail:cocktailCardHTML,beer:beerCardHTML,spirit:spiritCardHTML,shot:shotCardHTML,soft:softCardHTML,hot:hotCardHTML}[p.kind];
   return (T||classicCardHTML)(p,i);
 }
+/* ——— SOĞUK İÇECEK KARTI: "soğuk dolap" ———
+   ikili ızgarada dolap camı · kırmızı başlık şeridi (❄ 4°C) · yoğuşma damlaları · tel raf
+   · fotoğrafsız alkolsüz kokteyller: iki sütun genişliğinde, renkli bardak illüstrasyonu */
+function softType(p){var t=(p.name+' '+(p.desc||'')).toLocaleLowerCase('tr').replace(/ı/g,'i');
+  if(/alkolsüz kokteyl|alkolsuz kokteyl/.test(t))return 'ALKOLSÜZ KOKTEYL';
+  if(/iced|buzlu/.test(t))return 'BUZLU KAHVE';
+  if(/red bull|fuse tea/.test(t))return 'KUTU';
+  if(/churchill/.test(t))return 'FERAHLATICI';
+  return 'ŞİŞE';}
+var SNOW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>';
+function liquidColor(p){var t=(p.name+' '+(p.desc||'')).toLocaleLowerCase('tr');
+  if(/yeşil elma|elma/.test(t))return '#7DBB3C';
+  if(/orman|frambuaz|hibisk/.test(t))return '#C2185B';
+  return '#E4032D';}
+/* fotoğrafı olmayan alkolsüz kokteyl için çizim bardak */
+function mocktailSVG(col){
+  var bub='';for(var b=0;b<6;b++)bub+='<circle class="bb" style="--b:'+b+'" cx="'+(42+b*8)+'" cy="180" r="'+(2+b%3)+'"/>';
+  return '<svg class="mock" viewBox="0 0 120 210" aria-hidden="true" style="--liq:'+col+'">'
+   +'<defs><clipPath id="glassClip"><path d="M24 44 L96 44 L89 190 Q88 197 81 197 L39 197 Q32 197 31 190 Z"/></clipPath></defs>'
+   +'<line x1="78" y1="8" x2="62" y2="150" class="straw"/>'
+   +'<g clip-path="url(#glassClip)"><rect x="0" y="74" width="120" height="140" class="liq"/>'
+   +'<rect x="38" y="84" width="22" height="22" rx="4" class="ice" transform="rotate(-12 49 95)"/><rect x="62" y="98" width="20" height="20" rx="4" class="ice" transform="rotate(14 72 108)"/>'
+   +'<rect x="44" y="116" width="18" height="18" rx="4" class="ice" transform="rotate(8 53 125)"/>'+bub+'</g>'
+   +'<path d="M24 44 L96 44 L89 190 Q88 197 81 197 L39 197 Q32 197 31 190 Z" class="glass"/>'
+   +'<circle cx="30" cy="46" r="15" class="garnish"/><circle cx="30" cy="46" r="10" class="garnish-in"/>'
+   +'</svg>';
+}
+function softCardHTML(p,i){
+  var type=softType(p),mock=!p.img;
+  var vis=mock?mocktailSVG(liquidColor(p)):prodHTML(p);
+  var desc=p.desc?p.desc.replace(/^[^(]*\(|\)\s*$/g,''):'';
+  return cardOpen(p,i,'card--soft'+(mock?' card--mock':''))
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<p class="chill" aria-hidden="true">'+SNOW+'<span>SOĞUK</span><b>4°C</b></p>'
+   +'<div class="stage"><span class="frost" aria-hidden="true"></span>'+vis+'<span class="rack" aria-hidden="true"></span></div>'
+   +'<div class="meta"><p class="cat">'+esc(type)+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +(desc?'<p class="desc">'+esc(desc)+'</p>':'')
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* ——— SICAK İÇECEK KARTI: "kahvehane" ———
+   kraft kâğıt · fincan izleri · tüten buhar · TAZE DEMLEME mührü · fotoğrafsız espresso için çizim fincan */
+function hotType(p){var t=p.name.toLocaleLowerCase('tr').replace(/ı/g,'i');
+  if(/türk|turk/.test(t))return 'GELENEKSEL';
+  if(/filtre/.test(t))return 'DEMLEME';
+  if(/double|doppio/.test(t))return 'ÇİFT SHOT';
+  if(/americano/.test(t))return 'ESPRESSO + SU';
+  return 'SICAK';}
+function cupSVG(){
+  return '<svg class="cup" viewBox="0 0 200 140" aria-hidden="true">'
+   +'<ellipse cx="100" cy="122" rx="84" ry="14" class="saucer"/><ellipse cx="100" cy="118" rx="62" ry="9" class="saucer-in"/>'
+   +'<path d="M54 52 L146 52 Q144 104 118 116 L82 116 Q56 104 54 52 Z" class="body"/>'
+   +'<path d="M146 62 Q172 62 168 82 Q164 98 140 98" class="handle"/>'
+   +'<ellipse cx="100" cy="52" rx="46" ry="9" class="rim"/><ellipse cx="100" cy="53" rx="40" ry="6.5" class="coffee"/>'
+   +'</svg>';
+}
+function hotCardHTML(p,i){
+  var steam='<svg class="steam" viewBox="0 0 120 90" aria-hidden="true">'
+   +'<path d="M30 88 C18 70 42 58 30 40 C20 26 36 14 30 2"/><path d="M60 88 C48 70 72 58 60 40 C50 26 66 14 60 2"/><path d="M90 88 C78 70 102 58 90 40 C80 26 96 14 90 2"/></svg>';
+  return cardOpen(p,i,'card--hot')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div><span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span></div>'
+   +'<div class="stage">'+steam+(p.img?prodHTML(p):cupSVG())
+   +'<span class="stamp" aria-hidden="true"><b>TAZE</b><span>DEMLEME</span></span></div>'
+   +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
 /* ——— ortak parçalar ——— */
 function prodHTML(p){return p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>'}

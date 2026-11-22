@@ -2,7 +2,8 @@ import sharp from 'sharp'; import fs from 'node:fs';
 const C = 'scripts/.cache/', OUT = 'public/img/p/';
 fs.mkdirSync(OUT, { recursive: true });
 const downloads = JSON.parse(fs.readFileSync(C + 'downloads.json', 'utf8'));
-const STRICT = { 'americano': 251, 'filtre-kahve': 251 };
+const STRICT = { 'americano': 251, 'filtre-kahve': 251, 'ozerhisar-ayran': 251, 'churchill': 251 };
+const ADAPTIVE = new Set(['ozerhisar-ayran', 'churchill']); // zemini saf beyaz olmayan fotoğraflar
 const SOFT_CATS = ['smash-burger', 'tavuk-burger'];
 const STRICT_IDS = new Set();
 const STRICT_CATS = ['house-kokteyl', 'klasik-kokteyl']; // köpüklü/beyaz içecekler: yalnız saf beyaz zemin silinir
@@ -14,7 +15,19 @@ async function cut(src, LO = 205, soft = false, softBelow = 1) {
   const W = info.width, H = info.height, N = W * H;
   const out = Buffer.alloc(N * 4), seen = new Uint8Array(N), q = new Int32Array(N);
   // soft: tabak/burger gibi ürünlerde alttaki gri-bej gölge de zemin sayılır (gölge olarak yarı saydam kalır)
-  const bgLike = i => { const r = data[i*3], g = data[i*3+1], b = data[i*3+2]; const mn = Math.min(r,g,b), mx = Math.max(r,g,b); const sft = soft || ((i / W) | 0) > H * softBelow; return sft ? (mn > 150 && mx - mn < 30) : (mn > LO && mx - mn < 22); };
+  // adaptive: zemin saf beyaz değilse (gri/gürültülü), zemin rengi köşelerden ölçülür ve ona benzeyen pikseller silinir
+  const adaptive = ADAPTIVE.has(src.split('/').pop().replace('.jpg', ''));
+  let bgc = [255, 255, 255];
+  if (adaptive) {
+    const acc = [0, 0, 0]; let n = 0;
+    for (const [cx, cy] of [[12, 12], [W - 13, 12], [12, H - 13], [W - 13, H - 13]])
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const k = ((cy + dy) * W + cx + dx) * 3; acc[0] += data[k]; acc[1] += data[k+1]; acc[2] += data[k+2]; n++; }
+    bgc = acc.map(v => v / n);
+  }
+  const bgMin = Math.min(...bgc);
+  const bgLike = i => { const r = data[i*3], g = data[i*3+1], b = data[i*3+2]; const mn = Math.min(r,g,b), mx = Math.max(r,g,b); const sft = soft || ((i / W) | 0) > H * softBelow;
+    if (adaptive) return Math.max(Math.abs(r - bgc[0]), Math.abs(g - bgc[1]), Math.abs(b - bgc[2])) < 18 || (((i / W) | 0) > H * 0.72 && mn > 150 && mx - mn < 30);
+    return sft ? (mn > 150 && mx - mn < 30) : (mn > LO && mx - mn < 22); };
   const LOa = soft ? 150 : LO; // (alt bölgedeki gölge için ayrıca aşağıda satıra göre seçilir)
   let h = 0, t = 0;
   for (let x = 0; x < W; x++) for (const y of [0, H-1]) { const i = y*W+x; if (!seen[i] && bgLike(i)) { seen[i] = 1; q[t++] = i; } }
@@ -24,7 +37,8 @@ async function cut(src, LO = 205, soft = false, softBelow = 1) {
   // kenar bandı: arka plana 3px yakın açık pikseller de yumuşatılır (hale temizliği)
   const bg = new Float32Array(N); for (let i = 0; i < N; i++) bg[i] = seen[i] ? 1 : 0;
   let ring = seen.slice();
-  for (let pass = 1; pass <= 3; pass++) {
+  const passes = LO >= 248 ? 1 : 3; // beyaz ürünlerde (kupa) kenarı az yumuşat
+  for (let pass = 1; pass <= passes; pass++) {
     const nx = ring.slice();
     for (let i = 0; i < N; i++) if (!ring[i]) { const x = i % W, y = (i / W) | 0;
       if ((x>0&&ring[i-1])||(x<W-1&&ring[i+1])||(y>0&&ring[i-W])||(y<H-1&&ring[i+W])) { nx[i] = 1; bg[i] = 1 - pass * 0.3; } }
@@ -35,12 +49,23 @@ async function cut(src, LO = 205, soft = false, softBelow = 1) {
     let a = 255, R = r, G = g, B = b;
     if (bg[i] > 0) {
       const mn = Math.min(r, g, b), lo = bg[i] === 1 ? (((i / W) | 0) > H * softBelow ? 150 : LOa) : 150;
-      let af = (255 - mn) / (255 - lo); af = Math.max(0, Math.min(1, af)); af = bg[i] === 1 ? Math.pow(af, 1.6) * 0.85 : Math.pow(af, 1.4);
+      let af = adaptive && bg[i] === 1 ? (bgMin - mn) / (bgMin - 150) : (255 - mn) / (255 - lo); af = Math.max(0, Math.min(1, af)); af = bg[i] === 1 ? Math.pow(af, 1.6) * 0.85 : Math.pow(af, 1.4);
       if (bg[i] === 1) { R = 34; G = 8; B = 12; af *= 0.75; } // zemin gölgesi: koyu, yarı saydam gölge
       else if (af > 0.01) { const un = c => Math.max(0, Math.min(255, Math.round((c - 255 * (1 - af)) / af))); R = un(r); G = un(g); B = un(b); } else R = G = B = 0;
       a = Math.round(af * 255);
     }
     out[i*4] = R; out[i*4+1] = G; out[i*4+2] = B; out[i*4+3] = a;
+  }
+  // beyaz ürünlerde (kupa) dış kenardaki açık renkli saçağı 2 piksel kazı
+  if (LO >= 248) for (let pass = 0; pass < 2; pass++) {
+    const kill = [];
+    for (let i = 0; i < N; i++) {
+      if (out[i*4+3] < 10) continue;
+      const x = i % W, y = (i / W) | 0;
+      const edge = (x>0&&out[(i-1)*4+3]<10)||(x<W-1&&out[(i+1)*4+3]<10)||(y>0&&out[(i-W)*4+3]<10)||(y<H-1&&out[(i+W)*4+3]<10);
+      if (edge && Math.min(out[i*4], out[i*4+1], out[i*4+2]) > 225) kill.push(i);
+    }
+    for (const i of kill) out[i*4+3] = 0;
   }
   return sharp(out, { raw: { width: W, height: H, channels: 4 } }).trim({ threshold: 4 }).resize(640, 640, { fit: 'inside' }).webp({ quality: 82, alphaQuality: 90 }).toBuffer();
 }
