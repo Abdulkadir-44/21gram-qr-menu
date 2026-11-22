@@ -11,7 +11,7 @@ const menu = await fetch('/menu.json').then(r => r.json());
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
 /* kategori → kart türü (yemeğe göre farklı kart tasarımı). Listede olmayanlar klasik kartı kullanır. */
-const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger' };
+const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-kokteyl': 'cocktail', 'klasik-kokteyl': 'cocktail' };
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
@@ -25,7 +25,14 @@ const LAYER_COLORS = [
   [/cheese|cheddar|peynir|parmesan/, '#F2B705'], [/mayo|ranch/, '#E6CF95'], [/ketçap|reçel|dynamite|acı|sos/, '#E4032D'],
   [/soğan/, '#8E3B7A'], [/gürkens|turşu|marul|jalapeno|biber|salata/, '#5E8C31'], [/patates/, '#E3A33A'],
 ];
-const layerColor = s => { const t = s.toLocaleLowerCase('tr'); for (const [re, c] of LAYER_COLORS) if (re.test(t)) return c; return '#B08968'; };
+/* kokteyl kartı: isim + tariften baz içkiyi bul */
+const SPIRITS = [
+  [/long island/, 'KARIŞIK İÇKİ'], [/jäger|jager/, 'JÄGERMEISTER BAZLI'], [/negroni|\bgin\b|\bcin\b|beefeat|hendrick|tanqueray/, 'CİN BAZLI'],
+  [/vodka|votka|absolut/, 'VOTKA BAZLI'], [/whisky|viski|jack daniel|jameson|bourbon/, 'VİSKİ BAZLI'],
+  [/tekila|tequila|margar/, 'TEKİLA BAZLI'], [/\brom\b|\brum\b|bacardi/, 'ROM BAZLI'],
+];
+const spiritOf = p => { const t = (p.name + ' ' + (p.desc || '')).toLocaleLowerCase('tr').replace(/ı/g, 'i'); for (const [re, s] of SPIRITS) if (re.test(t)) return s; return ''; };
+const layerColor = s => { const t = s.toLocaleLowerCase('tr').replace(/ı/g, 'i'); for (const [re, c] of LAYER_COLORS) if (re.test(t)) return c; return '#B08968'; };
 const LOGO_IMG = '/img/logo.png';
 
 /* tema: renkler theme.css'ten okunur (3D sahne de aynı değerleri kullanır) */
@@ -401,7 +408,29 @@ function moveInd(){
   var tb=tabsEl,l=b.offsetLeft-(tb.clientWidth-b.offsetWidth)/2;if(tb.scrollWidth>tb.clientWidth)tb.scrollTo({left:l,behavior:RM?'auto':'smooth'});
 }
 function cardHTML(p,i){
-  return p.kind==='burger'?burgerCardHTML(p,i):classicCardHTML(p,i);
+  return p.kind==='burger'?burgerCardHTML(p,i):p.kind==='cocktail'?cocktailCardHTML(p,i):classicCardHTML(p,i);
+}
+/* ——— KOKTEYL KARTI: "gece barı" ———
+   koyu kart + art-deco çerçeve · ışık hüzmeli kemer pencerede bardak · kemer üstünde kavisli kategori adı
+   · baz içki rozeti · bar menüsü gibi ortalı tarif satırı */
+function cocktailCardHTML(p,i){
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'
+                :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
+  var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+  var recipe=parts.length?parts.map(function(s){return '<span>'+esc(s)+'</span>'}).join('<i aria-hidden="true">✦</i>')
+                         :'<span class="classic">Klasik reçete</span>';
+  var sp=spiritOf(p);
+  return '<article class="card card--cocktail" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+', '+money(p.price)+'. Detayı aç')+'">'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<div class="stage"><div class="arch" aria-hidden="true"><span class="rays"></span><span class="glow"></span></div>'
+   +'<svg class="arc-title" viewBox="0 0 300 120" aria-hidden="true"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>'
+   +'<span class="spark s1" aria-hidden="true">✦</span><span class="spark s2" aria-hidden="true">✦</span>'
+   +vis+'<span class="bar" aria-hidden="true"></span></div>'
+   +'<div class="meta"><p class="cat"><span class="no">No.'+String(p.no).padStart(2,'0')+'</span>'+(sp?'<span class="spirit">'+esc(sp)+'</span>':'')+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<p class="recipe">'+recipe+'</p>'
+   +'<div class="foot"><span class="price">'+money(p.price)+'</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'</div></div></article>';
 }
 /* ——— BURGER KARTI: "ambalaj kâğıdı" ———
    kareli tepsi kâğıdı şeridi · güneş patlaması rozeti üstünde taşan burger · eğik fiyat etiketi
