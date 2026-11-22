@@ -66,6 +66,44 @@ PRODUCTS.forEach(function(p){
   c.items.push(p);
 });
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
+/* TASARIM V2 — tüm burger kartları */
+function isV2(p){return p.kind==='burger'}
+/* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
+   Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
+   malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
+   Rastgelelik ürün kimliğinden tohumlanır → her açılışta aynı dağılım. */
+function wmHTML(p){return '<span class="wm" aria-hidden="true" data-seed="'+esc(p.id)+'"></span>'}
+function boxIn(el,root){var x=0,y=0,e=el;while(e&&e!==root){x+=e.offsetLeft;y+=e.offsetTop;e=e.offsetParent}return {x:x,y:y,w:el.offsetWidth,h:el.offsetHeight}}
+function layoutWM(root){
+  [].forEach.call(root.querySelectorAll('.wm[data-seed]'),function(wm){
+    var paper=wm.parentNode,card=paper.closest('.card-in');if(!card||!paper.offsetWidth)return;
+    var P=boxIn(paper,card),W=P.w,H=P.h,pad=5;
+    var obs=[].map.call(card.querySelectorAll('.prod,.ph,.cat span,.name,.ticket,.layers li,.cta,.more'),function(el){
+      var b=boxIn(el,card);return {x:b.x-P.x-pad,y:b.y-P.y-pad,w:b.w+pad*2,h:b.h+pad*2}});
+    var id=wm.dataset.seed,h=0;for(var k=0;k<id.length;k++)h=(h*31+id.charCodeAt(k))>>>0;
+    var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296};
+    var hit=function(a,b){return a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h};
+    wm.innerHTML='';var placed=0;
+    var size=function(fs,rot){var rr=rot*Math.PI/180,tw=fs*6.4,th=fs;
+      return {w:tw*Math.abs(Math.cos(rr))+th*Math.abs(Math.sin(rr)),h:tw*Math.abs(Math.sin(rr))+th*Math.abs(Math.cos(rr))}};
+    var put=function(cx,cy,fs,rot){var z=size(fs,rot),b={x:cx-z.w/2,y:cy-z.h/2,w:z.w,h:z.h};
+      if(obs.some(function(o){return hit(b,o)}))return false;
+      obs.push({x:b.x-14,y:b.y-14,w:b.w+28,h:b.h+28});
+      var i=document.createElement('i');i.textContent='21GRAM';
+      i.style.cssText='left:'+cx.toFixed(1)+'px;top:'+cy.toFixed(1)+'px;--r:'+rot+'deg;--s:'+fs+'px';
+      wm.appendChild(i);placed++;return true};
+    /* alt satırın ortası ("3D gör" ile ok düğmesi arası) sabit bir yer */
+    var cta=card.querySelector('.cta'),mo=card.querySelector('.more');
+    if(cta&&mo){var a=boxIn(cta,card),m=boxIn(mo,card);
+      put((a.x+a.w+m.x)/2-P.x,m.y+m.h/2-P.y,13,Math.round(rnd()*16-8))}
+    for(var t=0;t<500&&placed<7;t++){
+      var fs=9+Math.round(rnd()*6),rot=Math.round(rnd()*50-25),z=size(fs,rot);
+      put(10+z.w/2+rnd()*(W-20-z.w),12+z.h/2+rnd()*(H-30-z.h),fs,rot);
+    }
+  });
+}
+var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTimeout(function(){layoutWM(grid)},150)});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutWM(grid)});
 
 /* ——— durum ——— */
 var state={mode:'welcome',group:GROUPS[0].key,q:'',order:[],sheetId:null,pushed:false};
@@ -747,12 +785,14 @@ var DETAIL={
   burger:{
     hero:function(p){
       return '<span class="d-gingham"></span><svg class="d-burst" viewBox="0 0 200 200"><use href="#burst"/></svg>'
-        +'<span class="d-tag"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'
+        +(isV2(p)?'':'<span class="d-tag"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>')
         +'<span class="d-no">'+noHTML(p)+'</span>';
     },
     extra:function(p){
       var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean);
       if(!parts.length)return '';
+      if(isV2(p))return '<div class="stack v2"><p class="stack-h"><span>İÇİNDEKİLER</span><span>'+parts.length+' malzeme</span></p>'
+        +'<ul class="layers">'+parts.map(function(x){return '<li style="--c:'+layerColor(x)+'">'+esc(x)+'</li>'}).join('')+'</ul></div>';
       var sides=parts.filter(function(x){return layerType(x)==='side'});
       var layers=parts.filter(function(x){return layerType(x)!=='side'})
         .map(function(x,i){return {t:x,type:layerType(x),i:i}})
@@ -874,6 +914,7 @@ function cocktailCardHTML(p,i){
    kareli tepsi kâğıdı şeridi · güneş patlaması rozeti üstünde taşan burger · eğik fiyat etiketi
    · malzemeler burger katları gibi renk kodlu · alt kenar tırtıklı ambalaj */
 function burgerCardHTML(p,i){
+  if(isV2(p))return burgerCardV2(p,i);
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
@@ -887,6 +928,24 @@ function burgerCardHTML(p,i){
    +'<h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
    +(layers?'<ul class="layers" aria-label="Malzemeler">'+layers+'</ul>':'')
    +'<div class="foot"><span class="cta">Yakından bak</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'</div></div></article>';
+}
+/* V2: sarı rozet ve kareli şerit yok · fiyat adın karşısında bilet · "3D gör" · dağınık 21GRAM filigranı */
+function ticketHTML(p){return '<span class="ticket" aria-hidden="true"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'}
+function burgerCardV2(p,i){
+  var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
+                :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
+  var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+  var shown=parts.slice(0,5),rest=parts.length-shown.length;
+  var layers=shown.map(function(s){return '<li style="--c:'+layerColor(s)+'">'+esc(s)+'</li>'}).join('')+(rest>0?'<li class="more-l">+'+rest+'</li>':'');
+  return '<article class="card card--burger v2" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="stage">'+vis+'</div>'
+   +'<div class="meta"><p class="cat"><span>'+esc(p.category)+'</span></p>'
+   +'<div class="name-row"><h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
+   +ticketHTML(p)+'</div>'
+   +(layers?'<ul class="layers" aria-label="Malzemeler">'+layers+'</ul>':'')
+   +'<div class="foot"><span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
    +'</div></div></article>';
 }
 function classicCardHTML(p,i){
@@ -923,7 +982,7 @@ function render(opts){
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
   state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
-  grid.innerHTML=html;armImgs(grid);
+  grid.innerHTML=html;armImgs(grid);layoutWM(grid);
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
   if(gl.setGroup)gl.setGroup(hex,state.group);
@@ -1015,7 +1074,8 @@ function fillSheet(p){
   hpHost.innerHTML=vis;hp=$('#hp');armImgs(hpHost);
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
-  $('#sName').innerHTML=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
+  var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
+  $('#sName').innerHTML=isV2(p)?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
@@ -1023,19 +1083,62 @@ function fillSheet(p){
   $('#panel').dataset.light=/^#[0-9a-f]{6}$/i.test(heroC)&&isLight(heroC)?'1':'';
   var D=DETAIL[p.kind];
   $('#panel').dataset.kind=D?p.kind:'';
+  $('#panel').dataset.v2=isV2(p)?'1':'';
+  sheet.classList.toggle('pop',isV2(p));
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
   $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';
   hpT.rx=hpT.ry=0;
   var i=state.order.indexOf(p.id),many=state.order.length>1;
   $('.pn').style.display=many?'':'none';
 }
+/* ——— KART ÇEVİRME (v2 pop-up) ———
+   Tıklanan kart ekranın ortasına doğru giderken 90° döner (kenar kameraya dönük → görünmez),
+   o anda kartın "arka yüzü" olan detay paneli -90°'den 0°'a dönerek tam boyuta büyür.
+   Kapanışta aynı hareket tersine oynar ve kart yerine geri döner. */
+var popCard=null,FLIP_P='perspective(1400px) ';
+function flipGeom(card){
+  var r=card.getBoundingClientRect(),f=$('#panel').getBoundingClientRect();
+  var c0={x:r.left+r.width/2,y:r.top+r.height/2},c1={x:f.left+f.width/2,y:f.top+f.height/2};
+  var m={x:(c0.x+c1.x)/2,y:(c0.y+c1.y)/2},wm=(r.width+f.width)/2;
+  return {r:r,f:f,
+    cardMid:FLIP_P+'translate('+(m.x-c0.x)+'px,'+(m.y-c0.y)+'px) scale('+(wm/r.width)+')',
+    panelMid:FLIP_P+'translate('+(m.x-c1.x)+'px,'+(m.y-c1.y)+'px) scale('+(wm/f.width)+')'};
+}
+function flipClone(card,r){
+  var cl=card.cloneNode(true);cl.classList.remove('deal');cl.removeAttribute('tabindex');cl.removeAttribute('role');cl.setAttribute('aria-hidden','true');
+  cl.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;margin:0;z-index:61;pointer-events:none;backface-visibility:hidden';
+  document.body.appendChild(cl);return cl;
+}
+function onScreen(r){return r.bottom>0&&r.top<innerHeight&&r.width>0}
+function popFlipIn(card){
+  var g=flipGeom(card);if(!onScreen(g.r))return;
+  var cl=flipClone(card,g.r),T1=330,T2=460;
+  card.style.visibility='hidden';popCard=card;
+  cl.animate([{transform:FLIP_P+'rotateY(0deg)'},{transform:g.cardMid+' rotateY(90deg)'}],
+    {duration:T1,easing:'cubic-bezier(.45,0,.85,.55)',fill:'forwards'}).onfinish=function(){cl.remove()};
+  $('#panel').animate([{transform:g.panelMid+' rotateY(-90deg)'},{transform:FLIP_P+'rotateY(0deg)'}],
+    {duration:T2,delay:T1,easing:'cubic-bezier(.2,.65,.25,1)',fill:'backwards'});
+}
+function popFlipOut(card){
+  var pn=$('#panel'),g=flipGeom(card),T1=260,T2=380;
+  if(!onScreen(g.r)){pn.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.9)'}],{duration:240,easing:'ease-in',fill:'forwards'});return}
+  var cl=flipClone(card,g.r);card.style.visibility='hidden';
+  pn.animate([{transform:FLIP_P+'rotateY(0deg)'},{transform:g.panelMid+' rotateY(-90deg)'}],
+    {duration:T1,easing:'cubic-bezier(.45,0,.85,.55)',fill:'forwards'});
+  cl.animate([{transform:g.cardMid+' rotateY(90deg)'},{transform:FLIP_P+'rotateY(0deg)'}],
+    {duration:T2,delay:T1,easing:'cubic-bezier(.2,.65,.25,1)',fill:'backwards'})
+    .onfinish=function(){cl.remove();card.style.visibility=''};
+}
 function openSheet(id,fromEl,fromHash){
   var p=BYID[id];if(!p)return;
   lastFocus=fromEl||document.activeElement;
-  var r0=null;
-  if(fromEl){var im=fromEl.querySelector('.prod,.ph,.ramekin,.slice');if(im)r0=im.getBoundingClientRect()}
+  $('#panel').getAnimations().forEach(function(a){a.cancel()});
+  if(popCard){popCard.style.visibility='';popCard=null}
+  var r0=null,pop=isV2(p)&&!RM&&fromEl&&fromEl.classList.contains('card');
+  if(fromEl&&!pop){var im=fromEl.querySelector('.prod,.ph,.ramekin,.slice');if(im)r0=im.getBoundingClientRect()}
   state.sheetId=id;fillSheet(p);
   sheet.classList.add('open');document.documentElement.classList.add('lock');
+  if(pop)popFlipIn(fromEl);
   app.inert=true;app.setAttribute('aria-hidden','true');gl.render=false;
   if(!fromHash){try{history.pushState({sheet:id},'','#'+id);state.pushed=true}catch(e){}}
   $('#close').focus({preventScroll:true});
@@ -1052,6 +1155,10 @@ function openSheet(id,fromEl,fromHash){
 }
 function closeSheet(fromPop){
   if(!state.sheetId)return;
+  var back=sheet.classList.contains('pop')&&!RM&&cards.find(function(x){return x.el.dataset.id===state.sheetId});
+  if(popCard&&(!back||popCard!==back.el)){popCard.style.visibility=''}
+  popCard=null;
+  if(back)popFlipOut(back.el);
   if(state.gridOrder)state.order=state.gridOrder;
   sheet.classList.remove('open');state.sheetId=null;
   document.documentElement.classList.toggle('lock',state.mode==='welcome');

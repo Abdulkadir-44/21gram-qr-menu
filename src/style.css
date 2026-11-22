@@ -1025,3 +1025,66 @@ img.err+.sk{animation:none}
 .sk[data-k="hot"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M24%2034H72C72%2062%2063%2076%2048%2076S24%2062%2024%2034Z%20M72%2041A11%2011%200%201%201%2072%2063V57A5%205%200%201%200%2072%2047Z%20M12%2082C12%2078%2088%2078%2088%2082S80%2090%2050%2090%2012%2086%2012%2082Z'%2F%3E%3C%2Fsvg%3E");--sw:72%;--sh:112px;--sb:16px;--hh:min(230px,28dvh)}
 .sk[data-k="share"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M20%2064C22%2042%2036%2030%2050%2030S78%2042%2080%2064Z%20M6%2066C6%2062%2094%2062%2094%2066C94%2076%2074%2084%2050%2084S6%2076%206%2066Z'%2F%3E%3C%2Fsvg%3E");--sw:72%;--sh:170px;--sb:calc(50% - 85px);--hh:min(280px,34dvh)}
 .sk[data-k="classic"]{--m:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cpath%20d%3D'M50%2012A38%2038%200%201%201%2049.9%2012Z'%2F%3E%3C%2Fsvg%3E");--sw:64%;--sh:180px;--sb:calc(50% - 90px);--hh:min(260px,32dvh)}
+
+/* ==========================================================
+   TASARIM V2 — BURGER (şimdilik ilk kartta)
+   ========================================================== */
+.card--burger.v2 .paper{background:var(--cream)}
+/* dağınık 21GRAM filigranı — yalnızca görsel alanında */
+.card--burger.v2 .wm{position:absolute;inset:0;pointer-events:none}
+.card--burger.v2 .wm i{position:absolute;font-style:normal;font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;
+  font-size:var(--s);letter-spacing:.08em;line-height:1;white-space:nowrap;color:var(--red);opacity:.1;transform:translate(-50%,-50%) rotate(var(--r))}
+/* ad + bilet */
+.card--burger.v2 .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card--burger.v2 .name{flex:1;min-width:0}
+.ticket{flex:none;position:relative;display:inline-flex;align-items:center;gap:2px;margin-top:4px;
+  height:32px;padding:0 18px 0 20px;background:#F7E7A6;color:var(--ink);
+  font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:18px;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
+  transform:rotate(-3deg);filter:drop-shadow(0 4px 6px rgba(60,6,16,.18));
+  -webkit-mask:radial-gradient(circle at 0 50%,transparent 6px,#000 6.5px) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 6px,#000 6.5px) right/51% 100% no-repeat;
+          mask:radial-gradient(circle at 0 50%,transparent 6px,#000 6.5px) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 6px,#000 6.5px) right/51% 100% no-repeat}
+/* koçan çizgisi */
+.ticket::before{content:"";position:absolute;left:11px;top:5px;bottom:5px;border-left:1.5px dashed color-mix(in srgb,var(--ink) 35%,transparent)}
+.ticket small{font-size:12px;font-weight:700;margin-left:4px;margin-right:1px}
+/* detay: No. yok */
+.panel[data-v2="1"] .d-no{display:none}
+/* detay: ad + bilet, içindekiler düğmeleri */
+.panel[data-v2="1"] #sName{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.panel[data-v2="1"] #sName .nm{flex:1;min-width:0}
+.panel[data-v2="1"] #sName .ticket{margin-top:6px;height:38px;font-size:22px;padding:0 20px 0 24px}
+.panel[data-v2="1"] #sName .ticket small{font-size:14px}
+.panel[data-v2="1"] #sName .ticket::before{left:13px}
+.stack.v2 .layers{margin-top:0;gap:8px}
+.stack.v2 .layers li{font-size:15px;padding:7px 13px 7px 10px}
+.sheet.open .stack.v2 .layers li{animation:popIn .45s cubic-bezier(.2,.9,.3,1.4) both}
+.sheet.open .stack.v2 .layers li:nth-child(2){animation-delay:.06s}
+.sheet.open .stack.v2 .layers li:nth-child(3){animation-delay:.12s}
+.sheet.open .stack.v2 .layers li:nth-child(4){animation-delay:.18s}
+.sheet.open .stack.v2 .layers li:nth-child(5){animation-delay:.24s}
+.sheet.open .stack.v2 .layers li:nth-child(n+6){animation-delay:.3s}
+/* ==========================================================
+   V2 DETAY: tam ekran yerine ortada pop-up (kart çevrilerek açılır)
+   ========================================================== */
+.sheet.pop{align-items:center;padding:16px}
+.sheet.pop .panel{width:min(100%,420px);height:auto;max-height:calc(100dvh - 32px);border-radius:28px;flex-direction:column;
+  transform:none;opacity:1;transition:none;box-shadow:0 34px 70px -10px rgba(20,0,6,.6);will-change:transform}
+.sheet.pop:not(.open) .panel{transition:none}
+.sheet.pop .hero{flex:0 0 auto;height:min(270px,36dvh);min-height:0}
+.sheet.pop .info{flex:1 1 auto;min-height:0;overflow-y:auto}
+.sheet.pop .pn{padding-top:20px}
+.sheet.pop .d-burst{width:min(84vw,400px)}
+/* panel çevrilirken içerik sırayla gelsin (dönüş ~.33s sonra başlar) */
+.sheet.pop.open .info>:nth-child(1){transition-delay:.45s}
+.sheet.pop.open .info>:nth-child(2){transition-delay:.5s}
+.sheet.pop.open .info>:nth-child(3){transition-delay:.55s}
+.sheet.pop.open .info>:nth-child(4){transition-delay:.6s}
+.sheet.pop.open .info>:nth-child(n+5){transition-delay:.65s}
+@media(min-width:860px){
+  .sheet.pop .panel{width:440px;height:auto;flex-direction:column}
+  .sheet.pop .hero{flex:0 0 auto;height:300px}
+  .sheet.pop .info{padding:30px 28px 26px}
+  .sheet.pop .panel[data-kind="burger"] .info{margin:-12px 0 0;padding-left:28px;background:
+    linear-gradient(var(--cream),var(--cream)) 0 12px/100% 100% no-repeat,
+    radial-gradient(circle at 50% 100%,var(--cream) 6.5px,transparent 7px) 0 0/17px 12px repeat-x}
+  .sheet.pop .d-burst{width:420px}
+}
