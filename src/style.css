@@ -148,7 +148,7 @@ html.no-gl .w-sub{margin-top:18px}
     repeating-linear-gradient(90deg,color-mix(in srgb,var(--red) 22%,transparent) 0 11px,transparent 11px 22px);
   -webkit-mask:linear-gradient(#000 35%,transparent);mask:linear-gradient(#000 35%,transparent)}
 /* güneş patlaması rozeti */
-.card--burger .burst{position:absolute;width:300px;height:300px;left:50%;top:50%;margin:-178px 0 0 -150px;color:color-mix(in srgb,var(--red) 55%,var(--ink));transform:translateZ(18px);filter:drop-shadow(0 10px 14px rgba(60,6,16,.25))}
+.card--burger .burst{position:absolute;width:300px;height:300px;left:50%;top:50%;margin:-178px 0 0 -150px;color:var(--mustard);transform:translateZ(18px);filter:drop-shadow(0 10px 14px rgba(60,6,16,.25))}
 .card--burger .burst use{transform-origin:100px 100px;animation:spin 40s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .card--burger .prod{max-width:92%;max-height:228px;transform:translateZ(72px)}
@@ -567,13 +567,13 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
    ========================================================== */
 .panel[data-kind="burger"]{background:var(--cream)}
 .panel[data-kind="burger"] .plate{display:none}
-.panel[data-kind="burger"] .hero{background:var(--red)}
+.panel[data-kind="burger"] .hero{background:var(--hero)}
 .d-gingham{position:absolute;inset:0;opacity:.5;
   background:
-    repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 18px,transparent 18px 36px),
-    repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 18%,transparent) 0 18px,transparent 18px 36px);
+    repeating-linear-gradient(0deg,color-mix(in srgb,var(--red) 22%,transparent) 0 18px,transparent 18px 36px),
+    repeating-linear-gradient(90deg,color-mix(in srgb,var(--red) 22%,transparent) 0 18px,transparent 18px 36px);
   -webkit-mask:radial-gradient(75% 70% at 50% 55%,transparent 30%,#000 80%);mask:radial-gradient(75% 70% at 50% 55%,transparent 30%,#000 80%)}
-.d-burst{position:absolute;left:50%;top:52%;width:min(92vw,470px);aspect-ratio:1;transform:translate(-50%,-50%);color:color-mix(in srgb,var(--red) 55%,var(--ink));
+.d-burst{position:absolute;left:50%;top:52%;width:min(92vw,470px);aspect-ratio:1;transform:translate(-50%,-50%);color:var(--red);
   filter:drop-shadow(0 16px 26px rgba(40,0,8,.35))}
 .d-burst use{transform-origin:100px 100px;animation:spin 50s linear infinite}
 .sheet.open .d-burst{animation:burstIn .8s cubic-bezier(.2,.9,.2,1.15) both}
@@ -584,9 +584,9 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
 .d-tag small{font-size:17px;align-self:flex-start;margin-top:26px;margin-right:1px}
 .sheet.open .d-tag{animation:tagIn .6s .25s cubic-bezier(.2,.9,.25,1.5) both}
 @keyframes tagIn{from{transform:rotate(-40deg) scale(0)}}
-.d-no{position:absolute;right:76px;top:30px;color:var(--cream);font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.85}
+.d-no{position:absolute;right:76px;top:30px;color:var(--ink);font-size:12px;font-weight:800;letter-spacing:.16em;opacity:.85}
 .panel[data-kind="burger"] #hp{max-width:80%;max-height:74%;filter:drop-shadow(0 28px 22px rgba(40,0,8,.45))}
-.panel[data-kind="burger"] .hero-hint{color:var(--cream)}
+.panel[data-kind="burger"] .hero-hint{color:var(--ink)}
 
 /* ambalaj kâğıdı: üst kenarı tırtıklı, hero'nun üstüne biner */
 .panel[data-kind="burger"] .info{position:relative;z-index:2;margin-top:-12px;padding-top:30px;background:
@@ -641,3 +641,6 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
   .panel[data-kind="burger"] .close{right:30px;top:18px}
   .panel[data-kind="burger"] .d-no{right:94px}
 }
+/* açık renkli ürün arka planlarında yazılar koyu */
+.panel[data-light="1"] .hero-hint{color:var(--ink)}
+.panel[data-light="1"] .close{box-shadow:0 6px 18px rgba(20,0,6,.18)}

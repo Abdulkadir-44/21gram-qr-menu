@@ -23,10 +23,30 @@
   --logo-side:#2a0a12;    /* 3D logonun yan yüzü */
   --fig-shadow:#45000f;   /* figürlerin gölge kopyası */
 
+  /* tamamlayıcı palet — kırmızının yanında dengeleyici renkler */
+  --mustard:#F2B705;      /* hardal: burger, peynir */
+  --teal:#0F6E68;         /* koyu turkuaz: kırmızının tamamlayıcısı (Délice eşleşmesi) */
+  --mint:#9ED8CC;         /* nane: soğuk içecek */
+  --sand:#EAD7B1;         /* kum / kraft: bira, kahve */
+  --forest:#1E4D3A;       /* orman yeşili: yüksek alkol */
+  --blush:#F6CFC6;        /* pudra: tatlı */
+
   /* menü gruplarının arka plan renkleri (--g-<grup anahtarı>) */
   --g-yiyecek:#E4032D;
   --g-alkollu-icecek:#7B0A1F;
-  --g-icecek:#E4032D;
+  --g-icecek:#0F6E68;
+
+  /* detay penceresinde ürün arka planı (--hero-<kart türü>) */
+  --hero-burger:var(--mustard);
+  --hero-cocktail:var(--teal);
+  --hero-beer:var(--sand);
+  --hero-spirit:var(--forest);
+  --hero-shot:#14060A;
+  --hero-soft:var(--mint);
+  --hero-hot:var(--sand);
+  --hero-share:var(--teal);
+  --hero-sauce:var(--sand);
+  --hero-dessert:var(--blush);
 
   /* fontlar */
   --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;

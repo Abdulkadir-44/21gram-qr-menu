@@ -825,7 +825,9 @@ function fillSheet(p){
   $('#sName').innerHTML=esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'');
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
-  $('#panel').style.setProperty('--hero',groupColor(p.groupKey));
+  var heroC=cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
+  $('#panel').style.setProperty('--hero',heroC);
+  $('#panel').dataset.light=/^#[0-9a-f]{6}$/i.test(heroC)&&isLight(heroC)?'1':'';
   var D=DETAIL[p.kind];
   $('#panel').dataset.kind=D?p.kind:'';
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
