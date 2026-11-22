@@ -1,7 +1,7 @@
 /* Referans tasarımın stilleri. Renk/font değerleri theme.css içinde. */
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:auto}
-html.lock,html.lock body{overflow:hidden;height:100%}
+html.lock,html.lock body{overflow:hidden}
 body{font-family:var(--body);color:var(--cream);background-color:var(--bg);transition:background-color .7s ease;min-height:100vh;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 img{display:block}
