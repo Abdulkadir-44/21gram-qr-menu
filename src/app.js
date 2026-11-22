@@ -598,7 +598,66 @@ function pintSVG(cl){
    +'<circle class="bb" cx="40" cy="150" r="2.5"/><circle class="bb b2" cx="62" cy="158" r="2"/><circle class="bb b3" cx="80" cy="152" r="3"/></g>'
    +'<path class="glass" d="M18 14 L102 14 L92 160 Q91 166 85 166 L35 166 Q29 166 28 160 Z"/>'
    +'<line class="mark" x1="24" y1="26" x2="34" y2="26"/><text class="mk" x="38" y="30">50cl</text></svg>'}
+/* soğuk içecek: içindekiler (parantez içi ya da virgüllü açıklama) */
+function softParts(p){var d=p.desc||'',m=d.match(/\(([^)]*)\)/);
+  return (m?m[1]:(/,/.test(d)?d:'')).split(',').map(function(x){return x.trim()}).filter(Boolean)}
+var PART_COL={'elma':'#7DBB3C','semiz':'#4E9A3A','limon':'#F2C200','frambuaz':'#C2185B','hibisk':'#9C1B4A','tuz':'#B9C4C9','soda':'#8FD3E8','nane':'#3FA66B','çilek':'#E53950','portakal':'#F28C1B','pomelo':'#F47C6B','sour':'#C9D84A','şeker':'#E8DCC4'};
+function partCol(x){var t=x.toLocaleLowerCase('tr');for(var k in PART_COL)if(t.indexOf(k)>-1)return PART_COL[k];return 'var(--teal)'}
+/* sıcak içecek: demleme bilgisi */
+function brewOf(p){var t=p.name.toLocaleLowerCase('tr').replace(/ı/g,'i');
+  if(/türk|turk/.test(t))return {m:'Cezvede pişirilir',s:4,sugar:true};
+  if(/filtre/.test(t))return {m:'Filtreden damla damla demlenir',s:2};
+  if(/double|doppio/.test(t))return {m:'Çift shot espresso',s:5};
+  if(/americano/.test(t))return {m:'Espresso üzerine sıcak su',s:3};
+  return {m:'Taze demlenir',s:3}}
+var SUGAR={v:0},SUGARS=['Sade','Az şekerli','Orta','Şekerli'];
+function sugarHTML(){return '<div class="sugar-d"><p class="pair-h">NASIL İÇERSİN?</p><div class="seg" role="radiogroup" aria-label="Şeker">'
+  +SUGARS.map(function(x,k){return '<button type="button" role="radio" data-sugar="'+k+'" aria-checked="'+(k===SUGAR.v)+'">'+x+'</button>'}).join('')
+  +'</div><p class="hint-d">Siparişte garsona söylemen yeterli.</p></div>'}
+var BEAN='<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="7.5" ry="10" transform="rotate(30 12 12)"/><path d="M9 4.5c4 4 2 11 6 15" /></svg>';
 var DETAIL={
+  soft:{
+    hero:function(p){
+      var d='';for(var k=0;k<9;k++)d+='<i style="--d:'+k+'"></i>';
+      return '<span class="d-frost"></span><span class="d-halo"></span><span class="d-drops">'+d+'</span>'
+        +'<span class="d-cube c1"></span><span class="d-cube c2"></span><span class="d-cube c3"></span>'
+        +'<span class="d-chill">'+SNOW+'<span>SOĞUK</span><b>4°C</b></span>';
+    },
+    art:function(p){return mocktailSVG(liquidColor(p))},
+    extra:function(p){
+      var parts=softParts(p),type=softType(p),lead=(p.desc||'').split('(')[0].trim(),h='';
+      if(lead&&/\(/.test(p.desc))h+='<p class="lead-d">'+esc(lead.charAt(0).toLocaleUpperCase('tr')+lead.slice(1))+'</p>';
+      if(parts.length)h+='<div class="parts-d"><p class="pair-h">İÇİNDE NE VAR?</p><ul>'+parts.map(function(x,k){
+        return '<li style="--k:'+k+';--c:'+partCol(x)+'"><i aria-hidden="true"></i>'+esc(x)+'</li>'}).join('')+'</ul></div>';
+      h+='<div class="therm-d"><p class="pair-h"><span>SERVİS SICAKLIĞI</span><b>4°C</b></p><div class="tbar"><span class="cold"></span>'
+        +[0,4,8,12,16,20].map(function(t){return '<span class="tk" style="left:'+(t*5)+'%"><i>'+t+'°</i></span>'}).join('')+'</div></div>';
+      var pick=/KAHVE/.test(type)?PRODUCTS.filter(function(x){return x.kind==='dessert'})
+        :PRODUCTS.filter(function(x,i,a){return x.kind==='burger'&&a.findIndex(function(y){return y.catKey===x.catKey})===i});
+      if(pick.length)h+='<div class="pair"><p class="pair-h">'+(/KAHVE/.test(type)?'YANINA TATLI?':'YANINA İYİ GİDER')+'</p><div class="pair-l">'+pick.slice(0,2).map(goChip).join('')+'</div></div>';
+      return h;
+    }
+  },
+  hot:{
+    hero:function(p){
+      return '<span class="d-beans"></span><span class="d-ring r1"></span><span class="d-ring r2"></span>'
+        +'<svg class="d-steam" viewBox="0 0 120 90"><path d="M30 88 C18 70 42 58 30 40 C20 26 36 14 30 2"/><path d="M60 88 C48 70 72 58 60 40 C50 26 66 14 60 2"/><path d="M90 88 C78 70 102 58 90 40 C80 26 96 14 90 2"/></svg>'
+        +'<svg class="d-seal" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96"/><circle class="ring" cx="100" cy="100" r="64"/>'
+        +'<text><textPath href="#coasterRing" textLength="482">TAZE DEMLEME ✦ 21 GRAM ✦ TAZE DEMLEME ✦ 21 GRAM ✦</textPath></text>'
+        +'<path class="mid" d="M78 88 H118 V100 A20 20 0 0 1 78 100 Z"/><path class="mid-h" d="M118 92 H124 A7 7 0 0 1 124 106 H116"/><path class="mid-h" d="M88 82 q-4 -6 0 -12 M98 82 q-4 -6 0 -12 M108 82 q-4 -6 0 -12"/></svg>';
+    },
+    art:function(p){return cupSVG()},
+    extra:function(p){
+      var b=brewOf(p),beans='';
+      for(var k=0;k<5;k++)beans+='<span class="'+(k<b.s?'on':'')+'" style="--k:'+k+'">'+BEAN+'</span>';
+      SUGAR.v=0;
+      var h='<p class="brew-d"><span>YÖNTEM</span>'+esc(b.m)+'</p>'
+        +'<div class="str-d"><p class="pair-h">YOĞUNLUK</p><div class="beans" aria-label="Yoğunluk 5 üzerinden '+b.s+'">'+beans+'</div></div>'
+        +(b.sugar?sugarHTML():'');
+      var ds=PRODUCTS.filter(function(x){return x.kind==='dessert'});
+      if(ds.length)h+='<div class="pair"><p class="pair-h">YANINA TATLI?</p><div class="pair-l">'+ds.map(goChip).join('')+'</div></div>';
+      return h;
+    }
+  },
   cocktail:{
     hero:function(p){
       return '<span class="d-glow2"></span><span class="d-rays"></span><span class="d-arch"></span>'
@@ -985,6 +1044,8 @@ function step(dir){
   var c=cards.find(function(x){return x.el.dataset.id===id});if(c)lastFocus=c.el;
 }
 $('#sExtra').addEventListener('click',function(e){
+  var sb=e.target.closest('[data-sugar]');
+  if(sb){SUGAR.v=+sb.dataset.sugar;[].forEach.call(sb.parentNode.children,function(x){x.setAttribute('aria-checked',x===sb)});return}
   var rb=e.target.closest('[data-round]');
   if(rb){var pr=BYID[state.sheetId];ROUND.n=clamp(ROUND.n+(+rb.dataset.round),1,20);
     var rd=$('#sExtra .round');if(rd){rd.outerHTML=roundHTML(pr);var ob=$('#sExtra .round .per b');if(ob&&!RM)ob.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.9,.2,1.4)'})}
