@@ -7,7 +7,7 @@ import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 5;
+const IMG_V = 6;
 const menu = await fetch('/menu.json').then(r => r.json());
 
 /* menu.json → referanstaki düz ürün listesi biçimi */

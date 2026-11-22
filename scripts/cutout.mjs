@@ -26,7 +26,7 @@ async function cut(src, LO = 205, soft = false, softBelow = 1) {
   }
   const bgMin = Math.min(...bgc);
   const bgLike = i => { const r = data[i*3], g = data[i*3+1], b = data[i*3+2]; const mn = Math.min(r,g,b), mx = Math.max(r,g,b); const sft = soft || ((i / W) | 0) > H * softBelow;
-    if (adaptive) return Math.max(Math.abs(r - bgc[0]), Math.abs(g - bgc[1]), Math.abs(b - bgc[2])) < 18 || (((i / W) | 0) > H * 0.72 && mn > 150 && mx - mn < 30);
+    if (adaptive) return Math.max(Math.abs(r - bgc[0]), Math.abs(g - bgc[1]), Math.abs(b - bgc[2])) < 18 || (((i / W) | 0) > H * 0.93 && mn > 150 && mx - mn < 30);
     return sft ? (mn > 150 && mx - mn < 30) : (mn > LO && mx - mn < 22); };
   const LOa = soft ? 150 : LO; // (alt bölgedeki gölge için ayrıca aşağıda satıra göre seçilir)
   let h = 0, t = 0;

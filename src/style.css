@@ -353,7 +353,7 @@ html[data-group="icecek"] .card--mock{grid-column:span 2}
     linear-gradient(180deg,#f3f6f6 0%,var(--cream) 55%,var(--paper2) 100%)}
 /* camın içindeki soğuk ışık */
 .card--soft .paper::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 42%,transparent 54%);pointer-events:none}
-.card--soft .chill{position:relative;z-index:1;display:flex;align-items:center;gap:5px;margin:0;padding:8px 12px 7px;border-radius:20px 20px 0 0;background:var(--red);color:var(--cream);
+.card--soft .chill{position:relative;z-index:1;display:flex;align-items:center;gap:5px;margin:0;padding:8px 12px 7px;border-radius:20px 20px 0 0;background:var(--accent);color:var(--cream);
   font-size:11px;font-weight:800;letter-spacing:.18em;transform:translateZ(20px)}
 .card--soft .chill svg{width:13px;height:13px;flex:none}
 .card--soft .chill b{margin-left:auto;font-family:var(--display);font-stretch:var(--display-stretch);font-size:15px;letter-spacing:0}
@@ -365,12 +365,12 @@ html[data-group="icecek"] .card--mock{grid-column:span 2}
   border-top:2.5px solid color-mix(in srgb,var(--ink) 45%,transparent);
   background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 28%,transparent) 0 1.5px,transparent 1.5px 9px)}
 .card--soft .meta{padding:4px 14px 14px}
-.card--soft .cat{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--red);margin-bottom:4px}
+.card--soft .cat{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--accent);margin-bottom:4px}
 .card--soft .name{font-size:clamp(19px,5.6vw,24px);line-height:.95}
 .card--soft .desc{font-size:13px;margin-top:6px;-webkit-line-clamp:2}
 .card--soft .foot{padding-top:12px}
 .card--soft .price{font-size:20px}
-.card--soft .more{width:36px;height:36px;background:var(--red)}
+.card--soft .more{width:36px;height:36px;background:var(--accent)}
 .card--soft .more svg{width:17px;height:17px}
 
 /* alkolsüz kokteyl: iki sütun, yatay */
@@ -384,7 +384,7 @@ html[data-group="icecek"] .card--mock{grid-column:span 2}
 .mock .glass{fill:rgba(255,255,255,.25);stroke:var(--ink);stroke-width:3;stroke-linejoin:round}
 .mock .liq{fill:var(--liq);opacity:.88}
 .mock .ice{fill:rgba(255,255,255,.55);stroke:rgba(255,255,255,.9);stroke-width:1.5}
-.mock .straw{stroke:var(--red);stroke-width:6;stroke-linecap:round}
+.mock .straw{stroke:var(--accent);stroke-width:6;stroke-linecap:round}
 .mock .garnish{fill:var(--liq)}
 .mock .garnish-in{fill:color-mix(in srgb,var(--liq) 45%,#fff)}
 .mock .bb{fill:rgba(255,255,255,.75);animation:fizz 3.2s linear infinite;animation-delay:calc(var(--b) * -0.55s)}
@@ -418,11 +418,11 @@ html[data-group="icecek"] .card--mock{grid-column:span 2}
 @keyframes steam{from{stroke-dashoffset:150;opacity:0}20%{opacity:1}to{stroke-dashoffset:0;opacity:0}}
 /* mühür */
 .card--hot .stamp{position:absolute;top:16px;right:12px;width:62px;height:62px;border-radius:50%;display:grid;place-content:center;text-align:center;line-height:1;
-  border:2px solid var(--red);color:var(--red);transform:translateZ(70px) rotate(-14deg);box-shadow:inset 0 0 0 3px color-mix(in srgb,#d9bb8e 100%,transparent),inset 0 0 0 4px var(--red)}
+  border:2px solid var(--accent);color:var(--accent);transform:translateZ(70px) rotate(-14deg);box-shadow:inset 0 0 0 3px color-mix(in srgb,#d9bb8e 100%,transparent),inset 0 0 0 4px var(--accent)}
 .card--hot .stamp b{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:18px}
 .card--hot .stamp span{font-size:7.5px;font-weight:800;letter-spacing:.14em;margin-top:2px}
 .card--hot .meta{padding:4px 14px 14px;color:#3a1a0a}
-.card--hot .cat{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--red);margin-bottom:4px}
+.card--hot .cat{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--accent);margin-bottom:4px}
 .card--hot .name{font-size:clamp(19px,5.6vw,24px);line-height:.95}
 .card--hot .foot{padding-top:12px;border-top:1.5px dashed rgba(60,25,5,.3);margin-top:12px}
 .card--hot .price{font-size:20px}
@@ -644,3 +644,14 @@ html[data-group="yiyecek"] .grid>.card--sauce{grid-column:span 1;max-width:none}
 /* açık renkli ürün arka planlarında yazılar koyu */
 .panel[data-light="1"] .hero-hint{color:var(--ink)}
 .panel[data-light="1"] .close{box-shadow:0 6px 18px rgba(20,0,6,.18)}
+
+/* ==========================================================
+   İÇECEK KARTLARI — turkuaz zemine uyumlu vurgu (kırmızı yerine)
+   ========================================================== */
+.card--soft,.card--hot{--accent:var(--teal)}
+.card--soft .chill{background:var(--mint);color:var(--teal)}
+.card--soft .price{color:var(--ink)}
+.card--soft .more{background:var(--teal)}
+.mock .straw{stroke:var(--mustard)}
+.card--hot .price{color:#3a1a0a}
+.card--hot .stamp{box-shadow:inset 0 0 0 3px #d9bb8e,inset 0 0 0 4px var(--accent)}
