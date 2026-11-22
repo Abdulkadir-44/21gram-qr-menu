@@ -38,9 +38,9 @@
 
   /* detay penceresinde ürün arka planı (--hero-<kart türü>) */
   --hero-burger:var(--mustard);
-  --hero-cocktail:var(--teal);
-  --hero-beer:var(--sand);
-  --hero-spirit:var(--forest);
+  --hero-cocktail:#3A0A16;   /* gece bordosu */
+  --hero-beer:var(--wine);
+  --hero-spirit:#2A0910;    /* kan bordosu / mahzen */
   --hero-shot:#14060A;
   --hero-soft:var(--mint);
   --hero-hot:var(--sand);

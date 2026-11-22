@@ -582,7 +582,66 @@ function splitHTML(p){var per=Math.ceil(p.price/SPLIT.n);
   return '<div class="split"><p class="split-q">Kaç kişi paylaşacaksınız?</p><div class="stepper"><button type="button" data-split="-1" aria-label="Azalt">−</button>'
    +'<output aria-live="polite">'+SPLIT.n+'</output><button type="button" data-split="1" aria-label="Artır">+</button></div>'
    +'<p class="per">Kişi başı <b>'+money(per)+'</b></p></div>'}
+/* shot turu hesabı */
+var ROUND={n:1};
+function roundHTML(p){
+  return '<div class="split round"><p class="split-q">Kaç shot?</p><div class="stepper"><button type="button" data-round="-1" aria-label="Azalt">−</button>'
+   +'<output aria-live="polite">'+ROUND.n+'</output><button type="button" data-round="1" aria-label="Artır">+</button></div>'
+   +'<p class="per">Tur toplamı <b>'+money(p.price*ROUND.n)+'</b></p></div>'}
+/* bira bardağı: hacme göre dolar (50 cl = tam) */
+function pintSVG(cl){
+  var f=Math.max(.25,Math.min(1,(cl||33)/50)),top=26+(1-f)*128;
+  return '<svg class="pint" viewBox="0 0 120 170" aria-hidden="true" style="--fill-top:'+top.toFixed(1)+'px">'
+   +'<defs><clipPath id="pintClip"><path d="M18 14 L102 14 L92 160 Q91 166 85 166 L35 166 Q29 166 28 160 Z"/></clipPath></defs>'
+   +'<g clip-path="url(#pintClip)"><rect class="beer" x="0" y="'+top.toFixed(1)+'" width="120" height="170"/>'
+   +'<rect class="foam" x="0" y="'+(top-12).toFixed(1)+'" width="120" height="14" rx="7"/>'
+   +'<circle class="bb" cx="40" cy="150" r="2.5"/><circle class="bb b2" cx="62" cy="158" r="2"/><circle class="bb b3" cx="80" cy="152" r="3"/></g>'
+   +'<path class="glass" d="M18 14 L102 14 L92 160 Q91 166 85 166 L35 166 Q29 166 28 160 Z"/>'
+   +'<line class="mark" x1="24" y1="26" x2="34" y2="26"/><text class="mk" x="38" y="30">50cl</text></svg>'}
 var DETAIL={
+  cocktail:{
+    hero:function(p){
+      return '<span class="d-glow2"></span><span class="d-rays"></span><span class="d-arch"></span>'
+        +'<svg class="d-arc" viewBox="0 0 300 200"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>'
+        +'<span class="d-spark k1">✦</span><span class="d-spark k2">✦</span><span class="d-spark k3">✦</span>';
+    },
+    extra:function(p){
+      var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean),sp=spiritOf(p);
+      var h=sp?'<p class="spirit-d">'+esc(sp)+'</p>':'';
+      if(!parts.length)return h+'<p class="classic-d">Klasik reçeteyle hazırlanır.</p>';
+      return h+'<div class="recipe-d"><p class="pair-h">TARİF</p><ol>'+parts.map(function(x,k){
+        return '<li style="--k:'+k+'"><span class="n">'+String(k+1).padStart(2,'0')+'</span><span class="t">'+esc(x)+'</span><span class="pour" aria-hidden="true"></span></li>'}).join('')+'</ol></div>';
+    }
+  },
+  beer:{
+    hero:function(p){
+      var b='';for(var k=0;k<14;k++)b+='<i style="--b:'+k+'"></i>';
+      return '<span class="d-bubbles">'+b+'</span><svg class="d-coaster" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96"/><circle class="ring" cx="100" cy="100" r="64"/>'
+        +'<text><textPath href="#coasterRing" textLength="482">SOĞUK SERVİS ✦ 21 GRAM ✦ SOĞUK SERVİS ✦ 21 GRAM ✦</textPath></text></svg>';
+    },
+    extra:function(p){
+      var sz=sizeParts(p.size)||sizeParts(p.desc),draft=/fıçı|fiçi|fici/.test((p.name+' '+p.desc).toLocaleLowerCase('tr'));
+      return '<div class="beer-d"><div class="vol-d"><p class="type-d">'+(draft?'FIÇI':'ŞİŞE')+'</p>'
+        +(sz?'<p class="big-vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')+'</div>'
+        +(sz?pintSVG(parseFloat(sz.n)):'')+'</div>';
+    }
+  },
+  spirit:{
+    hero:function(p){return '<span class="d-spot"></span><span class="d-shelf"><span>TOP SHELF</span></span>'},
+    extra:function(p){
+      var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI',''),cl=sz?parseFloat(sz.n):5;
+      var ticks='';for(var t=1;t<=5;t++)ticks+='<span style="left:'+(t*20)+'%"><i>'+t+'</i></span>';
+      return '<p class="meta-d">'+[sp,sz?sz.n+' '+sz.u:'','TEK SERVİS'].filter(Boolean).map(esc).join('<i>·</i>')+'</p>'
+        +'<div class="jig-d"><p class="pair-h">SERVİS ÖLÇÜSÜ</p><div class="bar" style="--to:'+Math.min(100,cl*20)+'%">'+ticks+'<span class="fill"></span></div></div>';
+    }
+  },
+  shot:{
+    hero:function(p){return '<span class="d-neon"></span><span class="d-floor"></span><span class="d-sticker">SHOT!</span>'},
+    extra:function(p){
+      ROUND.n=1;var sp=spiritOf(p).replace(' BAZLI','');
+      return (sp?'<p class="spirit-d neon">'+esc(sp)+'</p>':'')+roundHTML(p);
+    }
+  },
   share:{
     hero:function(p){return '<span class="d-dots"></span><span class="d-stamp">PAYLAŞ</span><span class="d-no">'+noHTML(p)+'</span>'},
     extra:function(p){
@@ -865,7 +924,8 @@ function fillSheet(p){
     :'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>');
   hpHost.innerHTML=vis;hp=$('#hp');
   $('#sCat').textContent=p.category;
-  $('#sName').innerHTML=esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'');
+  var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
+  $('#sName').innerHTML=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
@@ -925,6 +985,10 @@ function step(dir){
   var c=cards.find(function(x){return x.el.dataset.id===id});if(c)lastFocus=c.el;
 }
 $('#sExtra').addEventListener('click',function(e){
+  var rb=e.target.closest('[data-round]');
+  if(rb){var pr=BYID[state.sheetId];ROUND.n=clamp(ROUND.n+(+rb.dataset.round),1,20);
+    var rd=$('#sExtra .round');if(rd){rd.outerHTML=roundHTML(pr);var ob=$('#sExtra .round .per b');if(ob&&!RM)ob.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.9,.2,1.4)'})}
+    return}
   var b=e.target.closest('[data-split]');
   if(b){var p=BYID[state.sheetId];SPLIT.n=clamp(SPLIT.n+(+b.dataset.split),1,12);
     var sp=$('#sExtra .split');if(sp){sp.outerHTML=splitHTML(p);var o=$('#sExtra .per b');if(o&&!RM)o.animate([{transform:'scale(1.25)'},{transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.9,.2,1.4)'})}
