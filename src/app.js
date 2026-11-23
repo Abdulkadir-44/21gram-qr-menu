@@ -5,6 +5,7 @@
    ========================================================== */
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
+import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 6;
@@ -157,25 +158,126 @@ var gl={ok:false};
       var tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=2;
       var im=new Image();
       im.onload=function(){cv.getContext('2d').drawImage(im,0,0,512,512);tx.needsUpdate=true};
-      im.src='data:image/svg+xml;base64,'+btoa(FIGS[name]);
+      im.src='data:image/svg+xml;base64,'+btoa(FIGS[name]||ARMY_SVG[name]);
       figTex[name]=tx;return tx;
     }
     var seed=11;var rnd=function(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
     var quad=new THREE.PlaneGeometry(1,1),figs=[],cream=c(T.cream),inkc=c(T.figShadow);
-    FIGSETS.forEach(function(set,gi){
+    /* HAYALET ORDUSU — açılışta Yiyecek (0) ve İçecek (1) takımları ekranı dolaşıp kapışır.
+       İlk 6'sı telefonda (3'e 3), hepsi geniş ekranda (4'e 4). */
+    var ARMY=[['burger',0],['cocktail',1],['fries',0],['beer',1],['burger',0],['cup',1],['fries',0],['iced',1]];
+    var sets=FIGSETS.concat([ARMY.map(function(a){return a[0]})]);
+    var mkMat=function(tex,col){return new THREE.MeshBasicMaterial({map:tex,color:col,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,fog:false})};
+    sets.forEach(function(set,gi){
       set.forEach(function(name,i){
-        var z=-1.4-rnd()*3.0,near=1-(-z-1.4)/3.0,tex=figTexture(name);
-        var mk=function(col){return new THREE.MeshBasicMaterial({map:tex,color:col,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,fog:false})};
+        var AK=gi===3?ARMY_KIND[name]:null;
+        var z=-1.4-rnd()*3.0,near=1-(-z-1.4)/3.0,tex=figTexture(AK?AK.body:name);
+        var mk=function(col){return mkMat(tex,col)};
         var front=new THREE.Mesh(quad,mk(cream)),back=new THREE.Mesh(quad,mk(inkc));
         back.position.set(.03,-.036,-.07);back.frustumCulled=false;front.frustumCulled=false;
         var grp=new THREE.Group();grp.add(back);grp.add(front);grp.visible=false;scene.add(grp);
+        /* ordu: omuzdan dönen atış kolu (gövdenin önünde) */
+        var pivot=null,armF=null,armB=null;
+        if(AK){
+          var at=figTexture('armT');pivot=new THREE.Group();pivot.position.set(AK.sh[0],AK.sh[1],.02);
+          armF=new THREE.Mesh(quad,mkMat(at,cream));armB=new THREE.Mesh(quad,mkMat(at,inkc));
+          armF.scale.set(.34,.34,1);armB.scale.set(.34,.34,1);armF.position.set(0,-.17,0);armB.position.set(.03,-.2,-.07);
+          armF.frustumCulled=armB.frustumCulled=false;pivot.add(armB);pivot.add(armF);grp.add(pivot);
+        }
         figs.push({g:gi,i:i,grp:grp,front:front,back:back,z:z,sz:.8+rnd()*.25,a0:.22+.2*near,par:.4+near*.8,
           ph:rnd()*6.283,fx:.35+rnd()*.3,fy:.3+rnd()*.3,fr:.3+rnd()*.3,r0:(rnd()-.5)*.36,flip:rnd()<.5?-1:1,
-          px:0,py:0,vx:0,vy:0,th:rnd()*6.283,spd:22+rnd()*20,wfr:.2+rnd()*.3,r:60,welOn:false,cur:0,hov:0,inside:false,lx:0,ly:0,wob:0,wobV:0,bn:0,bnV:0,sp:0,spT:0,sx:-9999,sy:-9999,half:1});
+          px:0,py:0,vx:0,vy:0,th:rnd()*6.283,spd:22+rnd()*20,wfr:.2+rnd()*.3,r:60,welOn:false,cur:0,hov:0,inside:false,lx:0,ly:0,wob:0,wobV:0,bn:0,bnV:0,sp:0,spT:0,sx:-9999,sy:-9999,half:1,
+          team:gi===3?ARMY[i][1]:-1,kind:name,pivot:pivot,armF:armF,armB:armB,hp:3,atkCd:1+rnd()*2.5,thr:null,hit:0,dead:-1,side:rnd()<.5?-1:1});
       });
     });
+    /* çarpışma kıvılcımı: 8 köşeli krem yıldız, büyüyüp söner */
+    var sparkTex=(function(){var cv=document.createElement('canvas');cv.width=cv.height=128;var x=cv.getContext('2d');x.fillStyle='#fff';x.beginPath();
+      for(var k=0;k<16;k++){var a=k/16*Math.PI*2,r=k%2?22:62;x.lineTo(64+Math.cos(a)*r,64+Math.sin(a)*r)}x.closePath();x.fill();
+      var t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;return t})();
+    var sparks=[];for(var sk=0;sk<6;sk++){var sm=new THREE.Mesh(quad,new THREE.MeshBasicMaterial({map:sparkTex,color:cream,transparent:true,opacity:0,depthWrite:false,fog:false}));sm.visible=false;scene.add(sm);sparks.push({m:sm,t0:-9})}
+    var sparkI=0;
+    function stepSparks(){sparks.forEach(function(p){var k=(ptime-p.t0)/.42;if(k>=1){p.m.visible=false;return}
+      var sc=figU*(.25+.55*Math.sqrt(k));p.m.scale.set(sc,sc,1);p.m.material.opacity=.8*(1-k)})}
+    /* ——— ATIŞMA ———
+       Her küçük insan en yakın canlı rakibine döner; arada atış mesafesi tutar, yan yan dolaşır.
+       Sırası gelince kolunu geriye alıp kendi ürününü fırlatır (burger → mini burger, patates → kızartma,
+       kokteyl → kiraz, bira → kapak, kahve → çekirdek, buzlu → buz). İsabet %65: rakip döne döne savrulur;
+       ıska: rakip zıplayıp kaçar. 3 isabet alan solar ve takımının kenarından takviye olarak döner. */
+    var V3=THREE.Vector3,vA=new V3(),vB=new V3();
+    var projs=[];
+    function getProj(kind){
+      for(var q=0;q<projs.length;q++)if(!projs[q].busy&&projs[q].kind===kind)return projs[q];
+      var m=new THREE.Mesh(quad,mkMat(figTexture(ARMY_KIND[kind].proj),cream));m.frustumCulled=false;m.visible=false;scene.add(m);
+      var p={m:m,kind:kind,busy:false};projs.push(p);return p;
+    }
+    function sparkAt(pos){var p=sparks[sparkI++%sparks.length];p.m.position.copy(pos);p.m.position.z+=.25;p.m.rotation.z=rnd()*6.28;p.t0=ptime;p.m.visible=true}
+    function release(f){
+      var e=f.thr.tg;if(!e||e.dead>=0)return;
+      f.pivot.localToWorld(vA.set(0,-.28,0));
+      var p=getProj(f.kind),d=vA.distanceTo(e.grp.position);
+      p.busy=true;p.p0=vA.clone();p.p1=e.grp.position.clone();p.t0=ptime;p.dur=.5+d*.05;p.h=.35+d*.12;
+      p.hit=rnd()<.65;p.tg=e;p.from=f;p.dodged=false;p.spin=(rnd()<.5?-1:1)*(8+rnd()*6);
+      p.sc=e.grp.scale.y*.17;p.m.visible=true;
+    }
+    function impact(p){
+      var e=p.tg,f=p.from;if(e.dead>=0)return;
+      var dir=e.px>=f.px?1:-1;
+      e.vx+=dir*300;e.vy-=60;e.spT+=(rnd()<.5?-1:1)*Math.PI*2;e.wobV+=(rnd()<.5?-1:1)*9;e.hit=1;e.hp--;
+      sparkAt(e.grp.position);f.bnV+=3;
+      if(e.hp<=0)e.dead=ptime;
+    }
+    function stepProjs(){
+      for(var q=0;q<projs.length;q++){var p=projs[q];if(!p.busy)continue;
+        var k=(ptime-p.t0)/p.dur;
+        if(!p.hit&&!p.dodged&&k>.45){p.dodged=true;p.tg.bnV+=6}
+        if(p.hit&&k>=1){impact(p);p.busy=false;p.m.visible=false;continue}
+        if(k>=1.35){p.busy=false;p.m.visible=false;continue}
+        var end=p.p1;
+        if(!p.hit){vB.copy(p.p1).sub(p.p0).multiplyScalar(.35);vB.add(p.p1);vB.y-=.3;end=vB}
+        p.m.position.lerpVectors(p.p0,end,Math.min(k,1)+(k>1?(k-1):0));
+        p.m.position.y+=Math.sin(Math.min(k,1)*Math.PI)*p.h;p.m.position.z+=.3;
+        p.m.rotation.z=k*p.spin;p.m.scale.set(p.sc,p.sc,1);
+        p.m.material.opacity=.9*(k>1?Math.max(0,1-(k-1)/.35):1);
+      }
+    }
+    /* kol açısı: 0 = aşağı sarkık, + öne (yüzü dönük taraf), − geriye */
+    function armAngle(f){
+      var idle=.25+Math.sin(ptime*3+f.ph)*.2;
+      if(!f.thr)return idle;
+      var k=ptime-f.thr.t0;
+      if(k<.32)return idle+(-2.5-idle)*(1-Math.pow(1-k/.32,2));
+      if(k<.5)return -2.5+3.7*((k-.32)/.18);
+      if(k<.75)return 1.2+(idle-1.2)*((k-.5)/.25);
+      return idle;
+    }
+    function armyAI(dt){
+      var W=window.innerWidth,H=window.innerHeight;
+      for(var i=0;i<figAct.length;i++){
+        var f=figAct[i];if(f.g!==3)continue;
+        f.hit=Math.max(0,f.hit-dt*2.5);f.atkCd-=dt;
+        if(f.thr){var tk=ptime-f.thr.t0;if(!f.thr.rel&&tk>=.4){f.thr.rel=true;release(f)}if(tk>.75)f.thr=null}
+        if(f.dead>=0){
+          f.thr=null;
+          if(ptime-f.dead>2.6&&f.cur<.05){ /* takviye: kendi takımının kenarından yeniden girer */
+            f.dead=-1;f.hp=3;f.px=f.team===0?f.r:W-f.r;f.py=yMinOf(f,1,H)+rnd()*Math.max(1,yMaxOf(f,1,H)-yMinOf(f,1,H));
+            f.vx=(f.team===0?1:-1)*f.spd;f.vy=0;f.th=Math.atan2(f.vy,f.vx);f.spT=f.sp;
+          }
+          continue;
+        }
+        var e=null,bd=1e9;
+        for(var j=0;j<figAct.length;j++){var o=figAct[j];if(o.g!==3||o.team===f.team||o.dead>=0)continue;
+          var dd=(o.px-f.px)*(o.px-f.px)+(o.py-f.py)*(o.py-f.py);if(dd<bd){bd=dd;e=o}}
+        if(!e)continue;
+        var dx=e.px-f.px,dy=e.py-f.py,d=Math.sqrt(dx*dx+dy*dy)||1,range=(f.r+e.r)*2.6,want=Math.atan2(dy,dx);
+        f.flip=dx>=0?1:-1;
+        if(f.thr){var dm=Math.exp(-dt*6);f.vx*=dm;f.vy*=dm;continue}
+        if(f.atkCd<=0&&d<range*1.6){f.thr={t0:ptime,tg:e,rel:false};f.atkCd=1.8+rnd()*2.2;continue}
+        var tgt=d>range*1.2?want:d<range*.7?want+Math.PI:want+f.side*Math.PI/2;
+        var da=Math.atan2(Math.sin(tgt-f.th),Math.cos(tgt-f.th));f.th+=da*Math.min(1,dt*2.2);
+      }
+    }
     function layoutFigs(portrait){
-      figs.forEach(function(fg){fg.welOn=fg.i<2&&!(portrait&&fg.g*2+fg.i===5)});
+      figs.forEach(function(fg){fg.welOn=fg.g===3&&(!portrait||fg.i<6)});
     }
     /* serbest dolaşım: her figür yavaşça yön değiştirerek süzülür; ekran kenarından ve birbirinden sekerek kaçınır */
     var figAct=[],figKey=-2,figW=0,figH=0;
@@ -207,11 +309,12 @@ var gl={ok:false};
     function stepFigs(dt,wv){
       var W=window.innerWidth,H=window.innerHeight,ppu=H/vis.h,sp=clamp(Math.min(W,H)/800,.7,1.3);
       var ko=wv>.5?keepOut():null,boost=1+Math.min(2,Math.abs(scrollVel))*.5,i,f;
+      if(wv>.5&&!RM)armyAI(dt);
       for(i=0;i<figs.length;i++){
         f=figs[i];f.r=figR(f,wv,ppu);
         if(!RM){
           f.th+=Math.sin(ptime*f.wfr+f.ph)*dt*.8;
-          var s0=f.spd*sp*boost,k=1-Math.exp(-dt*.9);
+          var s0=f.spd*sp*boost*(f.g===3?1.6:1),k=1-Math.exp(-dt*(f.g===3?1.4:.9));
           f.vx+=(Math.cos(f.th)*s0-f.vx)*k;f.vy+=(Math.sin(f.th)*s0-f.vy)*k;
           if(f.hov>.05){var dm=Math.exp(-dt*6*f.hov);f.vx*=dm;f.vy*=dm}
           f.px+=f.vx*dt;f.py+=f.vy*dt;
@@ -318,7 +421,7 @@ var gl={ok:false};
         stepFigs(dt,wv);
         for(var fi=0;fi<figs.length;fi++){
           var fg=figs[fi],grp=fg.grp;
-          var tg=wv*(fg.welOn?.8:0)+(1-wv)*(gi===fg.g?1:0);
+          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g?1:0);
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
           if(fg.cur<.01){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
           var fl=1+f*(.3+.5*fg.par),szf=fMul*(isPort?1-.2*wv:1-.07*wv);
@@ -343,10 +446,12 @@ var gl={ok:false};
           grp.rotation.set(Math.sin(ptime*.37+fg.ph*2)*.16-fg.ly*.55-scrollVel*.18*fg.par,
                            Math.sin(ptime*.5+fg.ph)*.3+fg.lx*.6*fg.flip,
                            fg.r0+Math.sin(ptime*fg.fr+fg.ph)*.14+fg.wob*.5+fg.sp);
-          fg.front.material.opacity=Math.min(.92,(fg.a0+.5*fg.hov)*fg.cur);
-          fg.back.material.opacity=Math.min(.45,(.26+.2*fg.hov)*fg.cur);
+          fg.front.material.opacity=Math.min(.95,(fg.a0+.5*fg.hov+.55*fg.hit)*fg.cur);
+          fg.back.material.opacity=Math.min(.5,(.26+.2*fg.hov+.2*fg.hit)*fg.cur);
+          if(fg.pivot){fg.pivot.rotation.z=RM?.25:armAngle(fg);fg.armF.material.opacity=fg.front.material.opacity;fg.armB.material.opacity=fg.back.material.opacity}
           grp.visible=true;
         }
+        stepSparks();stepProjs();
         canvas.parentNode.classList.toggle('fig-hover',any);
         scrollVel*=.9;
         renderer.render(scene,camera);
