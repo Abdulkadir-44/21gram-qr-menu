@@ -66,8 +66,8 @@ PRODUCTS.forEach(function(p){
   c.items.push(p);
 });
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
-/* TASARIM V2 — burger ve paylaşımlık kartları */
-function isV2(p){return p.kind==='burger'||p.kind==='share'}
+/* TASARIM V2 — burger, paylaşımlık ve sos kartları */
+function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
@@ -569,15 +569,69 @@ function shareCardV2(p,i){
 /* ——— SOS KARTI: "sos barı" ———
    yarım genişlikte küçük kart · sosun renginde üstten damlama · çizilmiş sos kâsesi */
 var SAUCE_COLORS={'bas-biber-sos':'#D8642A','bas-biber-recel-sos':'#9E1B14','dynamite-sos':'#F08A3C','truffle-sos':'#5B3B22','fake-mac-sos':'#F2A27A'};
-function ramekinSVG(){
-  var ridges='';for(var r=0;r<9;r++){var x=34+r*11.5;ridges+='<line x1="'+x+'" y1="58" x2="'+(x+(r-4)*0.8)+'" y2="98"/>';}
-  return '<svg class="ramekin" viewBox="0 0 160 120" aria-hidden="true">'
-   +'<ellipse cx="80" cy="106" rx="60" ry="9" class="shadow"/>'
-   +'<path d="M28 52 L132 52 L124 98 Q123 104 116 104 L44 104 Q37 104 36 98 Z" class="pot"/>'
-   +'<g class="ridges">'+ridges+'</g>'
-   +'<ellipse cx="80" cy="52" rx="52" ry="12" class="lip"/>'
-   +'<ellipse cx="80" cy="53" rx="45" ry="9" class="sauce"/>'
-   +'<path d="M58 51 Q72 46 84 52 Q96 58 106 51" class="swirl"/>'
+/* SOS GÖRSELLERİ — her sos kendi kâsesinde: kendi dokusu + yanında ne olduğunu anlatan malzeme.
+   Seramik kâse ortak; sosun rengi, parlaklığı, kıvamı (akışkan / krema tepesi) ve içindeki parçalar sosa özel. */
+var rkN=0;
+function rkDots(n,seed,fn){ /* sos yüzeyine (elips içine) tohumlu dağılım */
+  var h=seed,out='';for(var i=0;i<n;i++){h=(h*1664525+1013904223)>>>0;var a=h/4294967296*6.283;h=(h*1664525+1013904223)>>>0;var r=Math.sqrt(h/4294967296)*.86;
+    out+=fn(80+Math.cos(a)*r*42,52+Math.sin(a)*r*7.5,i)}return out}
+function chiliSVG(c1,c2){ /* yatan kırmızı biber */
+  return '<g transform="translate(96 88) rotate(-14)"><path d="M4 12 C14 2 40 0 58 6 C50 12 30 20 8 20 C2 20 0 15 4 12Z" fill="'+c1+'"/>'
+    +'<path d="M12 10 C26 5 40 5 52 7" stroke="#fff" stroke-opacity=".45" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+    +'<path d="M14 18 C30 18 44 13 54 8" stroke="'+c2+'" stroke-opacity=".5" stroke-width="2" fill="none"/>'
+    +'<path d="M2 14 C-2 10 -4 6 -2 2 C0 0 3 1 3 4 C3 7 5 10 6 12Z" fill="#3F7A26"/><path d="M-2 3 C-5 -1 -4 -5 0 -6" stroke="#2E5E1A" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>'}
+var SAUCE_ART={
+  'bas-biber-sos':{l:'#EE7446',b:'#CF4420',d:'#8E2410',
+    top:function(){return rkDots(14,7,function(x,y){return '<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="1.7" ry="1.1" fill="#F6D58C"/>'})
+      +rkDots(6,3,function(x,y){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="1.4" fill="#6E1608" opacity=".7"/>'})},
+    side:function(){return chiliSVG('#D8321E','#7A1206')}},
+  'bas-biber-recel-sos':{l:'#C42A1E',b:'#8E1410',d:'#3E0504',gloss:1,
+    top:function(){return rkDots(11,21,function(x,y,i){return '<rect x="'+(x-3).toFixed(1)+'" y="'+(y-1.6).toFixed(1)+'" width="'+(5+i%3)+'" height="3.2" rx="1.2" fill="'+(i%2?'#E0402A':'#B3201A')+'" transform="rotate('+((i*37)%60-30)+' '+x.toFixed(1)+' '+y.toFixed(1)+')"/>'})},
+    /* kâsenin kenarından akan reçel + yanında parlak biber */
+    pot:'<path d="M118 52 C119 60 121 66 119 72 C118 76 114 76 114 71 C114 64 112 58 110 54Z" fill="#8E1410"/><ellipse cx="117" cy="62" rx="1.2" ry="4" fill="#fff" opacity=".35"/>',
+    side:function(){return chiliSVG('#A3170F','#4E0806')}},
+  'dynamite-sos':{l:'#FFC08A',b:'#F2894A',d:'#D2602A',dollop:1,
+    top:function(){return rkDots(16,11,function(x,y,i){return i%3?'<rect x="'+(x-1.2).toFixed(1)+'" y="'+(y-.8).toFixed(1)+'" width="2.6" height="1.6" fill="#B3140C" transform="rotate('+(i*41%90)+' '+x.toFixed(1)+' '+y.toFixed(1)+')"/>'
+        :'<ellipse cx="'+x.toFixed(1)+'" cy="'+(y-4).toFixed(1)+'" rx="1.8" ry="1" fill="'+(i%2?'#2A1A12':'#FFF6E0')+'"/>'})
+      +'<g fill="none" stroke="#3E8A2C" stroke-width="1.8"><circle cx="72" cy="44" r="2.6"/><circle cx="90" cy="42" r="2.2"/><circle cx="82" cy="49" r="2.4"/></g>'},
+    side:function(){return '<g transform="translate(112 92)"><path d="M0 8 C6 0 26 -2 36 4 C30 10 16 14 4 13Z" fill="#E5311D"/><path d="M-1 9 C-5 6 -6 2 -3 0" stroke="#3F7A26" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>'}},
+  'truffle-sos':{l:'#F1E4C6',b:'#DCC79C',d:'#B39467',dollop:1,
+    top:function(){return rkDots(34,5,function(x,y,i){return '<circle cx="'+x.toFixed(1)+'" cy="'+(y-(i%3)*1.5).toFixed(1)+'" r="'+(i%4?0.9:1.4)+'" fill="#2B1C12"/>'})},
+    /* yanında siyah trüf ve ince dilimi */
+    side:function(){var bumps='';for(var i=0;i<14;i++){var a=i/14*6.283;bumps+='<circle cx="'+(124+Math.cos(a)*15).toFixed(1)+'" cy="'+(96+Math.sin(a)*12).toFixed(1)+'" r="3.4" fill="#2A1C14"/>'}
+      return '<g>'+bumps+'<ellipse cx="124" cy="96" rx="15" ry="12" fill="#33241A"/>'
+        +'<g fill="#1C120C">'+rkDots(10,9,function(x,y){return '<circle cx="'+(124+(x-80)*.3).toFixed(1)+'" cy="'+(96+(y-52)*1.3).toFixed(1)+'" r="1.3"/>'})+'</g>'
+        +'<ellipse cx="119" cy="91" rx="5" ry="3" fill="#fff" opacity=".12"/>'
+        +'<g transform="translate(98 104) rotate(-8)"><ellipse rx="11" ry="5" fill="#5A4130"/><path d="M-8 -1 C-4 2 0 -2 4 1 C6 2 8 0 9 -1 M-6 2 C-2 0 2 3 6 1" stroke="#D9C3A2" stroke-width=".9" fill="none"/></g></g>'}},
+  'fake-mac-sos':{l:'#FBCDB0',b:'#F0A37C',d:'#D7825A',dollop:1,
+    top:function(){return rkDots(15,17,function(x,y,i){return i%3===2?'<rect x="'+(x-1.3).toFixed(1)+'" y="'+(y-4.5).toFixed(1)+'" width="2.4" height="2" rx=".6" fill="#FFF8EC"/>'
+        :'<rect x="'+(x-1.6).toFixed(1)+'" y="'+(y-4).toFixed(1)+'" width="3.2" height="2.4" rx=".8" fill="'+(i%2?'#5E7F22':'#86A63A')+'"/>'})},
+    /* yanında turşu dilimi */
+    side:function(){var seeds='';for(var i=0;i<7;i++){var a=i/7*6.283;seeds+='<ellipse cx="'+(126+Math.cos(a)*7).toFixed(1)+'" cy="'+(98+Math.sin(a)*5.6).toFixed(1)+'" rx="1.6" ry="1" fill="#E9E6B0" transform="rotate('+(i/7*360).toFixed(0)+' '+(126+Math.cos(a)*7).toFixed(1)+' '+(98+Math.sin(a)*5.6).toFixed(1)+')"/>'}
+      return '<g><ellipse cx="126" cy="99" rx="17" ry="13" fill="#3F5E16"/><ellipse cx="126" cy="98" rx="15" ry="11.4" fill="#8FAF45"/><ellipse cx="126" cy="98" rx="11" ry="8.4" fill="#B6CB6A"/>'+seeds
+        +'<path d="M114 92 C118 88 124 87 130 88" stroke="#fff" stroke-opacity=".35" stroke-width="1.6" fill="none"/></g>'}}
+};
+function ramekinSVG(p){
+  var A=SAUCE_ART[p&&p.id]||SAUCE_ART['bas-biber-sos'],u='rk'+(++rkN);
+  var ridges='';for(var r=0;r<9;r++){var x=34+r*11.5;ridges+='<line x1="'+x+'" y1="58" x2="'+(x+(r-4)*0.8)+'" y2="98" stroke="#000" stroke-opacity=".06" stroke-width="2"/>';}
+  var sauce='url(#'+u+'s)';
+  return '<svg class="ramekin" viewBox="0 0 160 120" aria-hidden="true"><defs>'
+   +'<linearGradient id="'+u+'p" x1="0" x2="1"><stop offset="0" stop-color="#E6E0D3"/><stop offset=".3" stop-color="#FFFFFF"/><stop offset=".75" stop-color="#F3EEE4"/><stop offset="1" stop-color="#D6CFC0"/></linearGradient>'
+   +'<radialGradient id="'+u+'s" cx=".42" cy=".3" r=".75"><stop offset="0" stop-color="'+A.l+'"/><stop offset=".55" stop-color="'+A.b+'"/><stop offset="1" stop-color="'+A.d+'"/></radialGradient>'
+   +'</defs>'
+   +'<ellipse cx="80" cy="106" rx="62" ry="9" class="shadow"/>'
+   +'<path d="M28 52 L132 52 L124 98 Q123 104 116 104 L44 104 Q37 104 36 98 Z" fill="url(#'+u+'p)" stroke="#000" stroke-opacity=".14" stroke-width="1.5"/>'
+   +ridges
+   +'<ellipse cx="80" cy="52" rx="52" ry="12" fill="#FBF8F2" stroke="#000" stroke-opacity=".14" stroke-width="1.5"/>'
+   +'<ellipse cx="80" cy="53" rx="45.5" ry="9.2" fill="'+A.d+'"/>'
+   +'<ellipse cx="80" cy="52.4" rx="44" ry="8.4" fill="'+sauce+'"/>'
+   +(A.dollop?'<path d="M50 53 C52 44 64 37 78 36 C80 33 84 33 85 36 C98 37 108 44 110 53 C98 57 62 57 50 53Z" fill="'+sauce+'"/>'
+      +'<path d="M58 48 C68 43 92 42 102 48 M66 42 C74 39 86 39 94 42" stroke="#fff" stroke-opacity=".45" stroke-width="1.8" fill="none" stroke-linecap="round"/>':'')
+   +(A.top?A.top():'')
+   +'<path d="M54 49 C62 46 74 45 84 46" stroke="#fff" stroke-opacity="'+(A.gloss?.7:.4)+'" stroke-width="'+(A.gloss?3:2)+'" fill="none" stroke-linecap="round"/>'
+   +(A.gloss?'<ellipse cx="96" cy="50" rx="5" ry="1.4" fill="#fff" opacity=".5"/>':'')
+   +(A.pot||'')
+   +(A.side?A.side():'')
    +'</svg>';
 }
 function sauceCardHTML(p,i){
@@ -586,10 +640,10 @@ function sauceCardHTML(p,i){
   return cardOpen(p,i,'card--sauce').replace('style="','style="--sauce:'+col+';')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
    +'<svg class="drip" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg></div>'
-   +'<div class="stage">'+ramekinSVG()+'</div>'
+   +'<div class="stage">'+ramekinSVG(p)+'</div>'
    +'<div class="meta"><p class="cat">EKSTRA SOS</p>'
    +'<h3 class="name">'+esc(nm)+'</h3>'
-   +'<div class="foot"><span class="price">+'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -780,7 +834,7 @@ var DETAIL={
   sauce:{
     heroColor:function(p){return mixHex(SAUCE_COLORS[p.id]||'#E4032D','#FFFCEC',.78)},
     hero:function(p){return '<svg class="d-drip" style="fill:'+(SAUCE_COLORS[p.id]||'#E4032D')+'" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg>'},
-    art:function(p){return '<div style="--sauce:'+(SAUCE_COLORS[p.id]||'#E4032D')+'">'+ramekinSVG()+'</div>'},
+    art:function(p){return '<div style="--sauce:'+(SAUCE_COLORS[p.id]||'#E4032D')+'">'+ramekinSVG(p)+'</div>'},
     extra:function(p){
       var base=sauceBase(p);
       var used=PRODUCTS.filter(function(x){return x.kind!=='sauce'&&(x.desc||'').toLocaleLowerCase('tr').replace(/ı/g,'i').indexOf(base)>-1});
@@ -1125,27 +1179,39 @@ function flipGeom(card){
 }
 function flipClone(card,r){
   var cl=card.cloneNode(true);cl.classList.remove('deal');cl.removeAttribute('tabindex');cl.removeAttribute('role');cl.setAttribute('aria-hidden','true');
-  cl.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;margin:0;z-index:61;pointer-events:none;backface-visibility:hidden';
+  /* += : kartın kendi satır içi değişkenleri (ör. sosun rengi --sauce) korunur */
+  cl.style.cssText+=';position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;margin:0;z-index:61;pointer-events:none;backface-visibility:hidden;visibility:visible';
+  /* (kart detay açıkken gizli tutulur; kopyası o gizliliği devralmamalı) */
   document.body.appendChild(cl);return cl;
 }
 function onScreen(r){return r.bottom>0&&r.top<innerHeight&&r.width>0}
+/* 90°'de yüz kenarı kameraya döner ama perspektif yüzünden ince bir dilim olarak görünür kalır
+   (ekranın ortasında dikey "kesik"). Bu yüzden kenar anına yaklaşırken opaklık sıfıra iner. */
+function flipKF(from,to,edgeAtEnd,win){
+  win=win||.18;
+  return edgeAtEnd?[{transform:from,opacity:1},{offset:1-win,opacity:1},{transform:to,opacity:0}]
+                  :[{transform:from,opacity:0},{offset:win,opacity:1},{transform:to,opacity:1}];
+}
 function popFlipIn(card){
   var g=flipGeom(card);if(!onScreen(g.r))return;
   var cl=flipClone(card,g.r),T1=330,T2=460;
   card.style.visibility='hidden';popCard=card;
-  cl.animate([{transform:FLIP_P+'rotateY(0deg)'},{transform:g.cardMid+' rotateY(90deg)'}],
+  cl.animate(flipKF(FLIP_P+'rotateY(0deg)',g.cardMid+' rotateY(90deg)',true),
     {duration:T1,easing:'cubic-bezier(.45,0,.85,.55)',fill:'forwards'}).onfinish=function(){cl.remove()};
-  $('#panel').animate([{transform:g.panelMid+' rotateY(-90deg)'},{transform:FLIP_P+'rotateY(0deg)'}],
+  $('#panel').animate(flipKF(g.panelMid+' rotateY(-90deg)',FLIP_P+'rotateY(0deg)',false),
     {duration:T2,delay:T1,easing:'cubic-bezier(.2,.65,.25,1)',fill:'backwards'});
 }
 function popFlipOut(card){
   var pn=$('#panel'),g=flipGeom(card),T1=260,T2=380;
   if(!onScreen(g.r)){pn.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.9)'}],{duration:240,easing:'ease-in',fill:'forwards'});return}
   var cl=flipClone(card,g.r);card.style.visibility='hidden';
-  pn.animate([{transform:FLIP_P+'rotateY(0deg)'},{transform:g.panelMid+' rotateY(-90deg)'}],
+  /* kapanışta iki yüz üst üste biner: kart, panel tamamen sönmeden belirmeye başlar →
+     90° anında ekranda "hiçbir şey yok" boşluğu (kartın bir anlık kaybolması) oluşmaz */
+  var LAP=90;
+  pn.animate(flipKF(FLIP_P+'rotateY(0deg)',g.panelMid+' rotateY(-90deg)',true,.1),
     {duration:T1,easing:'cubic-bezier(.45,0,.85,.55)',fill:'forwards'});
-  cl.animate([{transform:g.cardMid+' rotateY(90deg)'},{transform:FLIP_P+'rotateY(0deg)'}],
-    {duration:T2,delay:T1,easing:'cubic-bezier(.2,.65,.25,1)',fill:'backwards'})
+  cl.animate(flipKF(g.cardMid+' rotateY(90deg)',FLIP_P+'rotateY(0deg)',false,.1),
+    {duration:T2,delay:T1-LAP,easing:'cubic-bezier(.2,.65,.25,1)',fill:'backwards'})
     .onfinish=function(){cl.remove();card.style.visibility=''};
 }
 function openSheet(id,fromEl,fromHash){

@@ -1111,3 +1111,13 @@ img.err+.sk{animation:none}
 .sheet.pop .panel[data-kind="share"] #hp{max-height:74%;max-width:72%}
 /* pop-up (burger + paylaşımlık): sabit yükseklik (Holy Chick ölçüsü); içerik taşarsa bilgi alanı kayar */
 .sheet.pop .panel{height:min(612px,calc(100dvh - 32px))}
+/* ==========================================================
+   TASARIM V2 — SOS: kartta bilet fiyat, detay pop-up
+   ========================================================== */
+.card--sauce .foot{align-items:center}
+.card--sauce .ticket{height:28px;font-size:16px;padding:0 13px 0 18px;margin-top:0}
+.card--sauce .ticket::before{left:10px;top:4px;bottom:4px}
+.card--sauce .ticket small{font-size:11px;margin-left:3px}
+/* pop-up: fiyat adın yanında bilet → büyük fiyat satırı gizli; kâse hero'ya sığsın */
+.sheet.pop .panel[data-kind="sauce"] .price.big{display:none}
+.sheet.pop .panel[data-kind="sauce"] #hp.art{width:min(52vw,230px)}
