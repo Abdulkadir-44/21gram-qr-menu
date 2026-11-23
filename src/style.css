@@ -1035,8 +1035,8 @@ img.err+.sk{animation:none}
 .card--burger.v2 .wm i{position:absolute;font-style:normal;font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;
   font-size:var(--s);letter-spacing:.08em;line-height:1;white-space:nowrap;color:var(--red);opacity:.1;transform:translate(-50%,-50%) rotate(var(--r))}
 /* ad + bilet */
-.card--burger.v2 .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.card--burger.v2 .name{flex:1;min-width:0}
+.card--burger.v2 .name-row,.card--plate .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card--burger.v2 .name,.card--plate .name-row .name{flex:1;min-width:0}
 .ticket{flex:none;position:relative;display:inline-flex;align-items:center;gap:2px;margin-top:4px;
   height:32px;padding:0 18px 0 20px;background:#F7E7A6;color:var(--ink);
   font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:18px;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
@@ -1088,3 +1088,26 @@ img.err+.sk{animation:none}
     radial-gradient(circle at 50% 100%,var(--cream) 6.5px,transparent 7px) 0 0/17px 12px repeat-x}
   .sheet.pop .d-burst{width:420px}
 }
+
+/* ==========================================================
+   TASARIM V2 — PAYLAŞIMLIK KARTI (düz krem kart, tabak taşar)
+   ========================================================== */
+.card--plate .stage{height:272px}
+.card--plate .paper{top:112px}
+.card--plate .shade{position:absolute;left:14px;right:14px;top:126px;bottom:-6px;border-radius:30px;background:rgba(50,0,10,.5);filter:blur(22px);transform:translateY(14px)}
+.card--plate .prod{max-width:88%;max-height:252px;transform:translateZ(70px);filter:drop-shadow(0 20px 16px rgba(60,6,16,.3))}
+.card--plate .meta{padding:4px 24px 24px}
+.card--plate .cat{font-size:14px;font-weight:700;color:var(--red);margin-bottom:6px}
+.card--plate .name{font-size:clamp(28px,8.4vw,36px);line-height:.95}
+.card--plate .desc{margin-top:12px;max-width:none}
+.card--plate .foot{border-top:2px dashed color-mix(in srgb,var(--ink) 16%,transparent);margin-top:18px;padding-top:14px}
+.card--plate .cta{font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.card--plate .more{background:var(--red);width:48px;height:48px}
+.card--plate:hover .more{transform:translateX(4px) scale(1.06)}
+/* düz krem kart (kâğıt dokusu yok) */
+.card--plate .paper{background:var(--cream)}
+/* pop-up'ta tabak hero yüksekliğine sığsın */
+.sheet.pop .plate{width:auto;height:86%}
+.sheet.pop .panel[data-kind="share"] #hp{max-height:74%;max-width:72%}
+/* pop-up (burger + paylaşımlık): sabit yükseklik (Holy Chick ölçüsü); içerik taşarsa bilgi alanı kayar */
+.sheet.pop .panel{height:min(612px,calc(100dvh - 32px))}

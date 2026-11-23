@@ -66,8 +66,8 @@ PRODUCTS.forEach(function(p){
   c.items.push(p);
 });
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
-/* TASARIM V2 — tüm burger kartları */
-function isV2(p){return p.kind==='burger'}
+/* TASARIM V2 — burger ve paylaşımlık kartları */
+function isV2(p){return p.kind==='burger'||p.kind==='share'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
@@ -541,6 +541,7 @@ function hotCardHTML(p,i){
 /* ——— PAYLAŞIMLIK KARTI: "sipariş fişi" ———
    yırtık kenarlı çizgili fiş · kırmızı başlık · kesik çizgili tabakta ürün · ✓ işaretli içerik · noktalı TOPLAM satırı */
 function shareCardHTML(p,i){
+  if(isV2(p))return shareCardV2(p,i);
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var list=parts.length?'<ul class="checks">'+parts.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>':'';
   return cardOpen(p,i,'card--share')
@@ -550,6 +551,18 @@ function shareCardHTML(p,i){
    +'<div class="meta"><p class="cat">'+esc(p.category)+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'+list
    +'<div class="foot"><span class="total">TOPLAM</span><span class="dots" aria-hidden="true"></span><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+
+/* V2: düz krem kart, tabak karttan taşar · ad + bilet · açıklama · "3D gör" + kırmızı ok */
+function shareCardV2(p,i){
+  return cardOpen(p,i,'card--plate v2')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +'<div class="stage">'+prodHTML(p)+'</div>'
+   +'<div class="meta"><p class="cat">'+esc(p.category)+'</p>'
+   +'<div class="name-row"><h3 class="name">'+esc(p.name)+'</h3>'+ticketHTML(p)+'</div>'
+   +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
+   +'<div class="foot"><span class="cta">3D gör</span>'+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -757,7 +770,8 @@ var DETAIL={
     extra:function(p){
       SPLIT.n=2;
       var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean);
-      return '<div class="slip-d"><p class="slip-h"><span>SİPARİŞ FİŞİ</span><span>'+noHTML(p)+'</span></p>'
+      if(isV2(p))return parts.length?ingrHTML(parts):'';
+      return '<div class="slip-d"><p class="slip-h"><span>SİPARİŞ FİŞİ</span>'+(isV2(p)?'':'<span>'+noHTML(p)+'</span>')+'</p>'
         +(parts.length?'<ul class="checks-d">'+parts.map(function(x,k){return '<li style="--k:'+k+'"><i aria-hidden="true"></i>'+esc(x)+'</li>'}).join('')+'</ul>':'')
         +splitHTML(p)
         +'<p class="total-d"><span>TOPLAM</span><span class="dots" aria-hidden="true"></span><b>'+money(p.price)+'</b></p></div>';
@@ -791,8 +805,7 @@ var DETAIL={
     extra:function(p){
       var parts=(p.desc||'').split(',').map(function(x){return x.trim()}).filter(Boolean);
       if(!parts.length)return '';
-      if(isV2(p))return '<div class="stack v2"><p class="stack-h"><span>İÇİNDEKİLER</span><span>'+parts.length+' malzeme</span></p>'
-        +'<ul class="layers">'+parts.map(function(x){return '<li style="--c:'+layerColor(x)+'">'+esc(x)+'</li>'}).join('')+'</ul></div>';
+      if(isV2(p))return ingrHTML(parts);
       var sides=parts.filter(function(x){return layerType(x)==='side'});
       var layers=parts.filter(function(x){return layerType(x)!=='side'})
         .map(function(x,i){return {t:x,type:layerType(x),i:i}})
@@ -931,6 +944,11 @@ function burgerCardHTML(p,i){
    +'</div></div></article>';
 }
 /* V2: sarı rozet ve kareli şerit yok · fiyat adın karşısında bilet · "3D gör" · dağınık 21GRAM filigranı */
+/* detay: içindekiler — karttaki renkli malzeme düğmeleri (burger + paylaşımlık) */
+function ingrHTML(parts){
+  return '<div class="stack v2"><p class="stack-h"><span>İÇİNDEKİLER</span><span>'+parts.length+' malzeme</span></p>'
+    +'<ul class="layers">'+parts.map(function(x){return '<li style="--c:'+layerColor(x)+'">'+esc(x)+'</li>'}).join('')+'</ul></div>';
+}
 function ticketHTML(p){return '<span class="ticket" aria-hidden="true"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'}
 function burgerCardV2(p,i){
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
@@ -1087,6 +1105,7 @@ function fillSheet(p){
   sheet.classList.toggle('pop',isV2(p));
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
   $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';
+  $('.info').scrollTop=0;
   hpT.rx=hpT.ry=0;
   var i=state.order.indexOf(p.id),many=state.order.length>1;
   $('.pn').style.display=many?'':'none';
