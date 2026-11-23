@@ -1125,3 +1125,39 @@ img.err+.sk{animation:none}
 .sheet.pop .panel[data-kind="dessert"] #hp.art{width:min(56vw,250px)}
 .sheet.pop.open .d-lid{animation-delay:.75s}
 .sheet.pop.open .panel[data-kind="dessert"] #hp.art{animation-delay:1.1s}
+/* ==========================================================
+   TASARIM V2 — ÜST KISIM: "yüzen cam kapsül"
+   Logo ve arama doğrudan sayfanın üstünde durur; bölüm sekmeleri + alt kategoriler
+   kenarlardan boşluklu, bulanık koyu camdan bir kapsülde yapışkan olarak yüzer.
+   Kartlar kapsülün altından geçerken renkleri camdan hafifçe sızar.
+   ========================================================== */
+:root{--hdr-line:rgba(255,252,236,.16);--glass:rgba(26,2,10,.52)}
+.top-wrap,.searchrow{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.top{padding-bottom:10px}
+.searchrow{max-width:none;padding:0 max(18px,calc((100% - 1160px)/2 + 18px))}
+.searchrow input{margin-top:2px;color:var(--cream);border:1.5px solid var(--hdr-line);
+  background:rgba(26,2,10,.4);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.searchrow input::placeholder{color:rgba(255,252,236,.5)}
+.searchrow input:focus{outline:none;border-color:rgba(255,252,236,.45)}
+/* arama düğmesi: küçük cam daire */
+.icon-btn{border:1.5px solid var(--hdr-line);color:var(--cream);background:rgba(26,2,10,.32);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.icon-btn:hover,.icon-btn[aria-expanded="true"]{background:var(--red);border-color:var(--red);color:var(--cream)}
+/* kapsül */
+.nav{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;padding:8px 0 10px}
+.nav-in{width:calc(100% - 24px);max-width:1136px;padding:10px;border-radius:26px;
+  background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
+  border:1px solid var(--hdr-line);box-shadow:0 18px 40px -16px rgba(10,0,4,.65),inset 0 1px 0 rgba(255,255,255,.1)}
+/* bölüm sekmeleri: koyu kanal içinde kırmızı hap */
+.tabs{display:flex;width:100%;background:rgba(0,0,0,.28);border:1px solid var(--hdr-line);padding:4px}
+.tab{flex:1;color:rgba(255,252,236,.66);padding:10px 14px}
+.tab:hover,.tab[aria-selected="true"]{color:var(--cream)}
+.ind{background:var(--red);box-shadow:0 6px 14px -6px rgba(228,3,45,.8),inset 0 1px 0 rgba(255,255,255,.22)}
+/* alt kategoriler: yarı saydam haplar, seçili olan krem dolgulu */
+.chips{gap:8px;margin-top:10px;padding:0}
+.chip{padding:0 16px;min-height:40px;display:inline-flex;align-items:center;border:1.5px solid var(--hdr-line);border-radius:999px;
+  color:rgba(255,252,236,.8);font-size:14px;font-weight:700;background:rgba(255,252,236,.07);transition:background .25s,color .25s,border-color .25s}
+.chip:hover{border-color:rgba(255,252,236,.4);color:var(--cream)}
+.chip[aria-current="true"]{background:var(--cream);border-color:var(--cream);color:var(--ink)}
+@media(min-width:700px){.tabs{display:inline-flex;width:auto}.tab{flex:none}}
+/* bulanıklığı desteklemeyen tarayıcıda cam yerine koyu, okunur zemin */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.nav-in{background:rgba(26,2,10,.88)}}
