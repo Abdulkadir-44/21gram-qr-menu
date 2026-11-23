@@ -718,6 +718,32 @@ function pintSVG(cl){
    +'<circle class="bb" cx="40" cy="150" r="2.5"/><circle class="bb b2" cx="62" cy="158" r="2"/><circle class="bb b3" cx="80" cy="152" r="3"/></g>'
    +'<path class="glass" d="M18 14 L102 14 L92 160 Q91 166 85 166 L35 166 Q29 166 28 160 Z"/>'
    +'<line class="mark" x1="24" y1="26" x2="34" y2="26"/><text class="mk" x="38" y="30">50cl</text></svg>'}
+/* BİRA V2 — hacmi sayı yerine bardak anlatır (50 cl = tam dolu).
+   İçeride katman katman sıvı: köpük başlığı · köpük altı açık geçiş · açık kehribar gövde ·
+   koyulaşan alt kısım · dipte tortu gölgesi; yükselen kabarcıklar ve cam parlaması.
+   Kartta küçük, detayda büyük çizilir (aynı SVG, CSS genişliği farklı). */
+var pintN=0;
+function pintTop(cl){var f=Math.max(.25,Math.min(1,(cl||33)/50));return 26+(1-f)*128}
+function pintLayersSVG(cl,big){
+  var top=pintTop(cl),u='pl'+(++pintN);
+  var glass='M18 14 L102 14 L92 160 Q91 166 85 166 L35 166 Q29 166 28 160 Z';
+  var foamB='';for(var k=0;k<7;k++)foamB+='<circle cx="'+(14+k*16)+'" cy="'+(top+2).toFixed(1)+'" r="'+(6+(k%3))+'"/>';
+  var bub='';if(big)for(var b=0;b<6;b++)bub+='<circle class="bb" style="animation-delay:'+(-b*.47).toFixed(2)+'s" cx="'+(36+b*9)+'" cy="'+(150+(b%3)*5)+'" r="'+(1.6+(b%3)*.6)+'"/>';
+  return '<svg class="pint pint2'+(big?' big':'')+'" viewBox="0 0 120 170" aria-hidden="true">'
+   +'<defs><clipPath id="'+u+'c"><path d="'+glass+'"/></clipPath>'
+   +'<linearGradient id="'+u+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F8CB5A"/><stop offset=".45" stop-color="#E9A12A"/><stop offset="1" stop-color="#B9620E"/></linearGradient></defs>'
+   +'<g clip-path="url(#'+u+'c)"><g class="liq">'
+   +'<rect x="0" y="'+top.toFixed(1)+'" width="120" height="170" fill="url(#'+u+'g)"/>'
+   +'<rect x="0" y="152" width="120" height="20" fill="#7A3A06" opacity=".28"/>'
+   +'<rect x="0" y="'+(top+2).toFixed(1)+'" width="120" height="7" fill="#FFE3A0" opacity=".75"/>'
+   +bub
+   +'<rect x="0" y="'+(top-13).toFixed(1)+'" width="120" height="15" fill="#FFF8EA"/>'
+   +'<g fill="#FFF8EA">'+foamB+'</g>'
+   +'<g fill="#F1E6CF">'+'<circle cx="34" cy="'+(top-6).toFixed(1)+'" r="2"/><circle cx="58" cy="'+(top-8).toFixed(1)+'" r="1.6"/><circle cx="80" cy="'+(top-5).toFixed(1)+'" r="2.2"/></g>'
+   +'</g><path d="M30 20 L38 20 L34 156 L30 156 Z" fill="#fff" opacity=".28"/></g>'
+   +'<path class="glass" d="'+glass+'"/>'
+   +(big?'<line class="mark" x1="24" y1="26" x2="34" y2="26"/>':'')
+   +'</svg>'}
 /* soğuk içecek: içindekiler (parantez içi ya da virgüllü açıklama) */
 function softParts(p){var d=p.desc||'',m=d.match(/\(([^)]*)\)/);
   return (m?m[1]:(/,/.test(d)?d:'')).split(',').map(function(x){return x.trim()}).filter(Boolean)}
@@ -800,6 +826,16 @@ var DETAIL={
     },
     extra:function(p){
       var sz=sizeParts(p.size)||sizeParts(p.desc),draft=/fıçı|fiçi|fici/.test((p.name+' '+p.desc).toLocaleLowerCase('tr'));
+      if(p.kind==='beer'){
+        if(!sz)return '<div class="beer-d v2"><p class="type-d">'+(draft?'FIÇI':'ŞİŞE')+'</p></div>';
+        var cl=parseFloat(sz.n),t=pintTop(cl),pc=function(y){return (y/170*100).toFixed(1)+'%'};
+        return '<div class="beer-d v2"><p class="type-d">'+(draft?'FIÇI':'ŞİŞE')+'</p>'
+          +'<div class="pint-wrap">'+pintLayersSVG(cl,true)
+          +'<span class="lbl tot" style="top:'+pc(t-13)+'"><b>'+esc(sz.n)+' '+esc(sz.u.toLocaleLowerCase('tr'))+'</b></span>'
+          +'<span class="lbl" style="top:'+pc(t-5)+'">Köpük</span>'
+          +'<span class="lbl" style="top:'+pc((t+160)/2)+'">Bira</span>'
+          +'</div></div>';
+      }
       return '<div class="beer-d"><div class="vol-d"><p class="type-d">'+(draft?'FIÇI':'ŞİŞE')+'</p>'
         +(sz?'<p class="big-vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')+'</div>'
         +(sz?pintSVG(parseFloat(sz.n)):'')+'</div>';
@@ -912,17 +948,19 @@ function sizeParts(s){var m=String(s||'').match(/(\d+[.,]?\d*)\s*(cl|ml|lt|l)\b/
 function beerCardHTML(p,i){
   var sz=sizeParts(p.size)||sizeParts(p.desc),draft=/fıçı|fiçi|fici/.test((p.name+' '+p.desc).toLocaleLowerCase('tr'));
   var bubbles='';for(var b=0;b<7;b++)bubbles+='<i style="--b:'+b+'"></i>';
-  return cardOpen(p,i,'card--beer')
+  var v2=true; /* bira v2: tüm biralar */
+  return cardOpen(p,i,'card--beer'+(v2?' v2':''))
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
    +'<div class="stage"><span class="bubbles" aria-hidden="true">'+bubbles+'</span>'
    +'<svg class="coaster" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96"/><circle class="ring" cx="100" cy="100" r="64"/>'
    +'<text><textPath href="#coasterRing" textLength="482">SOĞUK SERVİS ✦ 21 GRAM ✦ SOĞUK SERVİS ✦ 21 GRAM ✦</textPath></text></svg>'
    +prodHTML(p)+'</div>'
-   +'<div class="meta"><p class="cat"><span class="no">'+noHTML(p)+'</span><span class="type">'+(draft?'FIÇI':'ŞİŞE')+'</span></p>'
+   +'<div class="meta"><p class="cat">'+(v2?'':'<span class="no">'+noHTML(p)+'</span>')+'<span class="type">'+(draft?'FIÇI':'ŞİŞE')+'</span></p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
-   +(sz?'<p class="vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')
+   +(sz&&!v2?'<p class="vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')
    +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +(v2&&sz?'<div class="vol-g"><span class="cl">'+esc(sz.n)+'<small>'+esc(sz.u.toLocaleLowerCase('tr'))+'</small></span>'+pintLayersSVG(parseFloat(sz.n),false)+'</div>':'')
+   +'<div class="foot">'+(v2?ticketHTML(p):'<span class="price">'+money(p.price)+'</span>')+ARROW+'</div>'
    +'</div></div></article>';
 }
 

@@ -1273,3 +1273,43 @@ img.err+.sk{animation:none}
 .panel[data-kind="dessert"] .pn button{border:0;border-radius:8px;color:var(--ink);
   background:repeating-linear-gradient(90deg,#fff7f4 0 14px,#fdeee9 14px 28px);box-shadow:inset 0 -5px 0 var(--red),inset 0 0 0 1px rgba(29,10,14,.1)}
 .panel[data-kind="dessert"] .pn button:hover{background:var(--red);color:var(--cream);box-shadow:inset 0 -5px 0 color-mix(in srgb,var(--red) 70%,#000)}
+
+/* ==========================================================
+   TASARIM V2 — BİRA: hacim = bardak
+   ========================================================== */
+.pint2{overflow:visible}
+.pint2 .glass{fill:rgba(255,255,255,.18);stroke:var(--ink);stroke-width:4;stroke-linejoin:round}
+.card--beer .pint2 .glass{stroke-width:6}
+.pint2 .bb{fill:rgba(255,255,255,.75);animation:fizz 2.6s linear infinite}
+/* detay: büyük bardak ortada, katmanlar dolarak gelir */
+.beer-d.v2{flex-direction:column;align-items:center;gap:10px}
+.beer-d.v2 .type-d{align-self:flex-start}
+.pint2.big{width:min(46vw,170px)}
+.sheet.open .pint2.big .liq{animation:pintFill 1.3s .55s cubic-bezier(.3,.8,.3,1) both}
+/* bira v2 kartı: bardak sağda, alt çizginin (fiyat satırı) hemen üstünde; solunda hacim */
+.card--beer.v2 .vol-g{margin-top:auto;align-self:flex-end;display:flex;align-items:flex-end;gap:8px;padding:10px 4px 10px 0}
+.card--beer.v2 .vol-g .pint2{width:48px}
+.card--beer.v2 .foot{margin-top:0}
+.card--beer.v2 .cl{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:24px;line-height:.9;color:var(--red)}
+.card--beer.v2 .cl small{font-size:13px;margin-left:2px;letter-spacing:.06em}
+/* bira v2 detayı: katman etiketleri bardağın sağında, kısa çizgiyle bağlı */
+.beer-d.v2 .pint-wrap{position:relative;margin-right:90px}
+.beer-d.v2 .lbl{position:absolute;left:calc(100% - 8px);transform:translateY(-50%);padding-left:30px;white-space:nowrap;font-size:14px;font-weight:700;color:var(--muted)}
+.beer-d.v2 .lbl::before{content:"";position:absolute;left:0;top:50%;width:24px;border-top:1.5px solid color-mix(in srgb,var(--ink) 35%,transparent)}
+.beer-d.v2 .lbl.tot{color:var(--red);font-family:var(--display);font-stretch:var(--display-stretch);font-size:22px}
+.beer-d.v2 .lbl.tot::before{border-top-style:dashed;border-color:var(--red)}
+.sheet.open .beer-d.v2 .lbl{animation:lblIn .45s 1.6s cubic-bezier(.2,.9,.3,1) both}
+@keyframes lblIn{from{opacity:0;translate:-8px 0}}
+/* bira v2: fiyat bileti (kırmızı yazı) ve FIÇI/ŞİŞE için küçük çentikli sarı etiket — biletle aynı dil */
+.card--beer.v2 .foot{align-items:center}
+.card--beer.v2 .ticket{color:var(--red)}
+.card--beer.v2 .type{position:relative;display:inline-block;background:#F7E7A6;color:var(--red);border-radius:3px;padding:5px 14px 4px 20px;font-weight:800;letter-spacing:.18em;transform:rotate(-3deg);filter:drop-shadow(0 3px 4px rgba(60,6,16,.18));
+  -webkit-mask:radial-gradient(circle at 0 50%,transparent 5px,#000 5.5px) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 5px,#000 5.5px) right/51% 100% no-repeat;
+          mask:radial-gradient(circle at 0 50%,transparent 5px,#000 5.5px) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 5px,#000 5.5px) right/51% 100% no-repeat}
+.card--beer.v2 .type::before{content:"";position:absolute;left:10px;top:4px;bottom:4px;border-left:1.5px dashed color-mix(in srgb,var(--red) 45%,transparent)}
+/* toplam hacim bardağın solunda (sağdaki "Köpük" etiketiyle çakışmasın) */
+.beer-d.v2 .pint-wrap{margin:0 90px}
+.beer-d.v2 .lbl.tot{left:auto;right:calc(100% - 8px);padding:0 30px 0 0}
+.beer-d.v2 .lbl.tot::before{left:auto;right:0}
+.sheet.open .beer-d.v2 .lbl.tot{animation-name:lblInL}
+@keyframes lblInL{from{opacity:0;translate:8px 0}}
