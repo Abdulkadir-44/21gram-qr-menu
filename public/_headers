@@ -1,0 +1,31 @@
+# Tarayıcıda saklama (Cloudflare statik dosya başlıkları)
+# Değişmeyen dosyalar 1 yıl saklanır. Bu dosyaların adı ya da adresindeki sürüm değişince tarayıcı yenisini indirir.
+# Değişebilen dosyalar (sayfa, menü, logo) her açılışta "değişti mi?" diye sorulur; değişmediyse yeniden indirilmez.
+
+# Vite çıktısı: dosya adında içerik özeti var (index-XXXX.js); içerik değişince adı da değişir
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ürün görselleri: adresteki ?v=IMG_V sürümüyle yenilenir (görsel değişince src/app.js'te IMG_V artırılır)
+/img/new/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# fontlar ve 3D motoru (dosya adında sürüm var: three-r128)
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# logo ve kâğıt dokusu: adreslerinde sürüm yok → 1 gün sakla, sonra sor
+/img/logo.png
+  Cache-Control: public, max-age=86400
+/img/paper.png
+  Cache-Control: public, max-age=86400
+
+# fiyatlar ve sayfa: her açılışta kontrol et (değişmediyse sunucu "aynı" der, indirilmez)
+/menu.json
+  Cache-Control: no-cache
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
