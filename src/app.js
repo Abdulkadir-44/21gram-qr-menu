@@ -66,8 +66,8 @@ PRODUCTS.forEach(function(p){
   c.items.push(p);
 });
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
-/* TASARIM V2 — burger, paylaşımlık ve sos kartları */
-function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'}
+/* TASARIM V2 — burger, paylaşımlık, sos ve kokteyl kartları */
+function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'}
 /* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı */
 function isPop(p){return isV2(p)||p.kind==='dessert'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
@@ -780,8 +780,8 @@ var DETAIL={
   },
   cocktail:{
     hero:function(p){
-      return '<span class="d-glow2"></span><span class="d-rays"></span><span class="d-arch"></span>'
-        +'<svg class="d-arc" viewBox="0 0 300 200"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>'
+      return '<span class="d-glow2"></span><span class="d-rays"></span>'
+        +(isV2(p)?'':'<span class="d-arch"></span><svg class="d-arc" viewBox="0 0 300 200"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>')
         +'<span class="d-spark k1">✦</span><span class="d-spark k2">✦</span><span class="d-spark k3">✦</span>';
     },
     extra:function(p){
@@ -966,17 +966,17 @@ function cocktailCardHTML(p,i){
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var recipe=parts.length?parts.map(function(s){return '<span>'+esc(s)+'</span>'}).join('<i aria-hidden="true">✦</i>')
                          :'<span class="classic">Klasik reçete</span>';
-  var sp=spiritOf(p);
-  return '<article class="card card--cocktail" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+', '+money(p.price)+'. Detayı aç')+'">'
+  var sp=spiritOf(p),v2=isV2(p);
+  return '<article class="card card--cocktail'+(v2?' v2':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+', '+money(p.price)+'. Detayı aç')+'">'
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
-   +'<div class="stage"><div class="arch" aria-hidden="true"><span class="rays"></span><span class="glow"></span></div>'
-   +'<svg class="arc-title" viewBox="0 0 300 120" aria-hidden="true"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>'
+   +'<div class="stage">'+(v2?'':'<div class="arch" aria-hidden="true"><span class="rays"></span><span class="glow"></span></div>')
+   +(v2?'':'<svg class="arc-title" viewBox="0 0 300 120" aria-hidden="true"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>')
    +'<span class="spark s1" aria-hidden="true">✦</span><span class="spark s2" aria-hidden="true">✦</span>'
-   +vis+'<span class="bar" aria-hidden="true"></span></div>'
+   +vis+(v2?'':'<span class="bar" aria-hidden="true"></span>')+'</div>'
    +'<div class="meta"><p class="cat"><span class="no">No.'+String(p.no).padStart(2,'0')+'</span>'+(sp?'<span class="spirit">'+esc(sp)+'</span>':'')+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +'<p class="recipe">'+recipe+'</p>'
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'<div class="foot">'+(v2?ticketHTML(p):'<span class="price">'+money(p.price)+'</span>')+'<span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
    +'</div></div></article>';
 }
 /* ——— BURGER KARTI: "ambalaj kâğıdı" ———
@@ -1158,6 +1158,8 @@ function fillSheet(p){
   var D=DETAIL[p.kind];
   $('#panel').dataset.kind=D?p.kind:'';
   $('#panel').dataset.v2=isV2(p)?'1':'';
+  /* sos: düğmelerdeki damla o sosun renginde */
+  if(p.kind==='sauce')$('#panel').style.setProperty('--sauce',SAUCE_COLORS[p.id]||'#E4032D');else $('#panel').style.removeProperty('--sauce');
   sheet.classList.toggle('pop',isPop(p));
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
   $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';

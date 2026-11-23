@@ -1161,3 +1161,115 @@ img.err+.sk{animation:none}
 @media(min-width:700px){.tabs{display:inline-flex;width:auto}.tab{flex:none}}
 /* bulanıklığı desteklemeyen tarayıcıda cam yerine koyu, okunur zemin */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.nav-in{background:rgba(26,2,10,.88)}}
+
+/* ==========================================================
+   TASARIM V2 — KOKTEYL
+   Beyaz kart; koyu kemer pencere (fanus) ve kadeh kartın üstünden taşar,
+   kemer üstündeki kavisli yazı yok. İçerik aynı, renkler açık zemine göre; fiyat kırmızı bilet.
+   ========================================================== */
+.card--cocktail.v2 .stage{height:290px}
+.card--cocktail.v2 .paper{top:72px;background:var(--cream)}
+.card--cocktail.v2 .paper::before,.card--cocktail.v2 .paper::after{display:none}
+.card--cocktail.v2 .sheen{mix-blend-mode:soft-light;opacity:var(--so,0)}
+.card--cocktail.v2 .shade{top:86px;background:rgba(10,0,4,.5)}
+.card--cocktail.v2 .arch{box-shadow:0 18px 30px -12px rgba(20,0,6,.55),inset 0 0 0 6px color-mix(in srgb,var(--ink) 60%,transparent),inset 0 0 0 7px color-mix(in srgb,var(--cream) 14%,transparent)}
+.card--cocktail.v2 .spark{color:var(--red)}
+.card--cocktail.v2 .bar{background:color-mix(in srgb,var(--ink) 22%,transparent);box-shadow:none}
+.card--cocktail.v2 .meta{color:var(--ink)}
+.card--cocktail.v2 .cat{color:var(--muted)}
+.card--cocktail.v2 .spirit{color:var(--ink);border-color:color-mix(in srgb,var(--ink) 30%,transparent)}
+.card--cocktail.v2 .name{color:var(--ink)}
+.card--cocktail.v2 .recipe{color:var(--muted)}
+.card--cocktail.v2 .recipe i{color:var(--red)}
+.card--cocktail.v2 .foot{border-top:2px dashed color-mix(in srgb,var(--ink) 16%,transparent);align-items:center}
+.card--cocktail.v2 .ticket{color:var(--red)}
+.card--cocktail.v2 .more{background:var(--red);color:var(--cream)}
+.card--cocktail.v2:focus-visible{outline-color:var(--cream)}
+.card--cocktail.v2 .sk{--sk-c:var(--cream)}
+/* detay: üst (hero) koyu kalır, bilgi alanı beyaz; fiyat kırmızı bilet */
+.panel[data-kind="cocktail"][data-v2="1"]{background:var(--cream);color:var(--ink)}
+.panel[data-kind="cocktail"][data-v2="1"] .info,.panel[data-kind="cocktail"][data-v2="1"] .info .name{color:var(--ink)}
+.panel[data-kind="cocktail"][data-v2="1"] .info .cat{color:var(--red)}
+.panel[data-kind="cocktail"][data-v2="1"] .ticket{color:var(--red)}
+.panel[data-kind="cocktail"][data-v2="1"] .pair-h{color:var(--muted)}
+.panel[data-kind="cocktail"][data-v2="1"] .spirit-d{border-color:color-mix(in srgb,var(--ink) 30%,transparent)}
+.panel[data-kind="cocktail"][data-v2="1"] .classic-d{color:var(--muted)}
+.panel[data-kind="cocktail"][data-v2="1"] .recipe-d .n{color:var(--red)}
+.panel[data-kind="cocktail"][data-v2="1"] .recipe-d .pour{background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.sheet.pop .panel[data-kind="cocktail"] .price.big{display:none}
+/* yüzde değer bu ızgarada çözülmüyor → hero yüksekliğinden (min(270px,36dvh)) türetilmiş sabit sınır */
+.sheet.pop .panel[data-kind="cocktail"] #hp{max-height:min(214px,28.5dvh);margin-top:0}
+/* kokteyl v2: kemer (fanus) yok → kadeh büyür ve kartın üstünden taşar */
+.card--cocktail.v2 .stage{height:300px;padding-bottom:22px}
+.card--cocktail.v2 .paper{top:120px}
+.card--cocktail.v2 .shade{top:134px}
+.card--cocktail.v2 .prod{max-width:74%;max-height:262px;filter:drop-shadow(0 22px 16px rgba(40,0,8,.38))}
+.card--cocktail.v2 .spark.s1{top:150px}
+.card--cocktail.v2 .spark.s2{top:140px}
+/* ==========================================================
+   TASARIM V2 — ÖNCEKİ / SONRAKİ: kategoriye özel şekil
+   Yazı ve oklar aynı; düğmenin kendisi o kategorinin dünyasından bir nesne.
+   ========================================================== */
+.pn button{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .2s,color .2s,box-shadow .2s,transform .15s}
+.pn button:active{transform:scale(.97)}
+
+/* hamburger: susamlı ekmek — üstü kubbeli altın ekmek, üstünde susamlar */
+.panel[data-kind="burger"] .pn button{border:0;border-radius:30px 30px 14px 14px;color:var(--ink);background:var(--bun);
+  --bun:radial-gradient(ellipse 2.6px 1.6px at 22% 30%,#FFF4D6 98%,transparent),radial-gradient(ellipse 2.6px 1.6px at 41% 18%,#FFF4D6 98%,transparent),
+    radial-gradient(ellipse 2.6px 1.6px at 63% 26%,#FFF4D6 98%,transparent),radial-gradient(ellipse 2.6px 1.6px at 82% 34%,#FFF4D6 98%,transparent),
+    radial-gradient(ellipse 2.6px 1.6px at 12% 52%,#FFF4D6 98%,transparent),radial-gradient(ellipse 2.6px 1.6px at 90% 56%,#FFF4D6 98%,transparent),
+    linear-gradient(180deg,#F4C67B,#D99447);
+  box-shadow:inset 0 -4px 0 rgba(120,60,10,.25),inset 0 2px 0 rgba(255,255,255,.35),0 8px 14px -8px rgba(120,60,10,.6)}
+.panel[data-kind="burger"] .pn button:hover{background:var(--bun);border:0;color:var(--cream);filter:brightness(.82)}
+
+/* paylaşımlık: ahşap servis tahtası — damarlı ahşap, dış uçta asma deliği */
+.panel[data-kind="share"] .pn button{position:relative;border:0;border-radius:14px;color:var(--cream);text-shadow:0 1px 0 rgba(0,0,0,.25);
+  background:repeating-linear-gradient(176deg,rgba(255,255,255,.07) 0 3px,transparent 3px 9px),repeating-linear-gradient(183deg,rgba(60,25,5,.16) 0 1px,transparent 1px 13px),linear-gradient(180deg,#B57A45,#8E5A2E);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.18),0 8px 14px -8px rgba(60,25,5,.6)}
+.panel[data-kind="share"] .pn button::after{content:"";position:absolute;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:var(--cream);box-shadow:inset 0 1px 2px rgba(0,0,0,.45)}
+.panel[data-kind="share"] #prev::after{left:12px}
+.panel[data-kind="share"] #next::after{right:12px}
+.panel[data-kind="share"] .pn button:hover{filter:brightness(.85)}
+
+/* sos: üstünden o sosun renginde sos damlayan düğme */
+.panel[data-kind="sauce"] .pn button{border:2px solid var(--sauce,var(--red));border-radius:14px;color:var(--ink);padding-top:8px;
+  background:radial-gradient(circle at 50% 0,var(--sauce,var(--red)) 5px,transparent 5.5px) 6px 6px/26px 14px repeat-x,
+    radial-gradient(circle at 50% 0,var(--sauce,var(--red)) 3.5px,transparent 4px) 19px 6px/26px 9px repeat-x,
+    linear-gradient(var(--sauce,var(--red)),var(--sauce,var(--red))) top/100% 8px no-repeat,#fff}
+.panel[data-kind="sauce"] .pn button:hover{background-color:color-mix(in srgb,var(--sauce,var(--red)) 18%,#fff)}
+/* kokteyl: koyu bar altlığı — ince krem iç çerçeve */
+.panel[data-kind="cocktail"] .pn button{border:0;border-radius:14px;background:#2A0710;color:var(--cream);
+  box-shadow:inset 0 0 0 4px #2A0710,inset 0 0 0 5px rgba(255,252,236,.4),0 10px 18px -10px rgba(20,0,6,.7)}
+.panel[data-kind="cocktail"] .pn button:hover{background:var(--red);color:var(--cream);box-shadow:inset 0 0 0 4px var(--red),inset 0 0 0 5px rgba(255,252,236,.6),0 10px 18px -10px rgba(228,3,45,.7)}
+
+/* shot: neon tabela */
+.panel[data-kind="shot"] .pn button{border:2px solid color-mix(in srgb,var(--red) 80%,#fff);color:color-mix(in srgb,var(--red) 55%,#fff);background:transparent;
+  box-shadow:0 0 12px color-mix(in srgb,var(--red) 55%,transparent),inset 0 0 10px color-mix(in srgb,var(--red) 35%,transparent);text-shadow:0 0 6px var(--red)}
+.panel[data-kind="shot"] .pn button:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* bira: karton bardak altlığı — kesik çizgili iç halka */
+.panel[data-kind="beer"] .pn button{border:0;background:#F3E3C3;color:var(--ink);
+  box-shadow:inset 0 0 0 5px #F3E3C3,inset 0 0 0 7px transparent,0 8px 16px -10px rgba(40,10,0,.5);outline:2px dashed #C98A1B;outline-offset:-8px}
+.panel[data-kind="beer"] .pn button:hover{background:#E9A93A;color:var(--ink);box-shadow:inset 0 0 0 5px #E9A93A,0 8px 16px -10px rgba(40,10,0,.5)}
+
+/* sert içki: eski şişe etiketi — çift çizgili dikdörtgen */
+.panel[data-kind="spirit"] .pn button{border:0;border-radius:4px;background:var(--cream);color:var(--ink);letter-spacing:.2em;font-size:13px;
+  box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 5px var(--cream),inset 0 0 0 6px var(--ink)}
+.panel[data-kind="spirit"] .pn button:hover{background:var(--ink);color:var(--cream);box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 5px var(--ink),inset 0 0 0 6px var(--cream)}
+
+/* sıcak içecek: kraft karton bardak kılıfı — oluklu doku, üstten geniş */
+.panel[data-kind="hot"] .pn button{border:0;border-radius:6px;color:var(--ink);
+  background:repeating-linear-gradient(90deg,rgba(60,30,5,.09) 0 2px,transparent 2px 6px),#C99C6B;
+  clip-path:polygon(0 0,100% 0,96% 100%,4% 100%);box-shadow:inset 0 3px 0 rgba(255,255,255,.25)}
+.panel[data-kind="hot"] .pn button:hover{background:repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 2px,transparent 2px 6px),#8F6237;color:var(--cream)}
+
+/* soğuk içecek: buzlu cam — buğulu yarı saydam, nane çerçeve */
+.panel[data-kind="soft"] .pn button{border:1.5px solid color-mix(in srgb,var(--mint) 70%,#0f4a44);color:#0f3f3a;
+  background:linear-gradient(180deg,rgba(255,255,255,.85),color-mix(in srgb,var(--mint) 55%,#fff));box-shadow:inset 0 2px 0 #fff,0 8px 16px -10px rgba(15,70,66,.45)}
+.panel[data-kind="soft"] .pn button:hover{background:color-mix(in srgb,var(--mint) 80%,#0f4a44);color:#fff}
+
+/* tatlı: pastane kutusu — pembe-beyaz şerit, altta kırmızı kurdele */
+.panel[data-kind="dessert"] .pn button{border:0;border-radius:8px;color:var(--ink);
+  background:repeating-linear-gradient(90deg,#fff7f4 0 14px,#fdeee9 14px 28px);box-shadow:inset 0 -5px 0 var(--red),inset 0 0 0 1px rgba(29,10,14,.1)}
+.panel[data-kind="dessert"] .pn button:hover{background:var(--red);color:var(--cream);box-shadow:inset 0 -5px 0 color-mix(in srgb,var(--red) 70%,#000)}
