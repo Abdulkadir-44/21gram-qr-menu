@@ -1575,3 +1575,17 @@ img.err+.sk{animation:none}
 /* kokteyl .fit: görselin dört köşesinde eğik 21GRAM logo filigranı (burger kartıyla aynı) */
 .card--cocktail.fit .wm{position:absolute;inset:0;pointer-events:none}
 .card--cocktail.fit .wm i.lg{position:absolute;transform:translate(-50%,-50%) rotate(var(--r));background:var(--red);opacity:.1;-webkit-mask:url(/img/logo.png) center/contain no-repeat;mask:url(/img/logo.png) center/contain no-repeat}
+/* ==========================================================
+   SHOT — kokteyl kartındaki taşma ölçüsü (görsel ~60px taşar, altında ~25px boşluk),
+   fiyat bileti büyük, isim bir tık küçük
+   ========================================================== */
+.card--shot.v2 .stage{height:250px;place-items:center;padding-bottom:0}
+.card--shot.v2 .paper{top:78px}
+.card--shot.v2 .shade{top:92px}
+.card--shot.v2 .prod{max-width:84%;max-height:196px;transform:translateZ(64px)}
+.card--shot.v2 .floor{bottom:12px}
+.card--shot.v2 .sticker{top:96px}
+.card--shot.v2 .name{font-size:clamp(26px,7.6vw,32px)}
+.card--shot.v2 .ticket{height:44px;font-size:27px;padding:0 22px 0 28px}
+.card--shot.v2 .ticket small{font-size:17px}
+.card--shot.v2 .ticket::before{left:15px}
