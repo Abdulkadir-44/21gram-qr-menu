@@ -8,7 +8,7 @@ import FIGS_DATA from './data/figs.json';
 import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 7;
+const IMG_V = 10;
 const menu = await fetch('/menu.json').then(r => r.json());
 
 /* menu.json → referanstaki düz ürün listesi biçimi */

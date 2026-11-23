@@ -110,7 +110,7 @@
        "price": 340,
        "desc": "",
        "img": "truflu-parmesanli-patates-kizartmasi.webp",
-       "w": 470,
+       "w": 447,
        "h": 640
       },
       {
@@ -121,7 +121,7 @@
        "desc": "",
        "img": "tursu-tabagi.webp",
        "w": 640,
-       "h": 603
+       "h": 632
       },
       {
        "id": "patates-kizartmasi",
@@ -130,7 +130,7 @@
        "price": 280,
        "desc": "",
        "img": "patates-kizartmasi.webp",
-       "w": 489,
+       "w": 467,
        "h": 640
       },
       {
@@ -140,7 +140,7 @@
        "price": 320,
        "desc": "tuzlu yoğurt, labne, taze zahter, kuru zahter, lavaş cipsi",
        "img": "zahter-dip.webp",
-       "w": 570,
+       "w": 601,
        "h": 640
       },
       {
@@ -150,7 +150,7 @@
        "price": 320,
        "desc": "",
        "img": "halhali-zeytin.webp",
-       "w": 637,
+       "w": 614,
        "h": 640
       },
       {
@@ -160,7 +160,7 @@
        "price": 520,
        "desc": "altın çıtır tavuk, baş biber mayo, frenk soğan, patates kızartması, baş biber reçeli ile",
        "img": "holy-chick.webp",
-       "w": 493,
+       "w": 492,
        "h": 640
       },
       {
@@ -170,7 +170,7 @@
        "price": 480,
        "desc": "altın çıtır tavuk, patates kızartması",
        "img": "golden-chick.webp",
-       "w": 512,
+       "w": 479,
        "h": 640
       },
       {
@@ -180,8 +180,8 @@
        "price": 240,
        "desc": "",
        "img": "cerez.webp",
-       "w": 640,
-       "h": 638
+       "w": 624,
+       "h": 640
       },
       {
        "id": "elek-alti-fistik",
@@ -190,8 +190,8 @@
        "price": 180,
        "desc": "",
        "img": "elek-alti-fistik.webp",
-       "w": 640,
-       "h": 632
+       "w": 627,
+       "h": 640
       }
      ]
     },
