@@ -27,7 +27,7 @@ function renderList(q = '') {
       const items = c.items.filter(it => !nq || norm(`${it.name} ${it.desc} ${c.name} ${g.name}`).includes(nq));
       if (!items.length) continue;
       gh += `<p class="s-cat"><i style="background:${c.color}"></i>${esc(c.name)}</p>`;
-      gh += items.map(it => `<button class="s-item" type="button" data-id="${it.id}">${it.img ? `<img src="/img/p/${it.img}" alt="" loading="lazy">` : '<span class="s-ph"></span>'}<div><b>${esc(upper(it.name))}${it.size ? ` <small>${esc(it.size)}</small>` : ''}</b>${it.desc ? `<span>${esc(it.desc)}</span>` : ''}</div><em>${money(it.price)}</em></button>`).join('');
+      gh += items.map(it => `<button class="s-item" type="button" data-id="${it.id}">${it.img ? `<img src="/img/new/${it.img}" alt="" loading="lazy">` : '<span class="s-ph"></span>'}<div><b>${esc(upper(it.name))}${it.size ? ` <small>${esc(it.size)}</small>` : ''}</b>${it.desc ? `<span>${esc(it.desc)}</span>` : ''}</div><em>${money(it.price)}</em></button>`).join('');
     }
     if (gh) { any = true; html += `<h2 class="s-group">${esc(g.name)}</h2>` + gh; }
   }

@@ -1,5 +1,5 @@
 import sharp from 'sharp'; import fs from 'node:fs';
-const C = 'scripts/.cache/', OUT = 'public/img/p/';
+const C = 'scripts/.cache/', OUT = 'public/img/new/';
 fs.mkdirSync(OUT, { recursive: true });
 const downloads = JSON.parse(fs.readFileSync(C + 'downloads.json', 'utf8'));
 const STRICT = { 'americano': 251, 'filtre-kahve': 251, 'ozerhisar-ayran': 251, 'churchill': 251 };

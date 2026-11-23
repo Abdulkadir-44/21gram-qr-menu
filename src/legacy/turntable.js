@@ -128,7 +128,7 @@ export function createTurntables(stage, menu, loader) {
         w = asp >= 1 ? max * 1.08 : max * asp; h = asp >= 1 ? (max * 1.08) / asp : max;
         prod = new THREE.Mesh(quad, new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.02, depthWrite: true, fog: true, toneMapped: false, opacity: 1 }));
         prod.scale.set(w, h, 1); prod.position.y = h / 2 - 0.1;
-        prod.userData.url = '/img/p/' + it.img;
+        prod.userData.url = '/img/new/' + it.img;
         bill.add(prod);
         csh.scale.set(w * 0.9, 0.55, 1);
       } else if (cat.key === 'soslar') {

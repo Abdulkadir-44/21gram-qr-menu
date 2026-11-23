@@ -8,7 +8,7 @@ import FIGS_DATA from './data/figs.json';
 import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 6;
+const IMG_V = 7;
 const menu = await fetch('/menu.json').then(r => r.json());
 
 /* menu.json → referanstaki düz ürün listesi biçimi */
@@ -21,7 +21,7 @@ const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-koktey
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
-  img: it.img ? '/img/p/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
+  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
