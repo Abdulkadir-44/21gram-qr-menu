@@ -199,12 +199,18 @@ function initGL(){
     var GK=['yiyecek','alkollu-icecek','icecek'],GI={'yiyecek':0,'alkollu-icecek':1,'icecek':2};
     var FIGSETS=[['burger','fries','dancerA','burger','fries','dancerB'],['cocktail','beer','dj','guitar','cocktail','runner'],['cup','iced','dancerB','cup','iced','dancerA']];
     var figTex={};
+    /* AÇILIŞI RAHATLATMA — figür dokuları (SVG → 512px tuval → GPU) tek karede değil, sırayla ve
+       tarayıcı boş kaldıkça hazırlanır; ucuz telefonlarda ilk saniyedeki takılmayı önler. */
+    var texQueue=[],texBusy=false;
+    var idle=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:120})}:function(f){setTimeout(f,16)};
+    function texQ(job){texQueue.push(job);if(!texBusy){texBusy=true;idle(texRun)}}
+    function texRun(){var job=texQueue.shift();if(job)job();if(texQueue.length)idle(texRun);else texBusy=false}
     function figTexture(name){
       if(figTex[name])return figTex[name];
       var cv=document.createElement('canvas');cv.width=cv.height=512;
       var tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=2;
       var im=new Image();
-      im.onload=function(){cv.getContext('2d').drawImage(im,0,0,512,512);tx.needsUpdate=true};
+      im.onload=function(){texQ(function(){cv.getContext('2d').drawImage(im,0,0,512,512);tx.needsUpdate=true})};
       im.src='data:image/svg+xml;base64,'+btoa(FIGS[name]||ARMY_SVG[name]);
       figTex[name]=tx;return tx;
     }
