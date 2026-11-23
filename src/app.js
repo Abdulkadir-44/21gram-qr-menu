@@ -647,13 +647,22 @@ function mocktailSVG(col){
    +'<circle cx="30" cy="46" r="15" class="garnish"/><circle cx="30" cy="46" r="10" class="garnish-in"/>'
    +'</svg>';
 }
+/* tüm soğuk içeceklerde ürünün üstüne ve yanına kar yağar (.snow) */
+/* KAR — her tane ayrı: rastgele yer, boy, hız, gecikme, yana kayma ve dönüş (ürün kimliğinden tohumlu, kartlar farklı yağar) */
+function snowHTML(p){
+  var h=0;for(var k=0;k<p.id.length;k++)h=(h*31+p.id.charCodeAt(k))>>>0;
+  var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296},out='';
+  for(var n=0;n<7;n++){var d=6+rnd()*6;
+    out+='<i style="--x:'+(4+rnd()*88).toFixed(1)+'%;--s:'+(7+rnd()*8).toFixed(1)+'px;--d:'+d.toFixed(1)+'s;--dl:'+(-rnd()*d).toFixed(1)+'s;--dx:'+(rnd()*40-20).toFixed(0)+'px;--r:'+(rnd()<.5?-1:1)*(90+rnd()*180|0)+'deg"></i>'}
+  return '<span class="snow" aria-hidden="true">'+out+'</span>';
+}
 function softCardHTML(p,i){
   var type=softType(p),mock=!p.img;
   var vis=mock?mocktailSVG(liquidColor(p)):prodHTML(p);
   var desc=p.desc?p.desc.replace(/^[^(]*\(|\)\s*$/g,''):'';
   return cardOpen(p,i,'card--soft'+(mock?' card--mock':''))
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
-   +'<div class="stage"><span class="frost" aria-hidden="true"></span>'+vis+'</div>'
+   +'<div class="stage"><span class="frost" aria-hidden="true"></span>'+vis+snowHTML(p)+'</div>'
    +'<div class="meta"><p class="cat">'+esc(type)+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +(desc?'<p class="desc">'+esc(desc)+'</p>':'')
@@ -683,7 +692,7 @@ function hotCardHTML(p,i){
   return cardOpen(p,i,'card--hot')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div><span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span></div>'
    +'<div class="stage">'+steam+(p.img?prodHTML(p):cupSVG())
-   +'<span class="stamp" aria-hidden="true"><b>TAZE</b><span>DEMLEME</span></span></div>'
+   +'</div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
@@ -1351,6 +1360,13 @@ function classicCardHTML(p,i){
    +'</div></div></article>';
 }
 var cards=[],io=null;
+/* fotoğrafsız soğuk içecekler (Yok Yaa, Yok Öyle) listede birlikte, bölümün sonunda ve tek bir .mock-pair kutusunda:
+   mobilde alt alta, geniş ekranda yan yana */
+function pairMocks(items){
+  var mocks=items.filter(function(p){return p.kind==='soft'&&!p.img});
+  if(mocks.length<2)return items;
+  return items.filter(function(p){return mocks.indexOf(p)<0}).concat(mocks); /* bölümün sonunda */
+}
 function render(opts){
   opts=opts||{};
   var g=GROUPS.find(function(x){return x.key===state.group});
@@ -1366,7 +1382,14 @@ function render(opts){
     listTitle.textContent=g.name;
     g.cats.forEach(function(c){
       if(c.items.length>1)html+='<h3 class="cat-title" data-cat="'+c.key+'">'+esc(c.name)+'</h3>';
-      c.items.forEach(function(p){list.push(p);html+=cardHTML(p,i++)});
+      var pm=pairMocks(c.items),inPair=false;
+      pm.forEach(function(p,k){
+        var mock=p.kind==='soft'&&!p.img&&pm.filter(function(x){return x.kind==='soft'&&!x.img}).length>1;
+        if(mock&&!inPair){html+='<div class="mock-pair">';inPair=true}
+        if(!mock&&inPair){html+='</div>';inPair=false}
+        list.push(p);html+=cardHTML(p,i++);
+      });
+      if(inPair)html+='</div>';
       var ch=document.createElement('button');ch.type='button';ch.className='chip';ch.textContent=c.name;ch.dataset.cat=c.key;chipsEl.appendChild(ch);
     });
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});

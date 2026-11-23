@@ -247,7 +247,10 @@
        "name": "TİRAMİSU",
        "size": "",
        "price": 420,
-       "desc": ""
+       "desc": "",
+       "img": "tiramisu.webp",
+       "w": 640,
+       "h": 476
       }
      ]
     }
@@ -799,7 +802,10 @@
        "name": "Double Espresso",
        "size": "",
        "price": 220,
-       "desc": ""
+       "desc": "",
+       "img": "double-espresso.webp",
+       "w": 640,
+       "h": 382
       },
       {
        "id": "filtre-kahve",
