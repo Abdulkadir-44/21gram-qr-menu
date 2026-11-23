@@ -68,8 +68,8 @@ PRODUCTS.forEach(function(p){
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
 /* TASARIM V2 — burger, paylaşımlık, sos ve kokteyl kartları */
 function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'}
-/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı */
-function isPop(p){return isV2(p)||p.kind==='dessert'}
+/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı + bira */
+function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.

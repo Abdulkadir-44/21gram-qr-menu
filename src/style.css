@@ -1313,3 +1313,7 @@ img.err+.sk{animation:none}
 .beer-d.v2 .lbl.tot::before{left:auto;right:0}
 .sheet.open .beer-d.v2 .lbl.tot{animation-name:lblInL}
 @keyframes lblInL{from{opacity:0;translate:8px 0}}
+/* BİRA: pop-up — görsel hero'ya sığsın (yüzde sınır bu ızgarada çözülmüyor → sabit), bardak ve etiketler dar panele sığsın */
+.sheet.pop .panel[data-kind="beer"] #hp{max-height:min(214px,28.5dvh)}
+.sheet.pop .pint2.big{width:min(34vw,132px)}
+.sheet.pop .beer-d.v2 .pint-wrap{margin:0 78px}
