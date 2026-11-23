@@ -1535,3 +1535,8 @@ img.err+.sk{animation:none}
     repeating-linear-gradient(0deg,color-mix(in srgb,var(--red) 20%,transparent) 0 11px,transparent 11px 22px),
     repeating-linear-gradient(90deg,color-mix(in srgb,var(--red) 20%,transparent) 0 11px,transparent 11px 22px);
   -webkit-mask:linear-gradient(#000 30%,transparent);mask:linear-gradient(#000 30%,transparent)}
+/* hamburger + paylaşımlık detayı: isim bir tık küçük, fiyat bileti bir tık büyük */
+.panel[data-kind="burger"] .info .name,.panel[data-kind="share"] .info .name{font-size:clamp(32px,9vw,42px);line-height:.92}
+.panel[data-kind="burger"] #sName .ticket,.panel[data-kind="share"] #sName .ticket{height:42px;font-size:25px;padding:0 22px 0 27px;margin-top:2px}
+.panel[data-kind="burger"] #sName .ticket small,.panel[data-kind="share"] #sName .ticket small{font-size:16px}
+.panel[data-kind="burger"] #sName .ticket::before,.panel[data-kind="share"] #sName .ticket::before{left:14px}
