@@ -9,7 +9,8 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 10;
-const menu = await fetch('/menu.json').then(r => r.json());
+/* menü verisi pakete gömülü (ayrı istek ve bekleme yok); public/menu.json değişince build yeniden alır */
+import menu from '../public/menu.json';
 
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
@@ -161,7 +162,7 @@ var scrolled=0;
 
 /* ============ 3D SAHNE ============ */
 var gl={ok:false};
-(function initGL(){
+function initGL(){
   try{
     var canvas=$('#gl');
     var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -512,6 +513,33 @@ var gl={ok:false};
     requestAnimationFrame(function loop(now){requestAnimationFrame(loop);tick(now,.016)});
     if(window.console)console.warn('WebGL kapalı, düz görünüme geçildi',e);
   }
+}
+/* 3D MOTORU BEKLENMEZ — three.js "async" iner. O gelene kadar:
+   · karşılama ekranında düz 21GRAM logosu görünür (html.gl-wait), "Menüyü aç" hemen çalışır
+   · geçişleri yürüten döngü (tick) yedek döngüde döner
+   three.js gelince 3D sahne kurulur, o anki duruma (karşılama/menü, grup, detay açık mı) eşitlenir
+   ve düz logo yerini 3D logoya yumuşakça bırakır. */
+var fbLoop=0;
+function fallbackLoop(now){fbLoop=requestAnimationFrame(fallbackLoop);tick(now,.016)}
+function startGL(){
+  if(gl.started)return;gl.started=true;
+  cancelAnimationFrame(fbLoop);
+  var H=document.documentElement;
+  if(!window.THREE){H.classList.remove('gl-wait');H.classList.add('no-gl');requestAnimationFrame(fallbackLoop);return}
+  initGL();
+  if(gl.ok){
+    gl.setP(Pv);gl.setGroup(groupColor(state.group),state.group);gl.render=!state.sheetId;
+    H.classList.add('gl-in');setTimeout(function(){H.classList.remove('gl-wait','gl-in')},700);
+  }else H.classList.remove('gl-wait');
+}
+(function bootGL(){
+  if(window.THREE){startGL();return}
+  document.documentElement.classList.add('gl-wait');
+  fbLoop=requestAnimationFrame(fallbackLoop);
+  var sc=document.getElementById('threeJs');
+  if(!sc){startGL();return}
+  sc.addEventListener('load',startGL);
+  sc.addEventListener('error',startGL);
 })();
 
 /* ============ GEÇİŞ (karşılama ⇄ menü) ============ */

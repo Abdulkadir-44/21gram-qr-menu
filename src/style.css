@@ -1664,3 +1664,10 @@ img.err+.sk{animation:none}
 html[data-group="icecek"] .mock-pair{grid-column:1 / -1;width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:26px 20px;justify-content:center}
 html[data-group="icecek"] .mock-pair .card--mock{grid-column:auto;width:100%}
 @media(min-width:700px){html[data-group="icecek"] .mock-pair{grid-template-columns:repeat(2,minmax(0,440px))}}
+
+/* 3D motoru gelene kadar: düz logo 3D logonun yerinde; gelince düz logo söner, 3D tuval belirir */
+html.gl-wait .fb-logo{display:block;position:absolute;left:0;right:0;top:34%;width:min(70vw,520px);margin:-6vh auto 0;animation:none;transition:opacity .6s}
+html.gl-wait #gl{opacity:0}
+#gl{transition:opacity .6s}
+html.gl-in .fb-logo{opacity:0}
+html.gl-in #gl{opacity:1}
