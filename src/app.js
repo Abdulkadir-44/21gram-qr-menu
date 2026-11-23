@@ -1395,13 +1395,26 @@ function render(opts){
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
   state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
-  grid.innerHTML=html;armImgs(grid);layoutCards(grid);
+  /* LAZY LOADING — yalnız ilk 3 kartın görseli hemen (öncelikli) iner; diğerleri data-src'de bekler,
+     kart ekrana ~1 ekran yaklaşınca lazyIO ile yüklenir (yükleme silüeti .sk o sırada görünür) */
+  var nImg=0;
+  html=html.replace(/<img class="prod" src="/g,function(){return nImg++<3?'<img class="prod" fetchpriority="high" decoding="async" src="':'<img class="prod" decoding="async" data-src="'});
+  grid.innerHTML=html;armImgs(grid);layoutCards(grid);armLazy(grid);
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
   if(gl.setGroup)gl.setGroup(hex,state.group);
   var tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.content=hex;
   collectCards();moveInd();
   if(opts.deal!==false)dealCards();
+}
+var lazyIO=null;
+function loadLazy(el){[].forEach.call(el.querySelectorAll('img[data-src]'),function(im){im._t0=performance.now();im.src=im.getAttribute('data-src');im.removeAttribute('data-src')})}
+function armLazy(root){
+  if(lazyIO)lazyIO.disconnect();
+  var imgs=root.querySelectorAll('img[data-src]');if(!imgs.length)return;
+  if(!('IntersectionObserver' in window)){loadLazy(root);return}
+  lazyIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){loadLazy(e.target);lazyIO.unobserve(e.target)}})},{rootMargin:'600px 0px'});
+  [].forEach.call(root.querySelectorAll('.card'),function(c){if(c.querySelector('img[data-src]'))lazyIO.observe(c)});
 }
 function collectCards(){
   if(io)io.disconnect();
