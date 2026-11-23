@@ -68,8 +68,8 @@ PRODUCTS.forEach(function(p){
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
 /* TASARIM V2 — burger, paylaşımlık, sos, kokteyl ve shot kartları */
 function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'||p.kind==='shot'}
-/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı + bira + yüksek alkol */
-function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'||p.kind==='spirit'}
+/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı, bira, yüksek alkol, soğuk ve sıcak içecek */
+function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'||p.kind==='spirit'||p.kind==='soft'||p.kind==='hot'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
@@ -502,12 +502,11 @@ function softCardHTML(p,i){
   var desc=p.desc?p.desc.replace(/^[^(]*\(|\)\s*$/g,''):'';
   return cardOpen(p,i,'card--soft'+(mock?' card--mock':''))
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
-   +'<p class="chill" aria-hidden="true">'+SNOW+'<span>SOĞUK</span><b>4°C</b></p>'
-   +'<div class="stage"><span class="frost" aria-hidden="true"></span>'+vis+'<span class="rack" aria-hidden="true"></span></div>'
+   +'<div class="stage"><span class="frost" aria-hidden="true"></span>'+vis+'</div>'
    +'<div class="meta"><p class="cat">'+esc(type)+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +(desc?'<p class="desc">'+esc(desc)+'</p>':'')
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -536,7 +535,7 @@ function hotCardHTML(p,i){
    +'<span class="stamp" aria-hidden="true"><b>TAZE</b><span>DEMLEME</span></span></div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -766,8 +765,7 @@ var DETAIL={
     hero:function(p){
       var d='';for(var k=0;k<9;k++)d+='<i style="--d:'+k+'"></i>';
       return '<span class="d-frost"></span><span class="d-halo"></span><span class="d-drops">'+d+'</span>'
-        +'<span class="d-cube c1"></span><span class="d-cube c2"></span><span class="d-cube c3"></span>'
-        +'<span class="d-chill">'+SNOW+'<span>SOĞUK</span><b>4°C</b></span>';
+        +'<span class="d-cube c1"></span><span class="d-cube c2"></span><span class="d-cube c3"></span>';
     },
     art:function(p){return mocktailSVG(liquidColor(p))},
     extra:function(p){
@@ -777,9 +775,6 @@ var DETAIL={
         return '<li style="--k:'+k+';--c:'+partCol(x)+'"><i aria-hidden="true"></i>'+esc(x)+'</li>'}).join('')+'</ul></div>';
       h+='<div class="therm-d"><p class="pair-h"><span>SERVİS SICAKLIĞI</span><b>4°C</b></p><div class="tbar"><span class="cold"></span>'
         +[0,4,8,12,16,20].map(function(t){return '<span class="tk" style="left:'+(t*5)+'%"><i>'+t+'°</i></span>'}).join('')+'</div></div>';
-      var pick=/KAHVE/.test(type)?PRODUCTS.filter(function(x){return x.kind==='dessert'})
-        :PRODUCTS.filter(function(x,i,a){return x.kind==='burger'&&a.findIndex(function(y){return y.catKey===x.catKey})===i});
-      if(pick.length)h+='<div class="pair"><p class="pair-h">'+(/KAHVE/.test(type)?'YANINA TATLI?':'YANINA İYİ GİDER')+'</p><div class="pair-l">'+pick.slice(0,2).map(goChip).join('')+'</div></div>';
       return h;
     }
   },
@@ -799,8 +794,6 @@ var DETAIL={
       var h='<p class="brew-d"><span>YÖNTEM</span>'+esc(b.m)+'</p>'
         +'<div class="str-d"><p class="pair-h">YOĞUNLUK</p><div class="beans" aria-label="Yoğunluk 5 üzerinden '+b.s+'">'+beans+'</div></div>'
         +(b.sugar?sugarHTML():'');
-      var ds=PRODUCTS.filter(function(x){return x.kind==='dessert'});
-      if(ds.length)h+='<div class="pair"><p class="pair-h">YANINA TATLI?</p><div class="pair-l">'+ds.map(goChip).join('')+'</div></div>';
       return h;
     }
   },
@@ -1033,7 +1026,7 @@ function cocktailCardHTML(p,i){
    +(v2?'':'<svg class="arc-title" viewBox="0 0 300 120" aria-hidden="true"><text><textPath href="#cocktailArc" startOffset="50%" text-anchor="middle">'+esc(p.category.toLocaleUpperCase('tr'))+'</textPath></text></svg>')
    +'<span class="spark s1" aria-hidden="true">✦</span><span class="spark s2" aria-hidden="true">✦</span>'
    +vis+(v2?'':'<span class="bar" aria-hidden="true"></span>')+'</div>'
-   +'<div class="meta"><p class="cat"><span class="no">No.'+String(p.no).padStart(2,'0')+'</span>'+(sp?'<span class="spirit">'+esc(sp)+'</span>':'')+'</p>'
+   +'<div class="meta"><p class="cat">'+(sp?'<span class="spirit">'+esc(sp)+'</span>':'')+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +'<p class="recipe">'+recipe+'</p>'
    +'<div class="foot">'+(v2?ticketHTML(p):'<span class="price">'+money(p.price)+'</span>')+'<span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
@@ -1212,6 +1205,8 @@ function fillSheet(p){
   $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
+  /* içecek: fiyat isim yanında değil, aşağıdaki fiyat satırında bilet olarak */
+  if(p.kind==='soft'||p.kind==='hot')$('#sPrice').innerHTML=ticketHTML(p);
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
   $('#panel').style.setProperty('--hero',heroC);
   $('#panel').dataset.light=/^#[0-9a-f]{6}$/i.test(heroC)&&isLight(heroC)?'1':'';

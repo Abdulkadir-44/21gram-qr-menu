@@ -34,7 +34,7 @@
   /* menü gruplarının arka plan renkleri (--g-<grup anahtarı>) */
   --g-yiyecek:#E4032D;
   --g-alkollu-icecek:#7B0A1F;
-  --g-icecek:#0F6E68;
+  --g-icecek:#C8362A;      /* içecek: mercan-kırmızı (yiyeceğin saf kırmızısı ile alkollünün bordosundan ayrışır) */
 
   /* detay penceresinde ürün arka planı (--hero-<kart türü>) */
   --hero-burger:var(--mustard);
@@ -42,7 +42,7 @@
   --hero-beer:var(--wine);
   --hero-spirit:#2A0910;    /* kan bordosu / mahzen */
   --hero-shot:#14060A;
-  --hero-soft:var(--mint);
+  --hero-soft:#F7D3CC;     /* soğuk içecek detayı: açık mercan (turkuaz/nane yerine) */
   --hero-hot:var(--sand);
   --hero-share:var(--red);
   --hero-sauce:var(--sand);
