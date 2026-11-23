@@ -68,6 +68,8 @@ PRODUCTS.forEach(function(p){
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
 /* TASARIM V2 — burger, paylaşımlık ve sos kartları */
 function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'}
+/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı */
+function isPop(p){return isV2(p)||p.kind==='dessert'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
@@ -1156,7 +1158,7 @@ function fillSheet(p){
   var D=DETAIL[p.kind];
   $('#panel').dataset.kind=D?p.kind:'';
   $('#panel').dataset.v2=isV2(p)?'1':'';
-  sheet.classList.toggle('pop',isV2(p));
+  sheet.classList.toggle('pop',isPop(p));
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
   $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';
   $('.info').scrollTop=0;
@@ -1219,7 +1221,7 @@ function openSheet(id,fromEl,fromHash){
   lastFocus=fromEl||document.activeElement;
   $('#panel').getAnimations().forEach(function(a){a.cancel()});
   if(popCard){popCard.style.visibility='';popCard=null}
-  var r0=null,pop=isV2(p)&&!RM&&fromEl&&fromEl.classList.contains('card');
+  var r0=null,pop=isPop(p)&&!RM&&fromEl&&fromEl.classList.contains('card');
   if(fromEl&&!pop){var im=fromEl.querySelector('.prod,.ph,.ramekin,.slice');if(im)r0=im.getBoundingClientRect()}
   state.sheetId=id;fillSheet(p);
   sheet.classList.add('open');document.documentElement.classList.add('lock');

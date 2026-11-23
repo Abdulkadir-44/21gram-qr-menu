@@ -1121,3 +1121,7 @@ img.err+.sk{animation:none}
 /* pop-up: fiyat adın yanında bilet → büyük fiyat satırı gizli; kâse hero'ya sığsın */
 .sheet.pop .panel[data-kind="sauce"] .price.big{display:none}
 .sheet.pop .panel[data-kind="sauce"] #hp.art{width:min(52vw,230px)}
+/* TATLI: pop-up — dilim hero'ya sığsın; kutu kapağı ve dilim, kart dönüşü bittikten sonra oynasın */
+.sheet.pop .panel[data-kind="dessert"] #hp.art{width:min(56vw,250px)}
+.sheet.pop.open .d-lid{animation-delay:.75s}
+.sheet.pop.open .panel[data-kind="dessert"] #hp.art{animation-delay:1.1s}
