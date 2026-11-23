@@ -66,8 +66,8 @@ PRODUCTS.forEach(function(p){
   c.items.push(p);
 });
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
-/* TASARIM V2 — burger, paylaşımlık, sos ve kokteyl kartları */
-function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'}
+/* TASARIM V2 — burger, paylaşımlık, sos, kokteyl ve shot kartları */
+function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'||p.kind==='shot'}
 /* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı + bira + yüksek alkol */
 function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'||p.kind==='spirit'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
@@ -854,7 +854,8 @@ var DETAIL={
     hero:function(p){return '<span class="d-neon"></span><span class="d-floor"></span><span class="d-sticker">SHOT!</span>'},
     extra:function(p){
       ROUND.n=1;var sp=spiritOf(p).replace(' BAZLI','');
-      return (sp?'<p class="spirit-d neon">'+esc(sp)+'</p>':'')+roundHTML(p);
+      /* v2: kaç shot sayacı yok; fiyat bileti isim yerine bu satırda (isim sıkışmasın) */
+      return '<div class="shot-row">'+(sp?'<p class="spirit-d neon">'+esc(sp)+'</p>':'<span></span>')+ticketHTML(p)+'</div>';
     }
   },
   share:{
@@ -1007,13 +1008,13 @@ function spiritCardV1(p,i){
 function shotCardHTML(p,i){
   var sp=spiritOf(p).replace(' BAZLI','');
   var nm=p.name.replace(/\s*shot$/i,'');
-  return cardOpen(p,i,'card--shot')
+  return cardOpen(p,i,'card--shot v2')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
    +'<div class="stage"><span class="floor" aria-hidden="true"></span>'+prodHTML(p)
    +'<span class="sticker" aria-hidden="true">SHOT!</span></div>'
-   +'<div class="meta"><p class="cat"><span class="no">'+noHTML(p)+'</span>'+(sp?'<span class="type">'+esc(sp)+'</span>':'')+'</p>'
+   +'<div class="meta">'+(sp?'<p class="cat"><span class="type">'+esc(sp)+'</span></p>':'')
    +'<h3 class="name">'+esc(nm)+'</h3>'
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 /* ——— KOKTEYL KARTI: "gece barı" ———
@@ -1208,7 +1209,7 @@ function fillSheet(p){
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
-  $('#sName').innerHTML=(isV2(p)||p.kind==='spirit')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
+  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);

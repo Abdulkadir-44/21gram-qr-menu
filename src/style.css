@@ -1353,3 +1353,37 @@ img.err+.sk{animation:none}
 .panel[data-kind="spirit"] .info .name .ticket{color:var(--red);height:34px;font-size:19px}
 .panel[data-kind="spirit"] .price.big{display:none}
 .panel[data-kind="spirit"] .info .name .ticket small{display:inline}
+/* ==========================================================
+   TASARIM V2 — SHOT: beyaz kart, neon çerçeve sürer, shot bardağı karttan taşar,
+   No. yok, fiyat bilet; detay pop-up
+   ========================================================== */
+.card--shot.v2 .paper{top:104px;background:var(--cream)}
+.card--shot.v2 .shade{top:118px;background:rgba(10,0,4,.5)}
+.card--shot.v2 .sheen{mix-blend-mode:soft-light;opacity:var(--so,0)}
+.card--shot.v2 .stage{height:262px;padding-bottom:30px}
+.card--shot.v2 .prod{max-height:226px;max-width:62%;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--red) 45%,transparent)) drop-shadow(0 16px 12px rgba(40,0,8,.3))}
+.card--shot.v2 .floor{bottom:18px}
+.card--shot.v2 .sticker{top:124px;right:24px}
+.card--shot.v2 .meta{color:var(--ink)}
+.card--shot.v2 .cat{margin-top:4px}
+.card--shot.v2 .type{color:var(--red);border-color:var(--red);background:#fff;text-shadow:none}
+.card--shot.v2 .name{color:var(--ink);text-shadow:0 0 16px color-mix(in srgb,var(--red) 40%,transparent)}
+.card--shot.v2 .foot{border-top-color:color-mix(in srgb,var(--ink) 16%,transparent);align-items:center}
+.card--shot.v2 .ticket{color:var(--red)}
+.card--shot.v2 .sk{--sk-c:var(--ink)}
+/* detay: pop-up — görsel hero'ya sığsın, fiyat adın yanında bilet olduğundan büyük fiyat satırı gizli */
+.sheet.pop .panel[data-kind="shot"] #hp{max-height:min(200px,26dvh)}
+.sheet.pop .panel[data-kind="shot"] .price.big{display:none}
+.panel[data-kind="shot"] .ticket{color:var(--red)}
+/* shot detayı: bilgi alanı beyaz (üstteki görsel alanı koyu neon kalır) */
+.panel[data-kind="shot"][data-v2="1"]{background:var(--cream);color:var(--ink)}
+.panel[data-kind="shot"][data-v2="1"] .info,.panel[data-kind="shot"][data-v2="1"] .info .name{color:var(--ink)}
+.panel[data-kind="shot"][data-v2="1"] .info .cat{color:var(--red)}
+.panel[data-kind="shot"][data-v2="1"] .spirit-d.neon{color:var(--red);background:#fff;text-shadow:none}
+.panel[data-kind="shot"][data-v2="1"] .pn button{color:var(--red);text-shadow:none;background:#fff}
+.panel[data-kind="shot"][data-v2="1"] .pn button:hover{background:var(--red);color:#fff}
+/* shot detayı: içki türü solda, fiyat bileti sağda — isim tüm genişliği kullanır */
+.shot-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.shot-row .spirit-d{margin-top:0}
+.shot-row .ticket{height:38px;font-size:22px;padding:0 20px 0 24px}
+.shot-row .ticket small{font-size:14px}
