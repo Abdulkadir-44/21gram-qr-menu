@@ -86,15 +86,30 @@ function layoutWM(root){
     var id=wm.dataset.seed,h=0;for(var k=0;k<id.length;k++)h=(h*31+id.charCodeAt(k))>>>0;
     var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296};
     var hit=function(a,b){return a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h};
-    wm.innerHTML='';var placed=0;
-    var size=function(fs,rot){var rr=rot*Math.PI/180,tw=fs*6.4,th=fs;
+    wm.innerHTML='';var placed=0,logo=!!card.closest('.fit');
+    var size=function(fs,rot){var rr=rot*Math.PI/180,tw=fs*(logo?7.2:6.4),th=logo?tw*105/500:fs;
       return {w:tw*Math.abs(Math.cos(rr))+th*Math.abs(Math.sin(rr)),h:tw*Math.abs(Math.sin(rr))+th*Math.abs(Math.cos(rr))}};
     var put=function(cx,cy,fs,rot){var z=size(fs,rot),b={x:cx-z.w/2,y:cy-z.h/2,w:z.w,h:z.h};
       if(obs.some(function(o){return hit(b,o)}))return false;
       obs.push({x:b.x-14,y:b.y-14,w:b.w+28,h:b.h+28});
-      var i=document.createElement('i');i.textContent='21GRAM';
-      i.style.cssText='left:'+cx.toFixed(1)+'px;top:'+cy.toFixed(1)+'px;--r:'+rot+'deg;--s:'+fs+'px';
+      var i=document.createElement('i');
+      if(logo){i.className='lg';i.style.cssText='left:'+cx.toFixed(1)+'px;top:'+cy.toFixed(1)+'px;--r:'+rot+'deg;width:'+(fs*7.2).toFixed(1)+'px;height:'+(fs*7.2*105/500).toFixed(1)+'px'}
+      else{i.textContent='21GRAM';i.style.cssText='left:'+cx.toFixed(1)+'px;top:'+cy.toFixed(1)+'px;--r:'+rot+'deg;--s:'+fs+'px'}
       wm.appendChild(i);placed++;return true};
+    /* logo modu: rastgele değil, görselin dört köşesinde birer eğik logo
+       (sol üst, sağ üst, sol alt, sağ alt); eğim ±10–25° ürün kimliğinden tohumlanır */
+    if(logo){
+      var im=card.querySelector('.prod,.ph');if(!im)return;
+      var I=boxIn(im,card),ix=I.x-P.x,iy=I.y-P.y,top=Math.max(20,iy),bot=Math.min(H-40,iy+I.h);
+      var L=7.2*10,T=L*105/500,cx=function(x){return Math.max(L*.42,Math.min(W-L*.42,x))};
+      var ang=function(sg){return Math.round(sg*(10+rnd()*15))};
+      [[cx(ix+14),top+6,ang(-1)],[cx(ix+I.w-14),top+12,ang(1)],[cx(ix+18),bot-12,ang(1)],[cx(ix+I.w-18),bot-6,ang(-1)]].forEach(function(q){
+        var e=document.createElement('i');e.className='lg';
+        e.style.cssText='left:'+q[0].toFixed(1)+'px;top:'+q[1].toFixed(1)+'px;--r:'+q[2]+'deg;width:'+L.toFixed(1)+'px;height:'+T.toFixed(1)+'px';
+        wm.appendChild(e);
+      });
+      return;
+    }
     /* alt satırın ortası ("3D gör" ile ok düğmesi arası) sabit bir yer */
     var cta=card.querySelector('.cta'),mo=card.querySelector('.more');
     if(cta&&mo&&!card.querySelector('.mascot-lane')){ /* maskotun yürüdüğü satıra filigran koyma */var a=boxIn(cta,card),m=boxIn(mo,card);
@@ -105,8 +120,36 @@ function layoutWM(root){
     }
   });
 }
-var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTimeout(function(){layoutWM(grid)},150)});
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutWM(grid)});
+/* İÇİNDEKİLER 2 SATIR — tüm malzemeler çizilir, ölçülür; 3. satıra taşanlar gizlenir ve
+   2. satırın sonuna "+N" eklenir ("+N" sığmazsa bir malzeme daha gizlenir). */
+/* liste boyutu herhangi bir nedenle değişirse (yazı tipi geç yüklendi, ekran döndü…) yeniden kırp */
+var layersRO=window.ResizeObserver?new ResizeObserver(function(es){es.forEach(function(e){fitOne(e.target)})}):null,lastW=new WeakMap();
+function fitLayers(root){
+  [].forEach.call(root.querySelectorAll('.layers[data-max2]'),function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}fitOne(ul)});
+}
+function fitOne(ul){
+  (function(ul){
+    if(!ul.offsetWidth)return;
+    var lis=[].slice.call(ul.querySelectorAll('li:not(.more-l)')),more=ul.querySelector('.more-l');
+    if(more)more.remove();
+    lis.forEach(function(li){li.hidden=false});
+    var rowTops=[];lis.forEach(function(li){var t=li.offsetTop;if(rowTops.indexOf(t)<0)rowTops.push(t)});
+    if(rowTops.length<=2)return;
+    rowTops.sort(function(a,b){return a-b});
+    var cut=lis.findIndex(function(li){return li.offsetTop>rowTops[1]});
+    var m=document.createElement('li');m.className='more-l';ul.appendChild(m);
+    for(var k=cut;k>0;k--){
+      lis.forEach(function(li,j){li.hidden=j>=k});
+      m.textContent='+'+(lis.length-k);
+      if(m.offsetTop<=rowTops[1])break;
+    }
+  })(ul);
+}
+function layoutCards(root){fitLayers(root);layoutWM(root)}
+var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTimeout(function(){layoutCards(grid)},150)});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutCards(grid)});
+/* yazı tipi menü çizildikten sonra yüklenirse etiket genişlikleri değişir → yeniden ölç */
+if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',function(){layoutCards(grid)});
 
 /* ——— durum ——— */
 var state={mode:'welcome',group:GROUPS[0].key,q:'',order:[],sheetId:null,pushed:false};
@@ -1165,8 +1208,9 @@ function ingrHTML(parts){
 }
 function ticketHTML(p){return '<span class="ticket" aria-hidden="true"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'}
 /* KART MASKOTU — küçük Burger Adam: '3D GÖR'ün üstünden belirir, oka yürür, 'bas!' der, geri döner.
-   Şimdilik yalnızca ilk burger kartında (deneme). CSS ile oynar; kart ekranda değilse durur. */
-var MASCOT_ID=(PRODUCTS.find(function(p){return p.kind==='burger'})||{}).id;
+   Tüm burger kartlarında, kartlar arası kaydırmalı. CSS ile oynar; kart ekranda değilse durur. */
+/* yeni burger kartı düzeni (referans görsel ölçüsü, logo filigranı, sabit yükseklik, 2 satır içindekiler) — tüm burger kartları */
+var FIT_IDS=PRODUCTS.filter(function(p){return p.kind==='burger'}).map(function(p){return p.id});
 var MASCOT_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
  +'<g class="mc-legs"><path class="mc-l" d="M16 36 L15 46"/><path class="mc-r" d="M24 36 L25 46"/></g>'
  +'<ellipse cx="14" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/><ellipse cx="26" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/>'
@@ -1183,16 +1227,17 @@ function burgerCardV2(p,i){
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
-  var shown=parts.slice(0,5),rest=parts.length-shown.length;
+  /* maskot tüm burger kartlarında; kartlar aynı anda oynamasın diye her biri ~3,1 sn kaydırılır */
+  var bi=FIT_IDS.indexOf(p.id),mascot=bi>=0&&!RM,fit=bi>=0,mcd=-((bi*3.1)%12).toFixed(1);
+  var shown=fit?parts:parts.slice(0,5),rest=parts.length-shown.length;
   var layers=shown.map(function(s){return '<li style="--c:'+layerColor(s)+'">'+esc(s)+'</li>'}).join('')+(rest>0?'<li class="more-l">+'+rest+'</li>':'');
-  var mascot=p.id===MASCOT_ID&&!RM;
-  return '<article class="card card--burger v2'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
+  return '<article class="card card--burger v2'+(mascot?' has-mascot':'')+(fit?' fit':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
    +'<div class="stage">'+vis+'</div>'
    +'<div class="meta"><p class="cat"><span>'+esc(p.category)+'</span></p>'
    +'<div class="name-row"><h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
    +ticketHTML(p)+'</div>'
-   +(layers?'<ul class="layers" aria-label="Malzemeler">'+layers+'</ul>':'')
+   +(layers?'<ul class="layers" aria-label="Malzemeler"'+(fit?' data-max2':'')+'>'+layers+'</ul>':'')
    +'<div class="foot">'+(mascot?'<span class="mascot-lane" aria-hidden="true"><span class="mascot">'+MASCOT_SVG+'<span class="mc-say">bas!</span></span></span>':'')+'<span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
    +'</div></div></article>';
 }
@@ -1230,7 +1275,7 @@ function render(opts){
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
   state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
-  grid.innerHTML=html;armImgs(grid);layoutWM(grid);
+  grid.innerHTML=html;armImgs(grid);layoutCards(grid);
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
   if(gl.setGroup)gl.setGroup(hex,state.group);

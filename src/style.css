@@ -1487,3 +1487,28 @@ img.err+.sk{animation:none}
 .card--burger.has-mascot .cta{padding:16px 10px 16px 0;margin:-10px 0}
 .card--burger.has-mascot .mascot{left:4px;bottom:3px;width:34px;height:42px}
 .card--burger.has-mascot .mc-say{left:auto;right:22px;bottom:40px;border-radius:9px 9px 2px 9px;transform-origin:100% 100%}
+/* ==========================================================
+   BURGER — görsel ölçüsü referans tasarımdaki karttan (reference/21gram-menu-3d.html):
+   görsel alanı 250px, görsel en fazla 214px yükseklik / %86 genişlik, ortalı;
+   krem kart 78px'ten başlar → görsel yaklaşık 60px taşar, altında ~30px boşluk kalır.
+   ========================================================== */
+.card--burger.v2.fit .stage{height:250px}
+.card--burger.v2.fit .paper{top:78px}
+.card--burger.v2.fit .shade{top:92px}
+.card--burger.v2.fit .prod{max-width:84%;max-height:196px;transform:translateZ(64px)} /* 3D derinlik referansla aynı; perspektif büyütmesi hesaba katıldı */
+/* filigran: logo silüeti (kırmızı, soluk) */
+.card--burger.v2 .wm i.lg{background:var(--red);opacity:.1;-webkit-mask:url(/img/logo.png) center/contain no-repeat;mask:url(/img/logo.png) center/contain no-repeat}
+/* sabit yükseklik: alt satır ("3D gör" + ok) her zaman en altta; isim en fazla 2 satır */
+.card--burger.v2.fit .card-in{height:520px} /* en kötü durum: 2 satır isim + 2 satır malzeme */
+.card--burger.v2.fit .meta{min-height:0}
+.card--burger.v2.fit .name{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card--burger.v2.fit .layers{margin-bottom:16px}
+.card--burger.v2.fit .layers li[hidden]{display:none}
+.card--burger.v2.fit .foot{margin-top:auto}
+/* ilk kart: isim bir tık küçük (kart küçüldü), fiyat bileti ve içindeki yazı bir tık büyük */
+.card--burger.v2.fit .name{font-size:clamp(28px,8.6vw,34px);line-height:.92}
+.card--burger.v2.fit .ticket{height:36px;font-size:21px;padding:0 20px 0 24px}
+.card--burger.v2.fit .ticket small{font-size:14px}
+.card--burger.v2.fit .ticket::before{left:13px}
+/* maskot: kartlar arası kaydırma (her kart kendi --mcd gecikmesiyle; sahne parçaları birlikte) */
+.card--burger.has-mascot .mascot,.card--burger.has-mascot .mc-arm,.card--burger.has-mascot .mc-say,.card--burger.has-mascot .more{animation-delay:var(--mcd,0s)}
