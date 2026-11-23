@@ -1133,7 +1133,47 @@ function spiritCardV2(p,i){
    +'<div class="foot"><span class="total">TOPLAM</span>'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
-function spiritCardHTML(p,i){return spiritCardV2(p,i)}
+/* ——— YÜKSEK ALKOL V3: "arka bar rafı" ———
+   krem kart · şişe pirinç raf çubuğunun üstünde durur, arkasında sıcak spot ışığı · köşelerde 21GRAM logosu
+   · modern içki rozeti (tür + ölçü) · ortalı isim · "TOP SHELF" satırı · büyük bilet + ok · Şişe Adam maskotu */
+var BOTTLE_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
+ +'<g class="mc-legs"><path class="mc-l" d="M16 36 L15 46"/><path class="mc-r" d="M24 36 L25 46"/></g>'
+ +'<ellipse cx="14" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/><ellipse cx="26" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/>'
+ +'<rect x="16.5" y="1.5" width="7" height="4.5" rx="1.2" fill="#E4032D" stroke="#1D0A0E" stroke-width="1.2"/>'
+ +'<path d="M17.5 6 H22.5 V11 Q29 13 29 19 V35 Q29 37.5 26.5 37.5 H13.5 Q11 37.5 11 35 V19 Q11 13 17.5 11 Z" fill="#3E7D5A" stroke="#1D0A0E" stroke-width="1.4" stroke-linejoin="round"/>'
+ +'<path d="M14 15 Q15 13 17 12.4" stroke="#BFE3CC" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
+ +'<rect x="11.8" y="18" width="16.4" height="13" rx="2" fill="#FFFCEC" stroke="#1D0A0E" stroke-width="1.1"/>'
+ +'<circle cx="16.5" cy="23" r="2.2" fill="#fff" stroke="#1D0A0E" stroke-width="1"/><circle cx="23.5" cy="23" r="2.2" fill="#fff" stroke="#1D0A0E" stroke-width="1"/>'
+ +'<circle cx="17.2" cy="23.3" r="1" fill="#1D0A0E"/><circle cx="24.2" cy="23.3" r="1" fill="#1D0A0E"/>'
+ +'<path d="M17.5 27.5 q2.5 2 5 0" stroke="#1D0A0E" stroke-width="1.2" fill="none" stroke-linecap="round"/>'
+ +'<g class="mc-arm"><path d="M0 0 L0 9" stroke="#1D0A0E" stroke-width="2" stroke-linecap="round"/><circle cy="10" r="2.6" fill="#fff" stroke="#1D0A0E" stroke-width="1.2"/></g>'
+ +'</svg>';
+/* içindekiler: menüde açıklama yok → üreticilerin bilinen tarif notları (işletmeye teyit ettirilecek) */
+var SPIRIT_NOTES={
+  'tanqueray-5cl':[['Ardıç','#4E6B3A'],['Kişniş','#B8A04A'],['Melek otu','#7C9A5B'],['Meyan kökü','#5A3A22']],
+  'hendrick-s-5cl':[['Ardıç','#4E6B3A'],['Salatalık','#6FA24A'],['Bulgar gülü','#D46A8C'],['Narenciye kabuğu','#E8A33A']],
+  'beefeather-5cl':[['Ardıç','#4E6B3A'],['Sevilla portakalı','#E07A26'],['Limon kabuğu','#E8C93A'],['Kişniş','#B8A04A']],
+  'malfy-5cl':[['İtalyan limonu','#E8C93A'],['Ardıç','#4E6B3A'],['Kişniş','#B8A04A']],
+  'absolut-5cl':[['Kış buğdayı','#C99A4A'],['Saf kaynak suyu','#6AA8D0']]
+};
+/* tüm yüksek alkol kartları */
+var SPIRIT_FIT=PRODUCTS.filter(function(p){return p.kind==='spirit'}).map(function(p){return p.id});
+function spiritCardV3(p,i){
+  var si=SPIRIT_FIT.indexOf(p.id),mascot=!RM,mcd=-((si*3.1)%12).toFixed(1);
+  var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI',''),notes=SPIRIT_NOTES[p.id]||[];
+  var badge='<span class="spirit sp2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5C8 1.5 3 7.2 3 10.2a5 5 0 0 0 10 0C13 7.2 8 1.5 8 1.5z"/></svg>'
+   +'<b>'+esc(sp||p.category.toLocaleUpperCase('tr'))+'</b>'+(sz?'<span>'+esc(sz.n+' '+sz.u)+'</span>':'')+'</span>';
+  return '<article class="card card--bar fit'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><span class="spot" aria-hidden="true"></span>'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="stage">'+prodHTML(p)+'</div>'
+   +'<div class="meta"><p class="cat">'+badge+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<p class="top-shelf" aria-hidden="true">TOP SHELF</p>'
+   +(notes.length?'<ul class="layers" aria-label="İçindekiler" data-max2>'+notes.map(function(n){return '<li style="--c:'+n[1]+'">'+esc(n[0])+'</li>'}).join('')+'</ul>':'')
+   +'<div class="foot">'+(mascot?mascotLane(BOTTLE_SVG):'')+'<span class="cta tk">'+ticketHTML(p)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
+function spiritCardHTML(p,i){return SPIRIT_FIT.indexOf(p.id)>=0?spiritCardV3(p,i):spiritCardV2(p,i)}
 /* eski "mahzen etiketi" kartı — şimdilik kullanılmıyor */
 function spiritCardV1(p,i){
   var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI',''),cl=sz?parseFloat(sz.n):5;

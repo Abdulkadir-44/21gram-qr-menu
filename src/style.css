@@ -1589,3 +1589,48 @@ img.err+.sk{animation:none}
 .card--shot.v2 .ticket{height:44px;font-size:27px;padding:0 22px 0 28px}
 .card--shot.v2 .ticket small{font-size:17px}
 .card--shot.v2 .ticket::before{left:15px}
+
+/* ==========================================================
+   YÜKSEK ALKOL V3 — "arka bar rafı" (temel kart kuralları)
+   görsel ~60px taşar · sabit yükseklik · isim 2 satır … · büyük bilet · maskot biletin arkasından
+   ========================================================== */
+.card--bar .shade{position:absolute;left:18px;right:18px;top:92px;bottom:-4px;border-radius:30px;background:rgba(10,0,4,.5);filter:blur(22px);transform:translateY(14px)}
+.card--bar .paper{top:78px;border-radius:30px;background:var(--cream);overflow:hidden}
+.card--bar .sheen{mix-blend-mode:soft-light;opacity:var(--so,0)}
+/* şişenin arkasında sıcak spot ışığı */
+.card--bar .spot{position:absolute;left:50%;top:-40px;width:300px;height:230px;margin-left:-150px;pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,color-mix(in srgb,#F2B04A 34%,transparent),transparent 72%)}
+.card--bar .wm{position:absolute;inset:0;pointer-events:none}
+.card--bar .wm i.lg{position:absolute;transform:translate(-50%,-50%) rotate(var(--r));background:var(--red);opacity:.1;-webkit-mask:url(/img/logo.png) center/contain no-repeat;mask:url(/img/logo.png) center/contain no-repeat}
+.card--bar .stage{height:250px;place-items:center}
+.card--bar .prod{max-width:84%;max-height:196px;transform:translateZ(64px);filter:drop-shadow(0 14px 10px rgba(40,0,8,.28))}
+/* pirinç raf çubuğu: şişe üstünde durur */
+.card--bar .shelf{position:absolute;left:26px;right:26px;bottom:20px;height:9px;border-radius:5px;transform:translateZ(40px);
+  background:linear-gradient(#F4D38A,#C8913A 55%,#8A5A1E);box-shadow:0 10px 14px -6px rgba(60,20,0,.45)}
+.card--bar .card-in{height:476px}
+.card--bar .meta{align-items:center;text-align:center;padding:2px 24px 24px;min-height:0}
+.card--bar .cat{margin-bottom:10px}
+.card--bar .name{font-size:clamp(28px,8.6vw,34px);line-height:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card--bar .top-shelf{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:11px;font-weight:800;letter-spacing:.32em;color:color-mix(in srgb,#B07A2A 85%,var(--ink))}
+.card--bar .top-shelf::before,.card--bar .top-shelf::after{content:"";width:26px;height:1.5px;background:currentColor;opacity:.5}
+.card--bar .foot{align-self:stretch;margin-top:auto;padding-top:14px;border-top:2px dashed color-mix(in srgb,var(--ink) 16%,transparent)}
+.card--bar .cta.tk{display:inline-flex;align-items:center}
+.card--bar .ticket{color:var(--red);height:44px;font-size:27px;padding:0 22px 0 28px}
+.card--bar .ticket small{font-size:17px}
+.card--bar .ticket::before{left:15px}
+.card--bar .more{background:var(--red);color:var(--cream)}
+/* modern içki rozeti (kokteyldekiyle aynı) */
+.card--bar .spirit.sp2{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;
+  background:color-mix(in srgb,var(--red) 9%,var(--cream));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--red) 18%,transparent);
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--red)}
+.card--bar .spirit.sp2 svg{width:20px;height:20px;padding:4px;border-radius:50%;background:var(--red);fill:var(--cream);flex:none}
+.card--bar .spirit.sp2 b{font-weight:800;color:var(--ink)}
+.card--bar .spirit.sp2 span{font-weight:600;color:color-mix(in srgb,var(--red) 75%,transparent)}
+/* yüksek alkol: raf kalktı, içindekiler (en fazla 2 satır, fazlası +N) */
+.card--bar .layers{justify-content:center;margin-top:12px}
+.card--bar .layers li[hidden]{display:none}
+.card--bar .card-in{height:520px}
+/* bira: fiyat bileti kokteyl/shot ile aynı büyük boy */
+.card--beer.v2 .ticket{height:44px;font-size:27px;padding:0 22px 0 28px}
+.card--beer.v2 .ticket small{font-size:17px}
+.card--beer.v2 .ticket::before{left:15px}
