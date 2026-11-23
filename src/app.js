@@ -1552,6 +1552,20 @@ function fillSheet(p){
   hpT.rx=hpT.ry=0;
   var i=state.order.indexOf(p.id),many=state.order.length>1;
   $('.pn').style.display=many?'':'none';
+  if(many)prefetchNeighbors(i);
+}
+/* KOMŞU ÖN YÜKLEME — detay açıkken önceki ve sonraki ürünün görseli arka planda iner (düşük öncelik),
+   böylece ‹ › ile geçişte görsel beklenmez. Aynı adres olduğu için tarayıcı önbelleğinden gelir. */
+var prefetched={};
+function prefetchNeighbors(i){
+  var n=state.order.length;
+  [1,-1].forEach(function(d){
+    var q=BYID[state.order[(i+d+n)%n]];
+    if(!q||!q.img||prefetched[q.img])return;
+    prefetched[q.img]=1;
+    var im=new Image();im.decoding='async';try{im.fetchPriority='low'}catch(e){}
+    im.src=q.img;
+  });
 }
 /* ——— KART ÇEVİRME (v2 pop-up) ———
    Tıklanan kart ekranın ortasına doğru giderken 90° döner (kenar kameraya dönük → görünmez),
