@@ -704,14 +704,17 @@ function shareCardHTML(p,i){
 }
 
 /* V2: düz krem kart, tabak karttan taşar · ad + bilet · açıklama · "3D gör" + kırmızı ok */
+/* paylaşımlıkta burger kartı kuralları (görsel ölçüsü, sabit yükseklik, alt satır en altta, isim/açıklama 2 satır …) — tüm kartlar */
+var SHARE_FIT=PRODUCTS.filter(function(p){return p.kind==='share'}).map(function(p){return p.id});
 function shareCardV2(p,i){
-  return cardOpen(p,i,'card--plate v2')
-   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+  var si=SHARE_FIT.indexOf(p.id),fit=si>=0,mascot=fit&&!RM,mcd=-((si*3.1)%12).toFixed(1);
+  return cardOpen(p,i,'card--plate v2'+(fit?' fit':'')+(mascot?' has-mascot':'')).replace('style="','style="--mcd:'+mcd+'s;')
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="gingham" aria-hidden="true"></div><div class="sheen"></div></div>'
    +'<div class="stage">'+prodHTML(p)+'</div>'
    +'<div class="meta"><p class="cat">'+esc(p.category)+'</p>'
    +'<div class="name-row"><h3 class="name">'+esc(p.name)+'</h3>'+ticketHTML(p)+'</div>'
    +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
-   +'<div class="foot"><span class="cta">3D gör</span>'+ARROW+'</div>'
+   +'<div class="foot">'+(mascot?mascotLane(FRIES_SVG):'')+'<span class="cta">3D gör</span>'+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -1223,6 +1226,23 @@ var MASCOT_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
  +'<path d="M16.5 33 q3.5 2.4 7 0" stroke="#1D0A0E" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
  +'<g class="mc-arm"><path d="M0 0 L0 9" stroke="#1D0A0E" stroke-width="2" stroke-linecap="round"/><circle cy="10" r="2.6" fill="#fff" stroke="#1D0A0E" stroke-width="1.2"/></g>'
  +'</svg>';
+/* PATATES KUTUSU ADAM — paylaşımlık maskotu: kırmızı-krem çizgili kutu gövde, tepede saç gibi kızartmalar.
+   Burger Adam ile aynı iskelet (bacaklar 36–46, omuz 31,27) → aynı CSS sahnesi oynar. */
+var FRIES_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
+ +'<g class="mc-legs"><path class="mc-l" d="M16 36 L15 46"/><path class="mc-r" d="M24 36 L25 46"/></g>'
+ +'<ellipse cx="14" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/><ellipse cx="26" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/>'
+ +'<g fill="#FBD35E" stroke="#1D0A0E" stroke-width="1.2"><rect x="10.5" y="5" width="4" height="15" rx="1" transform="rotate(-12 12.5 18)"/><rect x="15.5" y="2" width="4" height="17" rx="1" transform="rotate(-4 17.5 18)"/>'
+ +'<rect x="20.5" y="2.5" width="4" height="17" rx="1" transform="rotate(5 22.5 18)"/><rect x="25.5" y="5.5" width="4" height="14" rx="1" transform="rotate(14 27.5 18)"/></g>'
+ +'<path d="M8 17 H32 L29.5 37 H10.5 Z" fill="#FFFCEC"/>'
+ +'<path d="M13.5 17 L14.6 37 M20 17 V37 M26.5 17 L25.4 37" stroke="#E4032D" stroke-width="3"/>'
+ +'<path d="M8 17 H32 L29.5 37 H10.5 Z" fill="none" stroke="#1D0A0E" stroke-width="1.4" stroke-linejoin="round"/>'
+ +'<rect x="12.5" y="20" width="15" height="13" rx="4.5" fill="#FFFCEC"/>'
+ +'<circle cx="16.5" cy="24" r="2.3" fill="#fff" stroke="#1D0A0E" stroke-width="1"/><circle cx="23.5" cy="24" r="2.3" fill="#fff" stroke="#1D0A0E" stroke-width="1"/>'
+ +'<circle cx="17.3" cy="24.3" r="1.1" fill="#1D0A0E"/><circle cx="24.3" cy="24.3" r="1.1" fill="#1D0A0E"/>'
+ +'<path d="M17 29.5 q3 2.2 6 0" stroke="#1D0A0E" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
+ +'<g class="mc-arm"><path d="M0 0 L0 9" stroke="#1D0A0E" stroke-width="2" stroke-linecap="round"/><circle cy="10" r="2.6" fill="#fff" stroke="#1D0A0E" stroke-width="1.2"/></g>'
+ +'</svg>';
+function mascotLane(svgStr){return '<span class="mascot-lane" aria-hidden="true"><span class="mascot">'+svgStr+'<span class="mc-say">bas!</span></span></span>'}
 function burgerCardV2(p,i){
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
@@ -1238,7 +1258,7 @@ function burgerCardV2(p,i){
    +'<div class="name-row"><h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
    +ticketHTML(p)+'</div>'
    +(layers?'<ul class="layers" aria-label="Malzemeler"'+(fit?' data-max2':'')+'>'+layers+'</ul>':'')
-   +'<div class="foot">'+(mascot?'<span class="mascot-lane" aria-hidden="true"><span class="mascot">'+MASCOT_SVG+'<span class="mc-say">bas!</span></span></span>':'')+'<span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'<div class="foot">'+(mascot?mascotLane(MASCOT_SVG):'')+'<span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
    +'</div></div></article>';
 }
 function classicCardHTML(p,i){
