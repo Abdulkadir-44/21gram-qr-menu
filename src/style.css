@@ -1433,3 +1433,57 @@ img.err+.sk{animation:none}
 /* alt kategoriler: az sayıda olduğunda (ör. içecekte 2) satırı eşit paylaşarak doldurur;
    çok olduğunda büyüme etkisizdir, satır yine yana kayar */
 .chip{flex:1 0 auto;justify-content:center}
+/* ==========================================================
+   KART MASKOTU — küçük Burger Adam (ilk burger kartı, deneme)
+   12 sn'lik döngü: belirir (0–7%) → oka yürür (7–18%) → oku gösterir, "bas!" (19–27%)
+   → geri yürür (28–37%) → saklanır (38–42%) → bekler. Ok düğmesi gösterilirken iki kez atar.
+   ========================================================== */
+.card--burger.has-mascot .foot{position:relative}
+.mascot-lane{position:absolute;left:0;right:58px;bottom:100%;height:46px;pointer-events:none;container-type:inline-size;
+  clip-path:inset(-60px -20px 0 -20px)}                 /* yalnız alt kenar kesilir: çizginin arkasından yükselir */
+.mascot{position:absolute;left:2px;bottom:-1px;width:30px;height:38px;transform-origin:50% 100%;transform:translate(0,105%);
+  animation:mcRun 12s linear infinite}
+.mascot .mc{display:block;width:100%;height:100%;overflow:visible}
+.mc-legs path{stroke:#1D0A0E;stroke-width:2.6;stroke-linecap:round;fill:none;transform-box:fill-box;transform-origin:50% 0;animation:mcStep .3s ease-in-out infinite alternate}
+.mc-legs .mc-r{animation-direction:alternate-reverse}
+.mc-arm{transform-box:view-box;transform:translate(31px,27px) rotate(20deg);animation:mcArm 12s linear infinite}
+.mc-say{position:absolute;left:22px;bottom:36px;padding:2px 7px 1px;border-radius:9px 9px 9px 2px;background:var(--cream);border:1.5px solid var(--ink);
+  font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:12px;color:var(--red);white-space:nowrap;
+  opacity:0;transform-origin:0 100%;animation:mcSay 12s linear infinite}
+.card--burger.has-mascot .more{animation:mcPulse 12s ease-in-out infinite}
+@keyframes mcRun{
+  0%{transform:translate(0,105%) scaleX(1)}
+  4%,7%{transform:translate(0,0) scaleX(1)}
+  18%,27%{transform:translate(calc(100cqw - 36px),0) scaleX(1)}
+  28%{transform:translate(calc(100cqw - 36px),0) scaleX(-1)}
+  37%{transform:translate(0,0) scaleX(-1)}
+  38%{transform:translate(0,0) scaleX(1)}
+  42%,100%{transform:translate(0,105%) scaleX(1)}
+}
+@keyframes mcStep{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+@keyframes mcArm{
+  0%,19%{transform:translate(31px,27px) rotate(20deg)}
+  21%,25%{transform:translate(31px,27px) rotate(-85deg)}
+  23%{transform:translate(31px,27px) rotate(-60deg)}
+  27%{transform:translate(31px,27px) rotate(-75deg)}
+  29%,100%{transform:translate(31px,27px) rotate(20deg)}
+}
+@keyframes mcSay{0%,19%{opacity:0;transform:scale(.4)}21%{opacity:1;transform:scale(1.1)}22%,27%{opacity:1;transform:scale(1)}28%,100%{opacity:0;transform:scale(.6)}}
+@keyframes mcPulse{0%,20%{transform:none}22%{transform:scale(1.2)}23.5%{transform:none}25%{transform:scale(1.2)}26.5%,100%{transform:none}}
+@media(prefers-reduced-motion:reduce){.mascot-lane{display:none}.card--burger.has-mascot .more{animation:none}}
+/* maskot yazı ve ok ile aynı satırda: "3D GÖR"ün arkasından çıkar, satır boyunca oka yürür, geri dönüp yazının arkasına girer */
+.card--burger.has-mascot .cta{position:relative;z-index:1;background:var(--cream);padding:6px 8px 6px 0}
+.card--burger.has-mascot .mascot-lane{top:14px;bottom:0;height:auto;clip-path:none}
+.card--burger.has-mascot .mascot{left:6px;bottom:3px;transform:translate(0,0);animation-name:mcRun2}
+@keyframes mcRun2{
+  0%,3%{transform:translate(0,0) scaleX(1)}
+  15%,27%{transform:translate(calc(100cqw - 36px),0) scaleX(1)}
+  28%{transform:translate(calc(100cqw - 36px),0) scaleX(-1)}
+  39%{transform:translate(0,0) scaleX(-1)}
+  40%,100%{transform:translate(0,0) scaleX(1)}
+}
+/* maskot dengesi: yazının arkasındaki krem zemin satırın tamamını örter (beklerken hiç görünmez),
+   karakter biraz büyük ve okla aynı hizada; "bas!" balonu başının sol üstünde (ok onu örtmesin) */
+.card--burger.has-mascot .cta{padding:16px 10px 16px 0;margin:-10px 0}
+.card--burger.has-mascot .mascot{left:4px;bottom:3px;width:34px;height:42px}
+.card--burger.has-mascot .mc-say{left:auto;right:22px;bottom:40px;border-radius:9px 9px 2px 9px;transform-origin:100% 100%}

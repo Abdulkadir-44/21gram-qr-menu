@@ -81,7 +81,7 @@ function layoutWM(root){
   [].forEach.call(root.querySelectorAll('.wm[data-seed]'),function(wm){
     var paper=wm.parentNode,card=paper.closest('.card-in');if(!card||!paper.offsetWidth)return;
     var P=boxIn(paper,card),W=P.w,H=P.h,pad=5;
-    var obs=[].map.call(card.querySelectorAll('.prod,.ph,.cat span,.name,.ticket,.layers li,.cta,.more'),function(el){
+    var obs=[].map.call(card.querySelectorAll('.prod,.ph,.cat span,.name,.ticket,.layers li,.cta,.more,.mascot-lane'),function(el){
       var b=boxIn(el,card);return {x:b.x-P.x-pad,y:b.y-P.y-pad,w:b.w+pad*2,h:b.h+pad*2}});
     var id=wm.dataset.seed,h=0;for(var k=0;k<id.length;k++)h=(h*31+id.charCodeAt(k))>>>0;
     var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296};
@@ -97,7 +97,7 @@ function layoutWM(root){
       wm.appendChild(i);placed++;return true};
     /* alt satırın ortası ("3D gör" ile ok düğmesi arası) sabit bir yer */
     var cta=card.querySelector('.cta'),mo=card.querySelector('.more');
-    if(cta&&mo){var a=boxIn(cta,card),m=boxIn(mo,card);
+    if(cta&&mo&&!card.querySelector('.mascot-lane')){ /* maskotun yürüdüğü satıra filigran koyma */var a=boxIn(cta,card),m=boxIn(mo,card);
       put((a.x+a.w+m.x)/2-P.x,m.y+m.h/2-P.y,13,Math.round(rnd()*16-8))}
     for(var t=0;t<500&&placed<7;t++){
       var fs=9+Math.round(rnd()*6),rot=Math.round(rnd()*50-25),z=size(fs,rot);
@@ -1164,20 +1164,36 @@ function ingrHTML(parts){
     +'<ul class="layers">'+parts.map(function(x){return '<li style="--c:'+layerColor(x)+'">'+esc(x)+'</li>'}).join('')+'</ul></div>';
 }
 function ticketHTML(p){return '<span class="ticket" aria-hidden="true"><small>₺</small>'+new Intl.NumberFormat('tr-TR').format(p.price)+'</span>'}
+/* KART MASKOTU — küçük Burger Adam: '3D GÖR'ün üstünden belirir, oka yürür, 'bas!' der, geri döner.
+   Şimdilik yalnızca ilk burger kartında (deneme). CSS ile oynar; kart ekranda değilse durur. */
+var MASCOT_ID=(PRODUCTS.find(function(p){return p.kind==='burger'})||{}).id;
+var MASCOT_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
+ +'<g class="mc-legs"><path class="mc-l" d="M16 36 L15 46"/><path class="mc-r" d="M24 36 L25 46"/></g>'
+ +'<ellipse cx="14" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/><ellipse cx="26" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/>'
+ +'<path d="M9 30 h22 a2 2 0 0 1 2 2 v1 a4 4 0 0 1 -4 4 h-18 a4 4 0 0 1 -4 -4 v-1 a2 2 0 0 1 2 -2z" fill="#E9A64F" stroke="#1D0A0E" stroke-width="1.4"/>'
+ +'<rect x="7" y="25" width="26" height="5.5" rx="2.7" fill="#6B2E12" stroke="#1D0A0E" stroke-width="1.4"/>'
+ +'<path d="M7 24.5 q3 -3 6 0 t6 0 t6 0 t6 0 t2 0" fill="none" stroke="#5FA83A" stroke-width="2.6" stroke-linecap="round"/>'
+ +'<path d="M8 23 C8 8 32 8 32 23 z" fill="#F2B04A" stroke="#1D0A0E" stroke-width="1.4"/>'
+ +'<circle cx="16" cy="17" r="2.4" fill="#fff" stroke="#1D0A0E" stroke-width="1"/><circle cx="24" cy="17" r="2.4" fill="#fff" stroke="#1D0A0E" stroke-width="1"/>'
+ +'<circle cx="16.8" cy="17.3" r="1.1" fill="#1D0A0E"/><circle cx="24.8" cy="17.3" r="1.1" fill="#1D0A0E"/>'
+ +'<path d="M16.5 33 q3.5 2.4 7 0" stroke="#1D0A0E" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
+ +'<g class="mc-arm"><path d="M0 0 L0 9" stroke="#1D0A0E" stroke-width="2" stroke-linecap="round"/><circle cy="10" r="2.6" fill="#fff" stroke="#1D0A0E" stroke-width="1.2"/></g>'
+ +'</svg>';
 function burgerCardV2(p,i){
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var shown=parts.slice(0,5),rest=parts.length-shown.length;
   var layers=shown.map(function(s){return '<li style="--c:'+layerColor(s)+'">'+esc(s)+'</li>'}).join('')+(rest>0?'<li class="more-l">+'+rest+'</li>':'');
-  return '<article class="card card--burger v2" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
+  var mascot=p.id===MASCOT_ID&&!RM;
+  return '<article class="card card--burger v2'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+'" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
    +'<div class="stage">'+vis+'</div>'
    +'<div class="meta"><p class="cat"><span>'+esc(p.category)+'</span></p>'
    +'<div class="name-row"><h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
    +ticketHTML(p)+'</div>'
    +(layers?'<ul class="layers" aria-label="Malzemeler">'+layers+'</ul>':'')
-   +'<div class="foot"><span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
+   +'<div class="foot">'+(mascot?'<span class="mascot-lane" aria-hidden="true"><span class="mascot">'+MASCOT_SVG+'<span class="mc-say">bas!</span></span></span>':'')+'<span class="cta">3D gör</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'
    +'</div></div></article>';
 }
 function classicCardHTML(p,i){
