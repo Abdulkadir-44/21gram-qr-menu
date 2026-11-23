@@ -68,8 +68,8 @@ PRODUCTS.forEach(function(p){
 var BYID={};PRODUCTS.forEach(function(p){BYID[p.id]=p});
 /* TASARIM V2 — burger, paylaşımlık, sos ve kokteyl kartları */
 function isV2(p){return p.kind==='burger'||p.kind==='share'||p.kind==='sauce'||p.kind==='cocktail'}
-/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı + bira */
-function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'}
+/* pop-up (kart çevrilerek açılan detay): v2 kartları + tatlı + bira + yüksek alkol */
+function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'||p.kind==='spirit'}
 /* "21GRAM" filigranı: kartın boş yerlerine rastgele dağılır.
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
@@ -966,7 +966,28 @@ function beerCardHTML(p,i){
 
 /* ——— YÜKSEK ALKOL KARTI: "mahzen etiketi" ———
    krem zemin + süslü çift çerçeve · kaide üstünde kadeh · 5cl'ye dolu ölçü cetveli · kurdele bayrakta isim */
-function spiritCardHTML(p,i){
+/* V2: "sipariş fişi" — eski paylaşımlık fişinin tasarımı (card--share stilleri) yüksek alkolde.
+   Açıklama olmadığından ✓ satırları yalnızca bilinenler: içki türü · ölçü · tek servis. */
+/* deneme: ilk yüksek alkolde şişe fişin dışına taşar */
+var SPIRIT_OUT=(PRODUCTS.find(function(p){return p.kind==='spirit'})||{}).id;
+function spiritCardV2(p,i){
+  var out=p.id===SPIRIT_OUT;
+  var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI','');
+  var lines=[sp?sp.charAt(0)+sp.slice(1).toLocaleLowerCase('tr'):'',sz?sz.n+' '+sz.u.toLocaleLowerCase('tr')+' ölçü':'','Tek servis'].filter(Boolean);
+  var slip='<p class="slip" aria-hidden="true"><span>SİPARİŞ FİŞİ</span>'+(sz?'<span>'+esc(sz.n+' '+sz.u)+'</span>':'')+'</p>';
+  var stage='<div class="stage">'+prodHTML(p)+'<span class="tag-share" aria-hidden="true">TOP SHELF</span></div>';
+  return cardOpen(p,i,'card--share card--fis'+(out?' out':''))
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
+   +(out?stage+slip:slip+stage)
+   +'<div class="meta"><p class="cat">'+esc(p.category)+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<ul class="checks">'+lines.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>'
+   +'<div class="foot"><span class="total">TOPLAM</span>'+ticketHTML(p)+ARROW+'</div>'
+   +'</div></div></article>';
+}
+function spiritCardHTML(p,i){return spiritCardV2(p,i)}
+/* eski "mahzen etiketi" kartı — şimdilik kullanılmıyor */
+function spiritCardV1(p,i){
   var sz=sizeParts(p.size),sp=spiritOf(p).replace(' BAZLI',''),cl=sz?parseFloat(sz.n):5;
   var ticks='';for(var t=5;t>=1;t--)ticks+='<li'+(t<=cl?' class="on"':'')+'><span>'+t+'</span></li>';
   return cardOpen(p,i,'card--spirit')
@@ -1187,7 +1208,7 @@ function fillSheet(p){
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
-  $('#sName').innerHTML=isV2(p)?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
+  $('#sName').innerHTML=(isV2(p)||p.kind==='spirit')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
@@ -1202,6 +1223,9 @@ function fillSheet(p){
   $('#heroDeco').innerHTML=D&&D.hero?D.hero(p):'';
   $('#sExtra').innerHTML=D&&D.extra?D.extra(p):'';
   $('.info').scrollTop=0;
+  /* yüksek alkol etiket çerçevesi kaydırılan içeriğin tamamını sarsın (görünen alanı değil) */
+  var inf=$('.info');inf.style.removeProperty('--sh');
+  if(p.kind==='spirit')requestAnimationFrame(function(){inf.style.setProperty('--sh',inf.scrollHeight+'px')});
   hpT.rx=hpT.ry=0;
   var i=state.order.indexOf(p.id),many=state.order.length>1;
   $('.pn').style.display=many?'':'none';

@@ -1317,3 +1317,39 @@ img.err+.sk{animation:none}
 .sheet.pop .panel[data-kind="beer"] #hp{max-height:min(214px,28.5dvh)}
 .sheet.pop .pint2.big{width:min(34vw,132px)}
 .sheet.pop .beer-d.v2 .pint-wrap{margin:0 78px}
+/* ==========================================================
+   TASARIM V2 — YÜKSEK ALKOL: "sipariş fişi" (paylaşımlık fişinin stilleri, card--share)
+   Şişeler uzun → tabak yok, şişe fişin ortasında dik durur.
+   ========================================================== */
+.card--fis .stage{height:268px;padding:14px 0 4px}
+.card--fis .prod{max-width:58%;max-height:236px;filter:drop-shadow(0 16px 12px rgba(40,0,8,.3))}
+.card--fis .tag-share{transform:translateZ(70px) rotate(8deg)}
+/* fiş: yuvarlak köşeler (yırtık kenar maskesi aynen kalır) */
+.card--fis .paper{border-radius:18px}
+.card--fis .shade{border-radius:18px}
+/* fiyat satırı: küçük TOPLAM etiketi + bilet + ok (noktalı çizgi yok, bilete yer açılsın) */
+.card--fis .foot{align-items:center;gap:10px}
+.card--fis .ticket{color:var(--red);margin-top:0}
+.card--fis .more{margin-left:auto}
+/* yüksek alkol pop-up: görsel hero'ya sığsın */
+.sheet.pop .panel[data-kind="spirit"] #hp{max-height:min(214px,28.5dvh)}
+/* deneme (ilk yüksek alkol): şişe fişin üst kenarından dışarı taşar; fiş başlığı şişenin altına iner */
+.card--fis.out .stage{height:300px;padding:0 0 6px}
+.card--fis.out .prod{max-height:290px;max-width:62%}
+.card--fis.out .paper{top:150px}
+.card--fis.out .shade{top:164px}
+.card--fis.out .tag-share{top:176px}
+.card--fis.out .slip{padding-top:16px}
+/* yüksek alkol detayı: etiket çerçevesi içeriğin tamamını sarar (yükseklik JS'ten: --sh = scrollHeight),
+   düğmeler çerçevenin içinde boşluklu kalır */
+.panel[data-kind="spirit"] .info::before{bottom:auto;height:calc(var(--sh,100%) - 20px)}
+.panel[data-kind="spirit"] .info{padding-bottom:calc(34px + env(safe-area-inset-bottom))}
+.panel[data-kind="spirit"] .pn{padding-left:6px;padding-right:6px}
+/* yüksek alkol detayı: kurdele yalnızca isimde (biraz küçük), sağında fiyat bileti; büyük fiyat satırı yok */
+.panel[data-kind="spirit"] .info .name{display:flex;align-items:center;justify-content:space-between;gap:12px;align-self:stretch;
+  background:none;color:var(--ink);padding:0;clip-path:none;font-size:clamp(26px,7.4vw,34px)}
+.panel[data-kind="spirit"] .info .name .nm{flex:none;max-width:68%;background:var(--ink);color:var(--cream);padding:9px 26px 7px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 13px) 50%,100% 100%,0 100%,13px 50%)}
+.panel[data-kind="spirit"] .info .name .ticket{color:var(--red);height:34px;font-size:19px}
+.panel[data-kind="spirit"] .price.big{display:none}
+.panel[data-kind="spirit"] .info .name .ticket small{display:inline}
