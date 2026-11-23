@@ -100,10 +100,13 @@ function layoutWM(root){
        (sol üst, sağ üst, sol alt, sağ alt); eğim ±10–25° ürün kimliğinden tohumlanır */
     if(logo){
       var im=card.querySelector('.prod,.ph');if(!im)return;
+      if(im.tagName==='IMG'&&!im.complete){im.addEventListener('load',function(){layoutWM(card)},{once:true});return}
       var I=boxIn(im,card),ix=I.x-P.x,iy=I.y-P.y,top=Math.max(20,iy),bot=Math.min(H-40,iy+I.h);
       var L=7.2*10,T=L*105/500,cx=function(x){return Math.max(L*.42,Math.min(W-L*.42,x))};
       var ang=function(sg){return Math.round(sg*(10+rnd()*15))};
-      [[cx(ix+14),top+6,ang(-1)],[cx(ix+I.w-14),top+12,ang(1)],[cx(ix+18),bot-12,ang(1)],[cx(ix+I.w-18),bot-6,ang(-1)]].forEach(function(q){
+      /* dar görselde (kokteyl bardağı) logolar görselin dış kenarına kayar, görselin arkasında kalmaz */
+      var nar=I.w<W*.6,lx=nar?ix-L*.28:ix+14,rx=nar?ix+I.w+L*.28:ix+I.w-14,lx2=nar?lx:ix+18,rx2=nar?rx:ix+I.w-18;
+      [[cx(lx),top+6,ang(-1)],[cx(rx),top+12,ang(1)],[cx(lx2),bot-12,ang(1)],[cx(rx2),bot-6,ang(-1)]].forEach(function(q){
         var e=document.createElement('i');e.className='lg';
         e.style.cssText='left:'+q[0].toFixed(1)+'px;top:'+q[1].toFixed(1)+'px;--r:'+q[2]+'deg;width:'+L.toFixed(1)+'px;height:'+T.toFixed(1)+'px';
         wm.appendChild(e);
@@ -1164,7 +1167,41 @@ function shotCardHTML(p,i){
 /* ——— KOKTEYL KARTI: "gece barı" ———
    koyu kart + art-deco çerçeve · ışık hüzmeli kemer pencerede bardak · kemer üstünde kavisli kategori adı
    · baz içki rozeti · bar menüsü gibi ortalı tarif satırı */
+/* KOKTEYL ADAM — kokteyl maskotu: kupa bardak gövde (kırmızı içki), kenarda kiraz çubuğu, ayaklı sap.
+   Burger Adam ile aynı iskelet (bacaklar 36–46, omuz 31,27) → aynı CSS sahnesi oynar. */
+var COCKTAIL_SVG='<svg class="mc" viewBox="0 0 40 50" aria-hidden="true">'
+ +'<g class="mc-legs"><path class="mc-l" d="M16 36 L15 46"/><path class="mc-r" d="M24 36 L25 46"/></g>'
+ +'<ellipse cx="14" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/><ellipse cx="26" cy="47" rx="4.4" ry="2.4" fill="#1D0A0E"/>'
+ +'<path d="M13 4 L19 15" stroke="#1D0A0E" stroke-width="1.3" stroke-linecap="round"/><circle cx="12.5" cy="4.5" r="3.2" fill="#C8102E" stroke="#1D0A0E" stroke-width="1.1"/>'
+ +'<path d="M20 30 V35" stroke="#1D0A0E" stroke-width="2.4"/><rect x="13" y="34.5" width="14" height="3" rx="1.5" fill="#FFFCEC" stroke="#1D0A0E" stroke-width="1.2"/>'
+ +'<path d="M5 13 H35 Q35 31 20 31 Q5 31 5 13 Z" fill="#E4032D" stroke="#1D0A0E" stroke-width="1.4" stroke-linejoin="round"/>'
+ +'<ellipse cx="20" cy="13" rx="15" ry="2.6" fill="#F7A3A8" stroke="#1D0A0E" stroke-width="1.2"/>'
+ +'<circle cx="31" cy="9" r="4.4" fill="#F2C94C" stroke="#1D0A0E" stroke-width="1.1"/><path d="M31 5 V13 M27 9 H35" stroke="#FFF6C8" stroke-width=".9"/>'
+ +'<circle cx="15.5" cy="20" r="2.4" fill="#fff" stroke="#1D0A0E" stroke-width="1"/><circle cx="24.5" cy="20" r="2.4" fill="#fff" stroke="#1D0A0E" stroke-width="1"/>'
+ +'<circle cx="16.3" cy="20.3" r="1.1" fill="#1D0A0E"/><circle cx="25.3" cy="20.3" r="1.1" fill="#1D0A0E"/>'
+ +'<path d="M17 25 q3 2.3 6 0" stroke="#1D0A0E" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
+ +'<g class="mc-arm"><path d="M0 0 L0 9" stroke="#1D0A0E" stroke-width="2" stroke-linecap="round"/><circle cy="10" r="2.6" fill="#fff" stroke="#1D0A0E" stroke-width="1.2"/></g>'
+ +'</svg>';
+/* baz içki rozeti (modern): damla simgesi + kalın içki adı + ince "BAZLI" */
+function spiritBadge(sp){var m=/^(.*)\s(BAZLI)$/.exec(sp);
+  return '<span class="spirit sp2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5C8 1.5 3 7.2 3 10.2a5 5 0 0 0 10 0C13 7.2 8 1.5 8 1.5z"/></svg><b>'+esc(m?m[1]:sp)+'</b>'+(m?'<span>'+m[2]+'</span>':'')+'</span>'}
+/* kokteylde burger kartı kuralları (.fit) — tüm kokteyl kartları */
+var COCKTAIL_FIT=PRODUCTS.filter(function(p){return p.kind==='cocktail'}).map(function(p){return p.id});
+function cocktailCardFit(p,i){
+  var ci=COCKTAIL_FIT.indexOf(p.id),mascot=!RM,mcd=-((ci*3.1)%12).toFixed(1),sp=spiritOf(p);
+  var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
+  var recipe=parts.length?parts.map(function(s){return '<span>'+esc(s)+'</span>'}).join('<i aria-hidden="true">✦</i>'):'<span class="classic">Klasik reçete</span>';
+  return '<article class="card card--cocktail v2 fit'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+', '+money(p.price)+'. Detayı aç')+'">'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="stage">'+prodHTML(p)+'</div>'
+   +'<div class="meta"><p class="cat">'+(sp?spiritBadge(sp):'')+'</p>'
+   +'<h3 class="name">'+esc(p.name)+'</h3>'
+   +'<p class="recipe">'+recipe+'</p>'
+   +'<div class="foot">'+(mascot?mascotLane(COCKTAIL_SVG):'')+'<span class="cta tk">'+ticketHTML(p)+'</span>'+ARROW+'</div>'
+   +'</div></div></article>';
+}
 function cocktailCardHTML(p,i){
+  if(COCKTAIL_FIT.indexOf(p.id)>=0)return cocktailCardFit(p,i);
   var vis=p.img?'<img class="prod" src="'+p.img+'" alt="" width="'+p.w+'" height="'+p.h+'" draggable="false">'+skHTML(p)
                 :'<div class="ph" aria-hidden="true"><img src="'+LOGO_IMG+'" alt=""></div>';
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);

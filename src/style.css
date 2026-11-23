@@ -1035,8 +1035,8 @@ img.err+.sk{animation:none}
 .card--burger.v2 .wm i{position:absolute;font-style:normal;font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;
   font-size:var(--s);letter-spacing:.08em;line-height:1;white-space:nowrap;color:var(--red);opacity:.1;transform:translate(-50%,-50%) rotate(var(--r))}
 /* ad + bilet */
-.card--burger.v2 .name-row,.card--plate .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.card--burger.v2 .name,.card--plate .name-row .name{flex:1;min-width:0}
+.card--burger.v2 .name-row,.card--plate .name-row,.card--cocktail.fit .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card--burger.v2 .name,.card--plate .name-row .name,.card--cocktail.fit .name-row .name{flex:1;min-width:0}
 .ticket{flex:none;position:relative;display:inline-flex;align-items:center;gap:2px;margin-top:4px;
   height:32px;padding:0 18px 0 20px;background:#F7E7A6;color:var(--ink);
   font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:18px;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
@@ -1540,3 +1540,38 @@ img.err+.sk{animation:none}
 .panel[data-kind="burger"] #sName .ticket,.panel[data-kind="share"] #sName .ticket{height:42px;font-size:25px;padding:0 22px 0 27px;margin-top:2px}
 .panel[data-kind="burger"] #sName .ticket small,.panel[data-kind="share"] #sName .ticket small{font-size:16px}
 .panel[data-kind="burger"] #sName .ticket::before,.panel[data-kind="share"] #sName .ticket::before{left:14px}
+
+/* ==========================================================
+   KOKTEYL — burger kartı kuralları (.fit), önce ilk kart:
+   görsel ~60px taşar, sabit yükseklik, isim + bilet aynı satırda, tarif 2 satır (…),
+   "3D gör" + ok hep en altta, Kokteyl Adam maskotu
+   ========================================================== */
+.card--cocktail.fit .stage{height:250px;place-items:center;padding-bottom:0}
+.card--cocktail.fit .paper{top:78px}
+.card--cocktail.fit .shade{top:92px}
+.card--cocktail.fit .prod{max-width:84%;max-height:196px;transform:translateZ(64px)}
+.card--cocktail.fit .spark.s1{left:calc(50% - 128px);top:104px}
+.card--cocktail.fit .spark.s2{left:calc(50% + 112px);top:96px}
+.card--cocktail.fit .card-in{height:512px} /* en kalabalık: 2 satır isim + 2 satır tarif (Alcohol You Later) */
+.card--cocktail.fit .meta{min-height:0}
+.card--cocktail.fit .name{font-size:clamp(28px,8.6vw,34px);line-height:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card--cocktail.fit .recipe{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:16px}
+.card--cocktail.fit .foot{margin-top:auto}
+.card--cocktail.fit .recipe{margin-bottom:16px}
+/* maskot fiyat biletinin arkasından çıkar: bilet krem zeminli sarmalda (beklerken karakteri örter) */
+.card--cocktail.fit .cta.tk{display:inline-flex;align-items:center}
+.card--cocktail.fit .ticket{height:44px;font-size:27px;padding:0 22px 0 28px}
+.card--cocktail.fit .ticket small{font-size:17px}
+.card--cocktail.fit .ticket::before{left:15px}
+
+/* baz içki rozeti — modern: yumuşak kırmızı zemin, damla simgeli kırmızı daire, kalın ad + soluk BAZLI */
+.card--cocktail .spirit.sp2{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border:0;border-radius:999px;
+  background:color-mix(in srgb,var(--red) 9%,var(--cream));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--red) 18%,transparent);
+  font-size:11px;letter-spacing:.14em;color:var(--red)}
+.card--cocktail .spirit.sp2 svg{width:20px;height:20px;padding:4px;border-radius:50%;background:var(--red);fill:var(--cream);flex:none}
+.card--cocktail .spirit.sp2 b{font-weight:800;color:var(--ink)}
+.card--cocktail .spirit.sp2 span{font-weight:600;color:color-mix(in srgb,var(--red) 75%,transparent)}
+
+/* kokteyl .fit: görselin dört köşesinde eğik 21GRAM logo filigranı (burger kartıyla aynı) */
+.card--cocktail.fit .wm{position:absolute;inset:0;pointer-events:none}
+.card--cocktail.fit .wm i.lg{position:absolute;transform:translate(-50%,-50%) rotate(var(--r));background:var(--red);opacity:.1;-webkit-mask:url(/img/logo.png) center/contain no-repeat;mask:url(/img/logo.png) center/contain no-repeat}
