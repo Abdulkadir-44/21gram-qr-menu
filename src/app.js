@@ -1544,10 +1544,10 @@ function render(opts){
       els.forEach(function(el){armImgs(el);[].push.apply(uls,el.querySelectorAll('.layers[data-max2]'))});
       uls.forEach(function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}});
       fitBatch(uls);observeLazy(els);
-      if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('deal')});
+      if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
     };
     var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
-      if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.deal').forEach(function(el){el.classList.remove('deal')})},1600)};
+      if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
     addChunk(3);afterPaint(step);
@@ -1645,14 +1645,20 @@ function switchGroup(tab){
   document.documentElement.dataset.group=state.group;
   var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
   if(RM){window.scrollTo(0,0);render();return}
-  clearTimeout(swT);
-  grid.style.transition='opacity .15s ease';grid.style.opacity='0';
-  swT=setTimeout(function(){
+  clearTimeout(swT);var my=++swSeq,done=false;
+  /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
+  var swap=function(){
+    if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
     window.scrollTo(0,0);
     render({chunk:true,dealChunk:true});
     grid.style.transition='none';grid.style.opacity='';
-  },150);
+  };
+  var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
+  grid.addEventListener('transitionend',onEnd);
+  grid.style.transition='opacity .15s ease';grid.style.opacity='0';
+  swT=setTimeout(swap,300);
 }
+var swSeq=0;
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});
