@@ -1691,3 +1691,19 @@ html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome 
 .panel[data-kind="soft"] #sName .ticket{color:var(--red);height:42px;font-size:25px;padding:0 22px 0 27px;margin-top:2px}
 .panel[data-kind="soft"] #sName .ticket small{font-size:16px}
 .panel[data-kind="soft"] #sName .ticket::before{left:14px}
+/* ==========================================================
+   3D MODEL (detay kartı) — "3D | Foto" anahtarı + görüntüleyici tuvali
+   ========================================================== */
+.m3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;opacity:0;transition:opacity .5s ease;touch-action:none;cursor:grab}
+.m3d-canvas:active{cursor:grabbing}
+.hero.is-3d .m3d-canvas{opacity:1}
+.hero.is-3d #hp,.hero.is-3d .hero-hint,.hero.is-3d .plate{opacity:0;pointer-events:none;transition:opacity .4s ease}
+.m3d-toggle{display:none;position:absolute;z-index:4;top:14px;left:14px;gap:2px;padding:3px;border-radius:999px;
+  background:rgba(29,10,14,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(20,0,6,.2)}
+.hero.has-3d .m3d-toggle{display:flex}
+.m3d-toggle button{min-width:48px;min-height:32px;padding:0 11px;border-radius:999px;font-family:var(--display);font-stretch:var(--display-stretch);
+  font-weight:800;font-size:12.5px;letter-spacing:.06em;color:var(--cream);transition:background .25s,color .25s}
+.m3d-toggle button[aria-pressed="true"]{background:var(--cream);color:var(--red)}
+.m3d-toggle small{font-size:10px;font-weight:700;letter-spacing:0;margin-left:2px}
+.hero.m3d-loading .m3d-toggle [data-m="3d"]{animation:m3dPulse 1s ease-in-out infinite alternate}
+@keyframes m3dPulse{to{opacity:.6}}

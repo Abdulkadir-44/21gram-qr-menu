@@ -6,6 +6,7 @@
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
 import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
+import { MODELS, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 10;
@@ -1624,6 +1625,7 @@ function fillSheet(p){
     :(D0&&D0.art?'<div id="hp" class="art" role="img" aria-label="'+esc(p.name)+'">'+D0.art(p)+'</div>'
     :'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>');
   hpHost.innerHTML=vis;hp=$('#hp');armImgs(hpHost);
+  setup3D(p);
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
@@ -1771,7 +1773,7 @@ function closeSheet(fromPop){
   popCard=null;
   if(back)popFlipOut(back.el);
   if(state.gridOrder)state.order=state.gridOrder;
-  sheet.classList.remove('open');state.sheetId=null;
+  sheet.classList.remove('open');state.sheetId=null;stop3D(true);
   document.documentElement.classList.toggle('lock',state.mode==='welcome');
   app.inert=false;app.removeAttribute('aria-hidden');gl.render=true;
   if(!fromPop){
@@ -1835,6 +1837,49 @@ hero.addEventListener('pointermove',function(e){
 });
 hero.addEventListener('pointerleave',function(){hpT.on=false});
 hero.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')hpT.on=false});
+/* ——— 3D MODEL (detay) ———
+   Modeli olan üründe detay 3D ile açılır; üstte "3D | Foto" anahtarı. Model inerken fotoğraf görünür,
+   anahtarda yüzde yazar; hazır olunca 3D yumuşakça fotoğrafın yerini alır. */
+var viewer3d=createViewer({
+  getDpr:function(){var d=Math.min(window.devicePixelRatio||1,2);return gl.q&&gl.q.lvl>0?Math.min(d,1):d},
+  fitRect:function(){return hp&&hp.tagName==='IMG'&&hp.offsetWidth?{w:hp.offsetWidth,h:hp.offsetHeight}:null}
+});
+var m3d={mode:'3d',url:null};
+var m3dBar=document.createElement('div');m3dBar.className='m3d-toggle';m3dBar.setAttribute('role','group');m3dBar.setAttribute('aria-label','Görünüm');
+m3dBar.innerHTML='<button type="button" data-m="3d" aria-pressed="true">3D<small></small></button><button type="button" data-m="foto" aria-pressed="false">Foto</button>';
+hero.appendChild(m3dBar);
+m3dBar.addEventListener('pointerdown',function(e){e.stopPropagation()});
+m3dBar.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b||!m3d.url)return;setMode3D(b.dataset.m)});
+function setMode3D(m){
+  m3d.mode=m;
+  [].forEach.call(m3dBar.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.m===m))});
+  if(m==='3d'){
+    var my=m3d.url,pct=m3dBar.querySelector('small');
+    viewer3d.show(hero,my,function(st,f){
+      if(m3d.url!==my||m3d.mode!=='3d')return;
+      if(st==='loading'){hero.classList.add('m3d-loading');pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
+      else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';hero.classList.add('is-3d')}
+      else{hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
+    });
+  }else{viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
+}
+function setup3D(p){
+  var u=MODELS[p.id]||null;
+  if(u===m3d.url&&u)return;            /* aynı ürün: durumu koru */
+  stop3D();m3d.url=u;
+  hero.classList.toggle('has-3d',!!u);
+  if(u){prefetchModel(u);setMode3D('3d');
+    /* fotoğraf sonradan yüklenirse model boyunu ona göre yeniden ayarla */
+    if(hp&&hp.tagName==='IMG'&&!hp.complete)hp.addEventListener('load',function(){viewer3d.resize()},{once:true})}
+}
+/* keepLook: detay kapanırken model son karesinde donar ve kart kapanana kadar görünür kalır
+   (fotoğraf araya girmez); görünüm kart kapandıktan sonra sıfırlanır */
+function stop3D(keepLook){
+  viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);
+  var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d')};
+  if(keepLook)m3d.t=setTimeout(function(){if(!state.sheetId)reset()},900);else reset();
+}
+window.addEventListener('resize',function(){viewer3d.resize()});
 function tickHero(dt){
   if(!hp||hp.classList.contains('ph'))return;
   var k=1-Math.exp(-dt*9),t=performance.now()/1000;

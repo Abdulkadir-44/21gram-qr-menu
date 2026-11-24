@@ -5,3 +5,6 @@ scripts/.cache/
 
 # eski ürün görselleri: yalnız yerel yedek (sorun olursa geri dönmek için), GitHub'a ve siteye girmez
 public/img/old/
+
+# ham 3D model dosyaları (büyük, GitHub'a gitmez); sıkıştırılmışı public/models içinde
+3d/
