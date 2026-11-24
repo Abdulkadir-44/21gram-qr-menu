@@ -998,8 +998,6 @@ var DETAIL={
       if(lead&&/\(/.test(p.desc))h+='<p class="lead-d">'+esc(lead.charAt(0).toLocaleUpperCase('tr')+lead.slice(1))+'</p>';
       if(parts.length)h+='<div class="parts-d"><p class="pair-h">İÇİNDE NE VAR?</p><ul>'+parts.map(function(x,k){
         return '<li style="--k:'+k+';--c:'+partCol(x)+'"><i aria-hidden="true"></i>'+esc(x)+'</li>'}).join('')+'</ul></div>';
-      h+='<div class="therm-d"><p class="pair-h"><span>SERVİS SICAKLIĞI</span><b>4°C</b></p><div class="tbar"><span class="cold"></span>'
-        +[0,4,8,12,16,20].map(function(t){return '<span class="tk" style="left:'+(t*5)+'%"><i>'+t+'°</i></span>'}).join('')+'</div></div>';
       return h;
     }
   },
@@ -1592,11 +1590,12 @@ function fillSheet(p){
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
-  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
+  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit'||p.kind==='soft')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
-  /* içecek: fiyat isim yanında değil, aşağıdaki fiyat satırında bilet olarak */
-  if(p.kind==='soft'||p.kind==='hot')$('#sPrice').innerHTML=ticketHTML(p);
+  /* sıcak içecek: fiyat aşağıdaki fiyat satırında bilet; soğuk içecek: bilet ismin sağında, alttaki satır gizli */
+  if(p.kind==='hot')$('#sPrice').innerHTML=ticketHTML(p);
+  $('#sPrice').style.display=p.kind==='soft'?'none':'';
   var heroC=(D0&&D0.heroColor&&D0.heroColor(p))||cssVar('--hero-'+p.kind)||groupColor(p.groupKey);
   $('#panel').style.setProperty('--hero',heroC);
   $('#panel').dataset.light=/^#[0-9a-f]{6}$/i.test(heroC)&&isLight(heroC)?'1':'';

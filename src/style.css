@@ -1684,3 +1684,10 @@ html.gl-on #welcome .w-sub,html.gl-on #welcome .enter,html.gl-on #welcome .w-hin
 html.no-gl #welcome .w-sub,html.no-gl #welcome .enter,html.no-gl #welcome .w-hint{opacity:1}
 html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome .w-hint{animation-delay:.4s}
 @media(prefers-reduced-motion:reduce){#welcome .w-sub,#welcome .enter,#welcome .w-hint{opacity:1;animation:none}}
+
+/* soğuk içecek detayı: fiyat bileti isim hizasında sağda (burger/paylaşımlık detayıyla aynı boy) */
+.panel[data-kind="soft"] #sName{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.panel[data-kind="soft"] #sName .nm{flex:1;min-width:0}
+.panel[data-kind="soft"] #sName .ticket{color:var(--red);height:42px;font-size:25px;padding:0 22px 0 27px;margin-top:2px}
+.panel[data-kind="soft"] #sName .ticket small{font-size:16px}
+.panel[data-kind="soft"] #sName .ticket::before{left:14px}
