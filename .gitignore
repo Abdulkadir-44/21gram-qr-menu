@@ -8,3 +8,6 @@ public/img/old/
 
 # ham 3D model dosyaları (büyük, GitHub'a gitmez); sıkıştırılmışı public/models içinde
 3d/
+
+# başta verilen prototip (yalnız yerel kaynak; scripts/extract-prototype.mjs okur), GitHub'a gitmez
+reference/
