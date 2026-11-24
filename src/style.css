@@ -1746,5 +1746,9 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .panel[data-kind="beer"] #sName .ticket small{font-size:16px}
 .panel[data-kind="beer"] #sName .ticket::before{left:14px}
 .panel[data-kind="beer"] .price.big{display:none}
+/* kart: bilet aşağı iner, alt çizgiye (fiyat satırının üst çizgisi) değer; detay bardağı bir tık daha küçük */
+.card--beer.v2 .vol-g .ticket{align-self:flex-end}
+.pint2.big{width:min(26vw,96px)}
+.sheet.pop .pint2.big{width:min(20vw,80px)}
 .pint2.big{width:min(30vw,116px)}
 .sheet.pop .pint2.big{width:min(24vw,96px)}
