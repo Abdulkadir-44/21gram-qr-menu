@@ -570,7 +570,7 @@ function initGL(){
         stepFigs(dt,wv);
         for(var fi=0;fi<figs.length;fi++){
           var fg=figs[fi],grp=fg.grp;
-          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&!(fewOn()&&fi%2)?1:0);
+          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&(fewOn()?fi%3===0:fi%2===0)?1:0);   /* menüde bölüm başına 3 figür (zorlanırsa 2) */
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
           var ra=Math.min(texA(fg.front.material.map),fg.pivot?texA(fg.armF.material.map):1);
           if(fg.cur<.01||ra<=0){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
@@ -784,7 +784,7 @@ function mocktailSVG(col){
 function snowHTML(p){
   var h=0;for(var k=0;k<p.id.length;k++)h=(h*31+p.id.charCodeAt(k))>>>0;
   var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296},out='';
-  for(var n=0;n<7;n++){var d=6+rnd()*6;
+  for(var n=0;n<4;n++){var d=6+rnd()*6;
     out+='<i style="--x:'+(4+rnd()*88).toFixed(1)+'%;--s:'+(7+rnd()*8).toFixed(1)+'px;--d:'+d.toFixed(1)+'s;--dl:'+(-rnd()*d).toFixed(1)+'s;--dx:'+(rnd()*40-20).toFixed(0)+'px;--r:'+(rnd()<.5?-1:1)*(90+rnd()*180|0)+'deg"></i>'}
   return '<span class="snow" aria-hidden="true">'+out+'</span>';
 }
