@@ -129,7 +129,9 @@ function layoutWM(root){
 /* İÇİNDEKİLER 2 SATIR — tüm malzemeler çizilir, ölçülür; 3. satıra taşanlar gizlenir ve
    2. satırın sonuna "+N" eklenir ("+N" sığmazsa bir malzeme daha gizlenir). */
 /* liste boyutu herhangi bir nedenle değişirse (yazı tipi geç yüklendi, ekran döndü…) yeniden kırp */
-var layersRO=window.ResizeObserver?new ResizeObserver(function(es){es.forEach(function(e){fitOne(e.target)})}):null,lastW=new WeakMap();
+/* yalnız GENİŞLİK değişince yeniden kırp (kendi gizle/göster işlemimizin yarattığı yükseklik değişimi döngü yapmasın) */
+var lastW=new WeakMap(),layersRO=window.ResizeObserver?new ResizeObserver(function(es){es.forEach(function(e){
+  var w=Math.round(e.contentRect.width);if(lastW.get(e.target)===w)return;lastW.set(e.target,w);fitOne(e.target)})}):null;
 /* Tüm listeler toplu işlenir: önce hepsine yaz (gizlileri aç, sona ölçüm için "+N" koy), sonra hepsini
    tek seferde ölç, kesim noktasını hesapla, en son hepsine yaz. Eskiden her deneme sayfayı yeniden ölçtürüyordu
    (23 kartta ~200 ms); şimdi tek ölçüm. Sonuç aynı: en fazla 2 satır, taşanlar 2. satırın sonunda "+N". */
@@ -175,7 +177,15 @@ function fitBatch(uls){
 }
 function layoutCards(root){fitLayers(root);layoutWM(root)}
 var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTimeout(function(){layoutCards(grid)},150)});
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layoutCards(grid)});
+/* FONT BEKLEME — font gelmeden telefonun kendi fontuyla hesaplanan "+N" font gelince değişiyordu
+   (bir malzeme gelip gidiyordu). İçindekiler listeleri font hazır olana kadar görünmez; son hesaptan
+   sonra yumuşakça belirir. Font 2,5 sn'de gelmezse yine de gösterilir. */
+(function(){
+  var H=document.documentElement,done=false;
+  var show=function(){if(done)return;done=true;layoutCards(grid);requestAnimationFrame(function(){H.classList.add('fonts-ready')})};
+  /* iki parça da (Latin + Türkçe karakterler) yüklensin: Türkçe harfli bir metinle açıkça iste */
+  if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('600 14px "Bricolage Grotesque"','Aa şğıİ'),document.fonts.ready]).then(show,show);setTimeout(show,2500)}else show();
+})();
 /* yazı tipi menü çizildikten sonra yüklenirse etiket genişlikleri değişir → yeniden ölç */
 if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',function(){layoutCards(grid)});
 
@@ -466,6 +476,12 @@ function initGL(){
     var Q={lvl:0,max:DPRS.length+1,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,get log(){return /[?&]perf/.test(location.search)}};
     gl.q=Q;
     if(Q.log&&window.console)console.info('[kalite] açık — piksel oranı kademeleri:',DPRS.join(' → '),'(ilk 2,5 sn ölçülmez)');
+    /* ?perf ile ekranda küçük gösterge (telefonda konsol olmadığı için) */
+    var hudEl=null;
+    function perfHud(t){
+      if(!hudEl){hudEl=document.createElement('pre');hudEl.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;margin:0;padding:6px 9px;border-radius:8px;background:rgba(0,0,0,.72);color:#9f9;font:11px/1.35 ui-monospace,monospace;pointer-events:none;white-space:pre';document.body.appendChild(hudEl)}
+      hudEl.textContent=t;
+    }
     function dprNow(){return DPRS[Math.min(Q.lvl,DPRS.length-1)]}
     function setLvl(l){
       l=Math.max(0,Math.min(Q.max,l));if(l===Q.lvl)return;Q.lvl=l;
@@ -478,6 +494,7 @@ function initGL(){
       if(now-Q.t0<1500)return;
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
+      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':''].filter(Boolean).join(String.fromCharCode(10)));
       if(avg>22){Q.good=0;setLvl(Q.lvl+1);Q.hold=now+800}
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;

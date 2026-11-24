@@ -1707,3 +1707,8 @@ html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome 
 .m3d-toggle small{font-size:10px;font-weight:700;letter-spacing:0;margin-left:2px}
 .hero.m3d-loading .m3d-toggle [data-m="3d"]{animation:m3dPulse 1s ease-in-out infinite alternate}
 @keyframes m3dPulse{to{opacity:.6}}
+/* içindekiler (2 satır + "+N"): font gelene kadar gizli, son hesaptan sonra yumuşakça görünür */
+.layers[data-max2]{opacity:0;transition:opacity .35s ease}
+html.fonts-ready .layers[data-max2]{opacity:1}
+/* masaüstü: kaydırma çubuğunun yeri baştan ayrılır; menü açılınca sayfa daralmaz (kartlar/içindekiler kaymaz) */
+html{scrollbar-gutter:stable}
