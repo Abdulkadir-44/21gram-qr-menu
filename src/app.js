@@ -1692,7 +1692,7 @@ function fillSheet(p){
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
-  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit'||p.kind==='soft')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
+  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit'||p.kind==='soft'||p.kind==='beer')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   /* sıcak içecek: fiyat aşağıdaki fiyat satırında bilet; soğuk içecek: bilet ismin sağında, alttaki satır gizli */
