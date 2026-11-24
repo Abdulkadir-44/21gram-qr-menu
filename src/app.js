@@ -606,7 +606,7 @@ function finishMode(){
 }
 function goTo(m,instant){
   var to=m==='menu'?1:0;
-  if(m==='menu'){if(chunkFlush)chunkFlush();warmMenu();app.classList.remove('is-hidden','prewarm');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
+  if(m==='menu'){if(chunkFlush)chunkFlush();warmMenu();if(!groupsPrefetched){clearTimeout(gpT);gpT=setTimeout(prefetchGroups,2500)}app.classList.remove('is-hidden','prewarm');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
   else{app.classList.remove('is-hidden');welcome.classList.remove('is-hidden')}
   document.documentElement.classList.toggle('lock',false);
   if(instant||RM){setP(to);finishMode();if(m==='menu')dealCards();return}
@@ -1455,10 +1455,10 @@ function render(opts){
     tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t.dataset.key===state.group;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   }
   state.order=list.map(function(p){return p.id});state.gridOrder=state.order;
-  /* LAZY LOADING — yalnız ilk 3 kartın görseli hemen (öncelikli) iner; diğerleri data-src'de bekler,
+  /* LAZY LOADING — yalnız ilk ekrandaki kartların görseli (eagerCount: sütun × 2 satır) hemen (öncelikli) iner; diğerleri data-src'de bekler,
      kart ekrana ~1 ekran yaklaşınca lazyIO ile yüklenir (yükleme silüeti .sk o sırada görünür) */
-  var nImg=0;
-  html=html.replace(/<img class="prod" src="/g,function(){return nImg++<3?'<img class="prod" fetchpriority="high" decoding="async" src="':'<img class="prod" decoding="async" data-src="'});
+  var nImg=0,nEager=eagerCount(state.group);
+  html=html.replace(/<img class="prod" src="/g,function(){return nImg++<nEager?'<img class="prod" fetchpriority="high" decoding="async" src="':'<img class="prod" decoding="async" data-src="'});
   var seq=++renderSeq;chunkFlush=null;
   if(opts.chunk){
     /* PARÇA PARÇA KURULUM (açılışta) — kartlar her karede birkaç tane eklenir; 23 kartı tek seferde
@@ -1618,15 +1618,39 @@ function fillSheet(p){
 }
 /* KOMŞU ÖN YÜKLEME — detay açıkken önceki ve sonraki ürünün görseli arka planda iner (düşük öncelik),
    böylece ‹ › ile geçişte görsel beklenmez. Aynı adres olduğu için tarayıcı önbelleğinden gelir. */
+/* İLK EKRANDAKİ KART SAYISI — bölümün o ekrandaki sütun sayısı × 2 satır (CSS ızgara kırılımlarıyla aynı:
+   İçecek 2/3/4 sütun, diğerleri 1/2/3 sütun; 700px ve 1040px). Yalnız pencere genişliği okunur, ölçüm yok. */
+function eagerCount(gk){
+  var w=window.innerWidth,cols=gk==='icecek'?(w>=1040?4:w>=700?3:2):(w>=1040?3:w>=700?2:1);
+  return cols*2;
+}
 var prefetched={};
+function prefetchImg(src){
+  if(!src||prefetched[src])return;prefetched[src]=1;
+  var im=new Image();im.decoding='async';try{im.fetchPriority='low'}catch(e){}
+  im.src=src;
+}
+/* DİĞER BÖLÜMLER — menüde ilk kaydırmada ya da menüye girdikten 2,5 sn sonra, açık olmayan bölümlerin
+   ilk ekranlık kart görseli (eagerCount) arka planda iner; bölüm değişince ilk kartlar beklemeden görünür. Bir kez yapılır. */
+var groupsPrefetched=false,gpT=0;
+function prefetchGroups(){
+  if(groupsPrefetched)return;groupsPrefetched=true;clearTimeout(gpT);
+  window.removeEventListener('scroll',onFirstScroll);
+  (window.requestIdleCallback||function(f){setTimeout(f,1)})(function(){
+    GROUPS.forEach(function(g){
+      if(g.key===state.group)return;
+      var n=0,lim=eagerCount(g.key);
+      g.cats.forEach(function(c){pairMocks(c.items).forEach(function(p){if(n<lim&&p.img){prefetchImg(p.img);n++}})});
+    });
+  },{timeout:2000});
+}
+function onFirstScroll(){if(state.mode==='menu')prefetchGroups()}
+window.addEventListener('scroll',onFirstScroll,{passive:true});
 function prefetchNeighbors(i){
   var n=state.order.length;
   [1,-1].forEach(function(d){
     var q=BYID[state.order[(i+d+n)%n]];
-    if(!q||!q.img||prefetched[q.img])return;
-    prefetched[q.img]=1;
-    var im=new Image();im.decoding='async';try{im.fetchPriority='low'}catch(e){}
-    im.src=q.img;
+    if(q)prefetchImg(q.img);
   });
 }
 /* ——— KART ÇEVİRME (v2 pop-up) ———
