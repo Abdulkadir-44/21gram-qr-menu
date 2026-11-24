@@ -1723,5 +1723,5 @@ html.fx-maskot .mascot-lane,html.fx-maskot .snow{display:none!important}
 html.fx-arka #gl{visibility:hidden}
 /* düz: kart içinde 3D katman yok (görsel ve yazılar aynı düzlemde) · parıltı: renk karıştırma katmanı yok */
 html.fx-duz .card .card-in{transform-style:flat!important;will-change:auto!important}
-html.fx-duz .card .prod,html.fx-duz .card .meta,html.fx-duz .card .stage>*{transform:none!important}
+html.fx-duz .card .prod,html.fx-duz .card .meta{transform:none!important}
 html.fx-parilti .card .sheen{display:none!important}
