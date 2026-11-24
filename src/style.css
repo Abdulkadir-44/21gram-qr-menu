@@ -1723,3 +1723,32 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .card.rise{animation:riseIn .42s cubic-bezier(.2,.8,.25,1) backwards;animation-delay:calc(min(var(--i),6)*45ms)}
 @keyframes riseIn{from{opacity:0;transform:translateY(18px)}}
 @media(prefers-reduced-motion:reduce){.card.rise{animation:none}}
+/* ==========================================================
+   BİRA KARTI (25.11): fiyat bileti bardakla aynı satırda solda, alt satırda yalnız ok;
+   hacim bardağın sol üst köşesinde küçük gri; detaydaki bardak küçük (kaydırma yapmasın)
+   ========================================================== */
+.card--beer.v2 .vol-g{align-self:stretch;justify-content:space-between;align-items:center;padding:10px 4px 0 0}
+.card--beer.v2 .vol-g .ticket{margin-top:0}
+.card--beer.v2 .pint-box{position:relative;display:block;line-height:0}
+.card--beer.v2 .cl{position:absolute;right:calc(100% + 2px);top:0;font-family:var(--body);font-stretch:normal;font-weight:600;font-size:11px;line-height:1;letter-spacing:.02em;color:var(--muted);white-space:nowrap}
+.card--beer.v2 .foot{justify-content:flex-end;padding-top:8px}
+/* sağ sütun içeriğe göre genişleyip kartın dışına taşmasın (ok sağ kenara yapışıyordu); bilet biraz küçük */
+.card--beer.v2 .card-in{grid-template-columns:44% minmax(0,1fr)}
+.card--beer.v2 .meta{min-width:0}
+.card--beer.v2 .vol-g{gap:8px}
+.card--beer.v2 .vol-g .ticket{height:36px;font-size:21px;padding:0 16px 0 22px}
+.card--beer.v2 .vol-g .ticket small{font-size:14px}
+.card--beer.v2 .vol-g .ticket::before{left:11px}
+/* detay: fiyat bileti ismin sağında, aynı hizada */
+.panel[data-kind="beer"] #sName{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.panel[data-kind="beer"] #sName .nm{flex:1;min-width:0}
+.panel[data-kind="beer"] #sName .ticket{color:var(--red);height:42px;font-size:25px;padding:0 22px 0 27px;margin-top:2px}
+.panel[data-kind="beer"] #sName .ticket small{font-size:16px}
+.panel[data-kind="beer"] #sName .ticket::before{left:14px}
+.panel[data-kind="beer"] .price.big{display:none}
+/* kart: bilet aşağı iner, alt çizgiye (fiyat satırının üst çizgisi) değer; detay bardağı bir tık daha küçük */
+.card--beer.v2 .vol-g .ticket{align-self:flex-end}
+/* bira (25.11, son): detay bardağı küçük (dosyanın sonunda: önceki boyut kurallarını ezer); kart bileti biraz sola */
+.pint2.big{width:min(22vw,84px)}
+.sheet.pop .pint2.big{width:min(18vw,68px)}
+.card--beer.v2 .vol-g .ticket{margin-left:-8px}

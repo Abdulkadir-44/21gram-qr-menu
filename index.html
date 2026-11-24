@@ -21,7 +21,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bricolage-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/vendor/three-r128.min.js" as="script">
+<!-- 3D motoru erken başlar ama düşük öncelikle: logo, font ve ilk görsellerle yarışmaz -->
+<link rel="preload" href="/vendor/three-r128.min.js" as="script" fetchpriority="low">
 <link rel="stylesheet" href="/src/theme.css">
 <link rel="stylesheet" href="/src/style.css">
 </head>
@@ -97,7 +98,7 @@
   </div>
 </div>
 
-<script src="/vendor/three-r128.min.js" async id="threeJs"></script>
+<script src="/vendor/three-r128.min.js" async fetchpriority="low" id="threeJs"></script>
 <script type="module" src="/src/app.js"></script>
 </body>
 </html>

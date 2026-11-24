@@ -202,7 +202,8 @@ var gl={ok:false};
 function initGL(){
   try{
     var canvas=$('#gl');
-    var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
+    /* telefonda (yoğun pikselli ekran) arka plan sahnesinde kenar yumuşatma kapalı: fark görünmez, ekran kartı rahatlar */
+    var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!(LITE&&(window.devicePixelRatio||1)>=2),alpha:true,powerPreference:'high-performance'});
     renderer.setClearColor(0x000000,0);
     renderer.outputEncoding=THREE.sRGBEncoding;
     var scene=new THREE.Scene();
@@ -1234,8 +1235,9 @@ function beerCardHTML(p,i){
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +(sz&&!v2?'<p class="vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')
    +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
-   +(v2&&sz?'<div class="vol-g"><span class="cl">'+esc(sz.n)+'<small>'+esc(sz.u.toLocaleLowerCase('tr'))+'</small></span>'+pintLayersSVG(parseFloat(sz.n),false)+'</div>':'')
-   +'<div class="foot">'+(v2?ticketHTML(p):'<span class="price">'+money(p.price)+'</span>')+ARROW+'</div>'
+   /* v2: fiyat bileti solda, bardakla aynı satırda; hacim bardağın sol üst köşesinde küçük gri yazı; alt satırda yalnız ok */
+   +(v2?'<div class="vol-g">'+ticketHTML(p)+(sz?'<span class="pint-box"><span class="cl">'+esc(sz.n)+' '+esc(sz.u.toLocaleLowerCase('tr'))+'</span>'+pintLayersSVG(parseFloat(sz.n),false)+'</span>':'')+'</div>':'')
+   +'<div class="foot">'+(v2?'':'<span class="price">'+money(p.price)+'</span>')+ARROW+'</div>'
    +'</div></div></article>';
 }
 
@@ -1690,7 +1692,7 @@ function fillSheet(p){
   $('#sCat').textContent=p.category;
   var nm0=p.kind==='shot'?p.name.replace(/\s*shot$/i,''):p.name;
   var nmH=esc(nm0)+(p.size&&p.kind!=='beer'?' <small>'+esc(p.size)+'</small>':'');
-  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit'||p.kind==='soft')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
+  $('#sName').innerHTML=((isV2(p)&&p.kind!=='shot')||p.kind==='spirit'||p.kind==='soft'||p.kind==='beer')?'<span class="nm">'+nmH+'</span>'+ticketHTML(p):nmH;
   var d=$('#sDesc');d.textContent=p.desc||'';d.style.display=p.desc?'':'none';
   $('#sPrice').textContent=money(p.price);
   /* sıcak içecek: fiyat aşağıdaki fiyat satırında bilet; soğuk içecek: bilet ismin sağında, alttaki satır gizli */
