@@ -1721,3 +1721,4 @@ html.fx-urun .card .prod{filter:none!important}
 html.fx-egim .card .card-in{transform:none!important}
 html.fx-maskot .mascot-lane,html.fx-maskot .snow{display:none!important}
 html.fx-arka #gl{visibility:hidden}
+html.fx-kar .card--soft .snow i:nth-child(n+5){display:none}

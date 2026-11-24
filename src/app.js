@@ -193,6 +193,8 @@ if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListen
    ilgili görsel efekti kapatır; telefonda ?perf göstergesiyle hangisinin kaydırmayı yavaşlattığını bulmak için */
 var FX=(function(){var m=/[?&]fx=([^&#]*)/.exec(location.search),o={};if(m)decodeURIComponent(m[1]).split(',').forEach(function(k){if(k)o[k]=1});
   if(o.hepsi)['golge','cam','urun','egim','maskot','arka'].forEach(function(k){o[k]=1});
+  /* hafif: ürün gölgesi yok, eğim yok, menüde arka plan figürleri yarıda + çözünürlük bir kademe düşük, daha az kar */
+  if(o.hafif)['urun','egim','figur','kar'].forEach(function(k){o[k]=1});
   Object.keys(o).forEach(function(k){document.documentElement.classList.add('fx-'+k)});return o})();
 
 /* ——— durum ——— */
@@ -537,6 +539,7 @@ function initGL(){
         /* kademe 2 (yarım hız): menüdeyken 3D sahne iki karede bir çizilir; geçen süre biriktirilir,
            böylece figürler aynı hızda hareket eder (yalnız kare sayısı yarıya iner). Kartlar her karede çalışır. */
         if(FX.arka&&P>.99)return;                         /* test: menüde arka plan 3D hiç çizilmez */
+        if(FX.figur&&P>.99&&Q.lvl<1)setLvl(1);            /* test: menüde çözünürlük bir kademe düşük */
         acc+=dt;
         if(halfOn()&&P>.99&&(++frameN&1))return;
         dt=Math.min(.1,acc);acc=0;
@@ -562,7 +565,7 @@ function initGL(){
         stepFigs(dt,wv);
         for(var fi=0;fi<figs.length;fi++){
           var fg=figs[fi],grp=fg.grp;
-          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&!(fewOn()&&fi%2)?1:0);
+          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&!((fewOn()||FX.figur)&&fi%2)?1:0);
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
           var ra=Math.min(texA(fg.front.material.map),fg.pivot?texA(fg.armF.material.map):1);
           if(fg.cur<.01||ra<=0){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
