@@ -1642,15 +1642,18 @@ function switchGroup(tab){
   tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t===tab;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   /* seçim balonu, sayfa rengi ve 3D arka plan rengi sekmeye basıldığı an değişir (kartların solmasıyla eş zamanlı) */
   moveInd();
-  document.documentElement.dataset.group=state.group;
+  /* yalnız RENK anında değişir (satır içi --bg); "hangi bölüm" bilgisi (data-group) ve ona bağlı ızgara düzeni
+     (İçecek'te 2 sütun) eski kartlar tamamen solduktan sonra render'da değişir → eski kartlar sıkışıp/genişleyip kaymaz */
+  var H=document.documentElement;H.style.setProperty('--bg','var(--g-'+state.group+')');
   var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
-  if(RM){window.scrollTo(0,0);render();return}
+  if(RM){window.scrollTo(0,0);render();H.style.removeProperty('--bg');return}
   clearTimeout(swT);var my=++swSeq,done=false;
   /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
   var swap=function(){
     if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
     window.scrollTo(0,0);
     render({chunk:true,dealChunk:true});
+    document.documentElement.style.removeProperty('--bg');
     grid.style.transition='none';grid.style.opacity='';
   };
   var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
