@@ -1651,7 +1651,18 @@ function switchGroup(tab){
   /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
   var swap=function(){
     if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
+    /* BAŞLIK — aşağıdayken logo+arama yukarıda kaybolmuş, kapsül en üste yapışmıştır. En üste dönünce kapsül eski yerinden
+       yeni yerine yumuşakça iner, logo+arama yukarıdan süzülerek belirir (yalnız transform/opacity: ucuz). */
+    var nav=document.querySelector('.nav'),tw=document.querySelector('.top-wrap'),y0=window.scrollY,n0=nav?nav.getBoundingClientRect().top:0;
     window.scrollTo(0,0);
+    if(nav&&y0>0&&!RM){
+      var dy=n0-nav.getBoundingClientRect().top;
+      if(Math.abs(dy)>2){
+        var ez='cubic-bezier(.2,.8,.25,1)';
+        nav.animate([{transform:'translateY('+dy+'px)'},{transform:'none'}],{duration:480,easing:ez});
+        if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
+      }
+    }
     render({chunk:true,dealChunk:true});
     document.documentElement.style.removeProperty('--bg');
     grid.style.transition='none';grid.style.opacity='';
