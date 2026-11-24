@@ -1640,6 +1640,10 @@ tabsEl.addEventListener('click',function(e){
 var swT=0;
 function switchGroup(tab){
   tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t===tab;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
+  /* seçim balonu, sayfa rengi ve 3D arka plan rengi sekmeye basıldığı an değişir (kartların solmasıyla eş zamanlı) */
+  moveInd();
+  document.documentElement.dataset.group=state.group;
+  var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
   if(RM){window.scrollTo(0,0);render();return}
   clearTimeout(swT);
   grid.style.transition='opacity .15s ease';grid.style.opacity='0';
