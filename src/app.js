@@ -450,10 +450,34 @@ function initGL(){
     var groupKey=null;
 
     var vis={w:6,h:5.7},fit=1,baseY=.25,unit=1,figU=1,fMul=1,isPort=false;
+    /* UYARLANABİLİR KALİTE — telefon modeline değil, gerçek kare sürelerine bakılır.
+       1,5 sn'lik pencerede ortalama kare süresi 22 ms'yi (≈45 fps altı) geçerse kalite bir kademe düşer;
+       art arda iki pencere 13 ms'nin altında kalırsa bir kademe geri yükselir. Güçlü cihazda hiçbir şey değişmez.
+       İlk 2,5 sn (gölgelendirici derleme, menü kurulumu) ölçülmez. Kademe 1+: 3D sahnenin çözünürlüğü (piksel oranı) düşer.
+       Adres sonuna ?perf eklenirse konsola yazar. */
+    var dMax=Math.min(window.devicePixelRatio||1,2);
+    var DPRS=[dMax,1.5,1,.75].filter(function(d,i,a){return d<=dMax&&a.indexOf(d)===i});
+    var Q={lvl:0,max:DPRS.length-1,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,log:/[?&]perf/.test(location.search)};
+    gl.q=Q;
+    function dprNow(){return DPRS[Math.min(Q.lvl,DPRS.length-1)]}
+    function setLvl(l){
+      l=Math.max(0,Math.min(Q.max,l));if(l===Q.lvl)return;Q.lvl=l;
+      renderer.setPixelRatio(dprNow());renderer.setSize(window.innerWidth,window.innerHeight,false);
+      if(Q.log&&window.console)console.info('[kalite] kademe',l,'piksel oranı',dprNow());
+    }
+    function qualityTick(now,raw){
+      if(raw>250||document.hidden||now<Q.hold){Q.sum=0;Q.n=0;Q.t0=now;return}  /* sekme dönüşü, açılış, kademe değişimi sonrası: ölçme */
+      Q.sum+=raw;Q.n++;
+      if(now-Q.t0<1500)return;
+      var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
+      if(avg>22){Q.good=0;setLvl(Q.lvl+1);Q.hold=now+800}
+      else if(avg<13&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
+      else Q.good=0;
+    }
     function resize(){
       var w=window.innerWidth,h=window.innerHeight;
       if(figW){figs.forEach(function(fg){fg.px*=w/figW;fg.py*=h/figH})}figW=w;figH=h;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      renderer.setPixelRatio(dprNow());
       renderer.setSize(w,h,false);
       camera.aspect=w/h;camera.updateProjectionMatrix();
       vis.h=2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.position.z;vis.w=vis.h*camera.aspect;
@@ -474,8 +498,9 @@ function initGL(){
 
     function frame(now){
       requestAnimationFrame(frame);
-      var dt=Math.min(.05,(now-last)/1000);last=now;
+      var raw=now-last,dt=Math.min(.05,raw/1000);last=now;
       if(document.hidden){return}
+      if(gl.render)qualityTick(now,raw);
       tick(now,dt);
       if(gl.render){
         if(!RM)time+=dt;
