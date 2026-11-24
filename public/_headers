@@ -22,9 +22,7 @@
 /img/paper.png
   Cache-Control: public, max-age=86400
 
-# fiyatlar ve sayfa: her açılışta kontrol et (değişmediyse sunucu "aynı" der, indirilmez)
-/menu.json
-  Cache-Control: no-cache
+# sayfa: her açılışta kontrol et (değişmediyse sunucu "aynı" der, indirilmez)
 /
   Cache-Control: no-cache
 /index.html

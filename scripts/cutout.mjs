@@ -7,8 +7,8 @@ const ADAPTIVE = new Set(['ozerhisar-ayran', 'churchill']); // zemini saf beyaz 
 const SOFT_CATS = ['smash-burger', 'tavuk-burger'];
 const STRICT_IDS = new Set();
 const STRICT_CATS = ['house-kokteyl', 'klasik-kokteyl']; // köpüklü/beyaz içecekler: yalnız saf beyaz zemin silinir
-for (const g of JSON.parse(fs.readFileSync('public/menu.json', 'utf8')).groups) for (const c of g.cats) if (STRICT_CATS.includes(c.key)) for (const i of c.items) { STRICT[i.id] ??= 246; STRICT_IDS.add(i.id); }
-const SOFT = new Set(JSON.parse(fs.readFileSync('public/menu.json', 'utf8')).groups.flatMap(g => g.cats.filter(c => SOFT_CATS.includes(c.key)).flatMap(c => c.items.map(i => i.id)))); // id -> eşik (beyaz ürünler için)
+for (const g of JSON.parse(fs.readFileSync('src/data/menu.json', 'utf8')).groups) for (const c of g.cats) if (STRICT_CATS.includes(c.key)) for (const i of c.items) { STRICT[i.id] ??= 246; STRICT_IDS.add(i.id); }
+const SOFT = new Set(JSON.parse(fs.readFileSync('src/data/menu.json', 'utf8')).groups.flatMap(g => g.cats.filter(c => SOFT_CATS.includes(c.key)).flatMap(c => c.items.map(i => i.id)))); // id -> eşik (beyaz ürünler için)
 async function cut(src, LO = 205, soft = false, softBelow = 1) {
   const meta0 = await sharp(src).metadata();
   const { data, info } = await sharp(src).extract({ left: 6, top: 6, width: meta0.width - 12, height: meta0.height - 12 }).extend({ top: 4, bottom: 4, left: 4, right: 4, background: '#ffffff' }).resize(900, 900, { fit: 'inside' }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -76,12 +76,12 @@ for (const d of downloads) {
   try { fs.writeFileSync(dst, await cut(C + 'raw/' + d.id + '.jpg', STRICT[d.id] || 205, SOFT.has(d.id), STRICT_IDS.has(d.id) ? 0.7 : 1)); n++; } catch (e) { console.log('ERR', d.id, e.message); }
 }
 // fotoğrafı simprada olmayıp prototipte olan
-const menu = JSON.parse(fs.readFileSync('public/menu.json', 'utf8'));
+const menu = JSON.parse(fs.readFileSync('src/data/menu.json', 'utf8'));
 for (const g of menu.groups) for (const c of g.cats) for (const it of c.items) {
   if (!it.img) continue;
   const dst = OUT + it.img;
   if (!fs.existsSync(dst) && fs.existsSync(C + 'proto/' + it.img)) fs.copyFileSync(C + 'proto/' + it.img, dst);
   const m = await sharp(dst).metadata(); it.w = m.width; it.h = m.height;
 }
-fs.writeFileSync('public/menu.json', JSON.stringify(menu, null, 1));
+fs.writeFileSync('src/data/menu.json', JSON.stringify(menu, null, 1));
 console.log('cut', n, 'total', fs.readdirSync(OUT).length);

@@ -1,7 +1,7 @@
 /* ==========================================================
    21 Gram Gastrobar — 3D QR menü
    Mantık ve animasyonlar referans tasarımdan (reference/21gram-menu-3d.html) birebir alındı.
-   Veri: public/menu.json · Tema: src/theme.css · 3D: Three.js r128 (public/vendor)
+   Veri: src/data/menu.json · Tema: src/theme.css · 3D: Three.js r128 (public/vendor)
    ========================================================== */
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
@@ -9,8 +9,8 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 10;
-/* menü verisi pakete gömülü (ayrı istek ve bekleme yok); public/menu.json değişince build yeniden alır */
-import menu from '../public/menu.json';
+/* menü verisi pakete gömülü (ayrı istek ve bekleme yok); src/data/menu.json değişince build yeniden alır */
+import menu from './data/menu.json';
 
 /* menu.json → referanstaki düz ürün listesi biçimi */
 const PRODUCTS = [];
@@ -129,26 +129,48 @@ function layoutWM(root){
    2. satırın sonuna "+N" eklenir ("+N" sığmazsa bir malzeme daha gizlenir). */
 /* liste boyutu herhangi bir nedenle değişirse (yazı tipi geç yüklendi, ekran döndü…) yeniden kırp */
 var layersRO=window.ResizeObserver?new ResizeObserver(function(es){es.forEach(function(e){fitOne(e.target)})}):null,lastW=new WeakMap();
+/* Tüm listeler toplu işlenir: önce hepsine yaz (gizlileri aç, sona ölçüm için "+N" koy), sonra hepsini
+   tek seferde ölç, kesim noktasını hesapla, en son hepsine yaz. Eskiden her deneme sayfayı yeniden ölçtürüyordu
+   (23 kartta ~200 ms); şimdi tek ölçüm. Sonuç aynı: en fazla 2 satır, taşanlar 2. satırın sonunda "+N". */
 function fitLayers(root){
-  [].forEach.call(root.querySelectorAll('.layers[data-max2]'),function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}fitOne(ul)});
+  var uls=[].filter.call(root.querySelectorAll('.layers[data-max2]'),function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}return true});
+  fitBatch(uls);
 }
-function fitOne(ul){
-  (function(ul){
-    if(!ul.offsetWidth)return;
-    var lis=[].slice.call(ul.querySelectorAll('li:not(.more-l)')),more=ul.querySelector('.more-l');
-    if(more)more.remove();
+function fitOne(ul){fitBatch([ul])}
+function fitBatch(uls){
+  /* 1) yaz: eski durumu sıfırla */
+  var jobs=uls.map(function(ul){
+    var lis=[].slice.call(ul.querySelectorAll('li:not(.more-l)'));
+    var m=ul.querySelector('.more-l')||document.createElement('li');m.className='more-l';
     lis.forEach(function(li){li.hidden=false});
-    var rowTops=[];lis.forEach(function(li){var t=li.offsetTop;if(rowTops.indexOf(t)<0)rowTops.push(t)});
-    if(rowTops.length<=2)return;
-    rowTops.sort(function(a,b){return a-b});
-    var cut=lis.findIndex(function(li){return li.offsetTop>rowTops[1]});
-    var m=document.createElement('li');m.className='more-l';ul.appendChild(m);
-    for(var k=cut;k>0;k--){
-      lis.forEach(function(li,j){li.hidden=j>=k});
-      m.textContent='+'+(lis.length-k);
-      if(m.offsetTop<=rowTops[1])break;
+    m.textContent='+'+lis.length;ul.appendChild(m);              /* en geniş olası "+N" ile ölç */
+    return {ul:ul,lis:lis,m:m};
+  });
+  /* 2) oku: tek düzen hesabı */
+  jobs.forEach(function(j){
+    if(!j.ul.offsetWidth){j.skip=1;return}
+    var cs=getComputedStyle(j.ul),ur=j.ul.getBoundingClientRect();
+    j.cw=ur.width-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    j.gap=parseFloat(cs.columnGap)||0;
+    j.r=j.lis.map(function(li){return li.getBoundingClientRect()});
+    j.mw=j.m.getBoundingClientRect().width;
+  });
+  /* 3) hesapla + yaz */
+  jobs.forEach(function(j){
+    if(j.skip){j.m.remove();return}
+    var tops=[];j.r.forEach(function(r){var t=Math.round(r.top);if(tops.indexOf(t)<0)tops.push(t)});tops.sort(function(a,b){return a-b});
+    if(tops.length<=2){j.m.remove();return}
+    var row=function(i){return tops.indexOf(Math.round(j.r[i].top))};
+    var cut=j.r.findIndex(function(r,i){return row(i)>1});
+    var first2=j.r.findIndex(function(r,i){return row(i)===1});
+    var k=cut;
+    for(;k>0;k--){
+      if(row(k-1)<1)break;                                        /* "+N" 2. satırın başına iner: sığar */
+      if(j.r[k-1].right-j.r[first2].left+j.gap+j.mw<=j.cw+.5)break;
     }
-  })(ul);
+    j.lis.forEach(function(li,i){li.hidden=i>=k});
+    j.m.textContent='+'+(j.lis.length-k);
+  });
 }
 function layoutCards(root){fitLayers(root);layoutWM(root)}
 var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTimeout(function(){layoutCards(grid)},150)});
@@ -205,13 +227,15 @@ function initGL(){
     var texQueue=[],texBusy=false;
     var idle=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:120})}:function(f){setTimeout(f,16)};
     function texQ(job){texQueue.push(job);if(!texBusy){texBusy=true;idle(texRun)}}
+    /* doku hazır değilse 0 (figür hiç çizilmez → boş doku ekran kartına yüklenmez), hazır olunca 0,6 sn'de 1'e çıkar */
+    function texA(tx){var t0=tx&&tx._t0;if(!t0)return 0;var k=Math.min(1,(performance.now()-t0)/600);return k*k*(3-2*k)}
     function texRun(){var job=texQueue.shift();if(job)job();if(texQueue.length)idle(texRun);else texBusy=false}
     function figTexture(name){
       if(figTex[name])return figTex[name];
       var cv=document.createElement('canvas');cv.width=cv.height=512;
       var tx=new THREE.CanvasTexture(cv);tx.encoding=THREE.sRGBEncoding;tx.anisotropy=2;
       var im=new Image();
-      im.onload=function(){texQ(function(){cv.getContext('2d').drawImage(im,0,0,512,512);tx.needsUpdate=true})};
+      im.onload=function(){texQ(function(){cv.getContext('2d').drawImage(im,0,0,512,512);tx.needsUpdate=true;tx._t0=performance.now()})};
       im.src='data:image/svg+xml;base64,'+btoa(FIGS[name]||ARMY_SVG[name]);
       figTex[name]=tx;return tx;
     }
@@ -291,7 +315,8 @@ function initGL(){
         p.m.position.lerpVectors(p.p0,end,Math.min(k,1)+(k>1?(k-1):0));
         p.m.position.y+=Math.sin(Math.min(k,1)*Math.PI)*p.h;p.m.position.z+=.3;
         p.m.rotation.z=k*p.spin;p.m.scale.set(p.sc,p.sc,1);
-        p.m.material.opacity=.9*(k>1?Math.max(0,1-(k-1)/.35):1);
+        var pa=texA(p.m.material.map);p.m.visible=pa>0;
+        p.m.material.opacity=.9*(k>1?Math.max(0,1-(k-1)/.35):1)*pa;
       }
     }
     /* kol açısı: 0 = aşağı sarkık, + öne (yüzü dönük taraf), − geriye */
@@ -477,7 +502,8 @@ function initGL(){
           var fg=figs[fi],grp=fg.grp;
           var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g?1:0);
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
-          if(fg.cur<.01){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
+          var ra=Math.min(texA(fg.front.material.map),fg.pivot?texA(fg.armF.material.map):1);
+          if(fg.cur<.01||ra<=0){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
           var fl=1+f*(.3+.5*fg.par),szf=fMul*(isPort?1-.2*wv:1-.07*wv);
           var nx=((fg.px/W*2-1)+Math.sin(ptime*fg.fx+fg.ph)*.012+aim.x*.06*fg.par+drag.x*.05*fg.par)*fl;
           var ny=((1-fg.py/H*2)+Math.sin(ptime*fg.fy+fg.ph*1.3)*.016-aim.y*.04*fg.par+Math.sin(sc*fg.par*.9+fg.ph)*.03+scrollVel*.02*fg.par)*fl;
@@ -500,8 +526,8 @@ function initGL(){
           grp.rotation.set(Math.sin(ptime*.37+fg.ph*2)*.16-fg.ly*.55-scrollVel*.18*fg.par,
                            Math.sin(ptime*.5+fg.ph)*.3+fg.lx*.6*fg.flip,
                            fg.r0+Math.sin(ptime*fg.fr+fg.ph)*.14+fg.wob*.5+fg.sp);
-          fg.front.material.opacity=Math.min(.95,(fg.a0+.5*fg.hov+.55*fg.hit)*fg.cur);
-          fg.back.material.opacity=Math.min(.5,(.26+.2*fg.hov+.2*fg.hit)*fg.cur);
+          fg.front.material.opacity=Math.min(.95,(fg.a0+.5*fg.hov+.55*fg.hit)*fg.cur)*ra;
+          fg.back.material.opacity=Math.min(.5,(.26+.2*fg.hov+.2*fg.hit)*fg.cur)*ra;
           if(fg.pivot){fg.pivot.rotation.z=RM?.25:armAngle(fg);fg.armF.material.opacity=fg.front.material.opacity;fg.armB.material.opacity=fg.back.material.opacity}
           grp.visible=true;
         }
@@ -536,7 +562,8 @@ function startGL(){
   initGL();
   if(gl.ok){
     gl.setP(Pv);gl.setGroup(groupColor(state.group),state.group);gl.render=!state.sheetId;
-    H.classList.add('gl-in');setTimeout(function(){H.classList.remove('gl-wait','gl-in')},700);
+    /* ilk kare çizildikten sonra tuvali görünür yap (CSS 0,8 sn'lik geçişle belirtir) */
+    requestAnimationFrame(function(){requestAnimationFrame(function(){H.classList.add('gl-on');if(H.classList.contains('gl-wait')){H.classList.add('gl-in');setTimeout(function(){H.classList.remove('gl-wait','gl-in')},800)}})});
   }else H.classList.remove('gl-wait');
 }
 (function bootGL(){
@@ -579,7 +606,7 @@ function finishMode(){
 }
 function goTo(m,instant){
   var to=m==='menu'?1:0;
-  if(m==='menu'){warmMenu();app.classList.remove('is-hidden','prewarm');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
+  if(m==='menu'){if(chunkFlush)chunkFlush();warmMenu();app.classList.remove('is-hidden','prewarm');welcome.classList.remove('is-hidden');window.scrollTo(0,0)}
   else{app.classList.remove('is-hidden');welcome.classList.remove('is-hidden')}
   document.documentElement.classList.toggle('lock',false);
   if(instant||RM){setP(to);finishMode();if(m==='menu')dealCards();return}
@@ -1434,22 +1461,51 @@ function render(opts){
      kart ekrana ~1 ekran yaklaşınca lazyIO ile yüklenir (yükleme silüeti .sk o sırada görünür) */
   var nImg=0;
   html=html.replace(/<img class="prod" src="/g,function(){return nImg++<3?'<img class="prod" fetchpriority="high" decoding="async" src="':'<img class="prod" decoding="async" data-src="'});
-  grid.innerHTML=html;armImgs(grid);layoutCards(grid);armLazy(grid);
+  var seq=++renderSeq;chunkFlush=null;
+  if(opts.chunk){
+    /* PARÇA PARÇA KURULUM (açılışta) — kartlar her karede birkaç tane eklenir; 23 kartı tek seferde
+       yerleştirmenin ~180 ms'lik donması, karşılama animasyonunu bozmayan küçük parçalara bölünür.
+       "Menüyü aç"a erken basılırsa kalanlar o an eklenir (chunkFlush). */
+    var tpl=document.createElement('template');tpl.innerHTML=html;
+    var nodes=[].slice.call(tpl.content.childNodes);
+    grid.textContent='';armLazy(grid);
+    var addChunk=function(n){
+      var part=nodes.splice(0,n);if(!part.length)return;
+      var frag=document.createDocumentFragment();part.forEach(function(x){frag.appendChild(x)});grid.appendChild(frag);
+      var els=part.filter(function(x){return x.nodeType===1}),uls=[];
+      els.forEach(function(el){armImgs(el);[].push.apply(uls,el.querySelectorAll('.layers[data-max2]'))});
+      uls.forEach(function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}});
+      fitBatch(uls);observeLazy(els);
+    };
+    var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd()};
+    var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
+    chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
+    addChunk(3);afterPaint(step);
+  }else{
+    grid.innerHTML=html;armImgs(grid);layoutCards(grid);armLazy(grid);
+  }
   document.documentElement.dataset.group=state.group;
   var hex=groupColor(state.group);
   if(gl.setGroup)gl.setGroup(hex,state.group);
   var tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.content=hex;
-  collectCards();moveInd();
+  if(!opts.chunk){collectCards();moveInd()}
   if(opts.deal!==false)dealCards();
 }
+var renderSeq=0,chunkFlush=null;
+function afterPaint(f){requestAnimationFrame(function(){setTimeout(f,0)})}
 var lazyIO=null;
 function loadLazy(el){[].forEach.call(el.querySelectorAll('img[data-src]'),function(im){im._t0=performance.now();im.src=im.getAttribute('data-src');im.removeAttribute('data-src')})}
 function armLazy(root){
-  if(lazyIO)lazyIO.disconnect();
-  var imgs=root.querySelectorAll('img[data-src]');if(!imgs.length)return;
-  if(!('IntersectionObserver' in window)){loadLazy(root);return}
-  lazyIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){loadLazy(e.target);lazyIO.unobserve(e.target)}})},{rootMargin:'600px 0px'});
-  [].forEach.call(root.querySelectorAll('.card'),function(c){if(c.querySelector('img[data-src]'))lazyIO.observe(c)});
+  if(lazyIO){lazyIO.disconnect();lazyIO=null}
+  observeLazy([root]);
+}
+function observeLazy(els){
+  if(!('IntersectionObserver' in window)){els.forEach(loadLazy);return}
+  if(!lazyIO)lazyIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){loadLazy(e.target);lazyIO.unobserve(e.target)}})},{rootMargin:'600px 0px'});
+  els.forEach(function(el){
+    var cs=el.matches&&el.matches('.card')?[el]:[].slice.call(el.querySelectorAll?el.querySelectorAll('.card'):[]);
+    cs.forEach(function(c){if(c.querySelector('img[data-src]'))lazyIO.observe(c)});
+  });
 }
 function collectCards(){
   if(io)io.disconnect();
@@ -1734,7 +1790,7 @@ function goToMenuForHash(id){
   goTo('menu',true);render({deal:false});
   openSheet(id,null,true);
 }
-render({deal:false});setP(0);finishMode();
+render({deal:false,chunk:true});setP(0);finishMode();
 setTimeout(function(){(window.requestIdleCallback||function(f){setTimeout(f,1)})(warmMenu,{timeout:1500})},900);
 var h0=location.hash.slice(1);
 if(h0&&BYID[h0])goToMenuForHash(h0);

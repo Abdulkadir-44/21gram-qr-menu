@@ -1666,8 +1666,21 @@ html[data-group="icecek"] .mock-pair .card--mock{grid-column:auto;width:100%}
 @media(min-width:700px){html[data-group="icecek"] .mock-pair{grid-template-columns:repeat(2,minmax(0,440px))}}
 
 /* 3D motoru gelene kadar: düz logo 3D logonun yerinde; gelince düz logo söner, 3D tuval belirir */
-html.gl-wait .fb-logo{display:block;position:absolute;left:0;right:0;top:34%;width:min(70vw,520px);margin:-6vh auto 0;animation:none;transition:opacity .6s}
-html.gl-wait #gl{opacity:0}
-#gl{transition:opacity .6s}
-html.gl-in .fb-logo{opacity:0}
-html.gl-in #gl{opacity:1}
+/* 3D sahne her açılışta ilk karesinden sonra 0,8 sn'de belirir (logo aniden çıkmaz).
+   Düz yedek logo yalnız 3D motoru 0,4 sn'den fazla gecikirse, o da yumuşakça görünür. */
+#gl{opacity:0;transition:opacity .8s ease}
+html.gl-on #gl{opacity:1}
+html.gl-wait .fb-logo{display:block;position:absolute;left:0;right:0;top:34%;width:min(70vw,520px);margin:-6vh auto 0;opacity:0;
+  animation:fbIn .5s .4s ease forwards;transition:opacity .6s}
+@keyframes fbIn{to{opacity:1}}
+html.gl-in .fb-logo{animation:none;opacity:0}
+html.no-gl #gl{opacity:0}
+/* karşılama yazısı + "Menüyü aç" + ipucu: önce arka plan, 3D sahne çizilince yumuşakça gelir.
+   3D motoru gecikirse 0,4 sn sonra düz logoyla birlikte; her ihtimale karşı en geç 2,5 sn'de kendiliğinden görünür */
+#welcome .w-sub,#welcome .enter,#welcome .w-hint{opacity:0;animation:fbIn .6s 2.5s ease forwards}
+#welcome .w-sub,#welcome .w-hint{transition:opacity .8s ease .15s}
+#welcome .enter{transition:transform .25s cubic-bezier(.2,.9,.2,1.3),box-shadow .25s,opacity .8s ease .25s}
+html.gl-on #welcome .w-sub,html.gl-on #welcome .enter,html.gl-on #welcome .w-hint,
+html.no-gl #welcome .w-sub,html.no-gl #welcome .enter,html.no-gl #welcome .w-hint{opacity:1}
+html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome .w-hint{animation-delay:.4s}
+@media(prefers-reduced-motion:reduce){#welcome .w-sub,#welcome .enter,#welcome .w-hint{opacity:1;animation:none}}

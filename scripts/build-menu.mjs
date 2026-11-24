@@ -40,7 +40,7 @@ for (const g of [...groups].sort(sortO)) {
   }
   out.groups.push(G);
 }
-fs.writeFileSync('public/menu.json', JSON.stringify(out, null, 1));
+fs.writeFileSync('src/data/menu.json', JSON.stringify(out, null, 1));
 fs.writeFileSync(C + 'downloads.json', JSON.stringify(downloads, null, 1));
 let n = 0; for (const g of out.groups) for (const c of g.cats) { n += c.items.length; console.log(g.name, '/', c.name, c.items.length); }
 console.log('TOTAL', n, 'images', downloads.length, 'proto-matched', downloads.filter(d => d.proto).length);
