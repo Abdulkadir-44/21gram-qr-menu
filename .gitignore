@@ -11,3 +11,6 @@ public/img/old/
 
 # başta verilen prototip (yalnız yerel kaynak; scripts/extract-prototype.mjs okur), GitHub'a gitmez
 reference/
+
+# proje durumu notu (yalnız yerel; compact sonrası hatırlamak için)
+docs/PROJE-DURUMU.md
