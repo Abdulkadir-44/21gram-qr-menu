@@ -457,14 +457,17 @@ function initGL(){
        Adres sonuna ?perf eklenirse konsola yazar. */
     var dMax=Math.min(window.devicePixelRatio||1,2);
     var DPRS=[dMax,1.5,1,.75].filter(function(d,i,a){return d<=dMax&&a.indexOf(d)===i});
-    var Q={lvl:0,max:DPRS.length-1,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,get log(){return /[?&]perf/.test(location.search)}};
+    /* kademeler: 0…DPRS.length-1 çözünürlük adımları, DPRS.length = yarım hız (menüde 3D sahne 30 fps) */
+    var acc=0,frameN=0;
+    function halfOn(){return Q.lvl>=DPRS.length}
+    var Q={lvl:0,max:DPRS.length,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,get log(){return /[?&]perf/.test(location.search)}};
     gl.q=Q;
     if(Q.log&&window.console)console.info('[kalite] açık — piksel oranı kademeleri:',DPRS.join(' → '),'(ilk 2,5 sn ölçülmez)');
     function dprNow(){return DPRS[Math.min(Q.lvl,DPRS.length-1)]}
     function setLvl(l){
       l=Math.max(0,Math.min(Q.max,l));if(l===Q.lvl)return;Q.lvl=l;
       renderer.setPixelRatio(dprNow());renderer.setSize(window.innerWidth,window.innerHeight,false);
-      if(Q.log&&window.console)console.info('[kalite] kademe',l,'piksel oranı',dprNow());
+      if(Q.log&&window.console)console.info('[kalite] kademe',l,'piksel oranı',dprNow(),halfOn()?'· menüde 3D yarım hız':'');
     }
     function qualityTick(now,raw){
       if(raw>250||document.hidden||now<Q.hold){Q.sum=0;Q.n=0;Q.t0=now;return}  /* sekme dönüşü, açılış, kademe değişimi sonrası: ölçme */
@@ -505,6 +508,11 @@ function initGL(){
       if(gl.render)qualityTick(now,raw);
       tick(now,dt);
       if(gl.render){
+        /* kademe 2 (yarım hız): menüdeyken 3D sahne iki karede bir çizilir; geçen süre biriktirilir,
+           böylece figürler aynı hızda hareket eder (yalnız kare sayısı yarıya iner). Kartlar her karede çalışır. */
+        acc+=dt;
+        if(halfOn()&&P>.99&&(++frameN&1))return;
+        dt=Math.min(.1,acc);acc=0;
         if(!RM)time+=dt;
         var k=1-Math.exp(-dt*7);
         aim.x+=(aimT.x-aim.x)*k;aim.y+=(aimT.y-aim.y)*k;
