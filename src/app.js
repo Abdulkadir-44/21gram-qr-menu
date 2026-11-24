@@ -1532,8 +1532,10 @@ function render(opts){
       els.forEach(function(el){armImgs(el);[].push.apply(uls,el.querySelectorAll('.layers[data-max2]'))});
       uls.forEach(function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}});
       fitBatch(uls);observeLazy(els);
+      if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
     };
-    var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd()};
+    var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
+      if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
     addChunk(3);afterPaint(step);
@@ -1545,7 +1547,7 @@ function render(opts){
   if(gl.setGroup)gl.setGroup(hex,state.group);
   var tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.content=hex;
   if(!opts.chunk){collectCards();moveInd()}
-  if(opts.deal!==false)dealCards();
+  if(opts.deal!==false&&!opts.chunk)dealCards();
 }
 var renderSeq=0,chunkFlush=null;
 function afterPaint(f){requestAnimationFrame(function(){setTimeout(f,0)})}
@@ -1617,8 +1619,47 @@ tabsEl.addEventListener('click',function(e){
   var b=e.target.closest('.tab');if(!b)return;
   if(b.dataset.key===state.group&&!state.q)return;
   state.q='';qEl.value='';state.group=b.dataset.key;tickCards.cur=null;
-  window.scrollTo(0,0);render();
+  switchGroup(b);
 });
+/* BÖLÜM DEĞİŞİMİ — eskiden sayfa bir anda en üste zıplıyor ve 29 kart tek seferde kuruluyordu (~235 ms donma).
+   Şimdi: sekme anında seçili görünür → mevcut kartlar 150 ms'de solar → sayfa görünmezken en üste alınır →
+   yeni kartlar parça parça (ilk 3 hemen, gerisi kare kare) eklenir ve her biri "dağıtılma" animasyonuyla gelir. */
+var swT=0;
+function switchGroup(tab){
+  tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t===tab;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
+  /* seçim balonu, sayfa rengi ve 3D arka plan rengi sekmeye basıldığı an değişir (kartların solmasıyla eş zamanlı) */
+  moveInd();
+  /* yalnız RENK anında değişir (satır içi --bg); "hangi bölüm" bilgisi (data-group) ve ona bağlı ızgara düzeni
+     (İçecek'te 2 sütun) eski kartlar tamamen solduktan sonra render'da değişir → eski kartlar sıkışıp/genişleyip kaymaz */
+  var H=document.documentElement;H.style.setProperty('--bg','var(--g-'+state.group+')');
+  var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
+  if(RM){window.scrollTo(0,0);render();H.style.removeProperty('--bg');return}
+  clearTimeout(swT);var my=++swSeq,done=false;
+  /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
+  var swap=function(){
+    if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
+    /* BAŞLIK — aşağıdayken logo+arama yukarıda kaybolmuş, kapsül en üste yapışmıştır. En üste dönünce kapsül eski yerinden
+       yeni yerine yumuşakça iner, logo+arama yukarıdan süzülerek belirir (yalnız transform/opacity: ucuz). */
+    var nav=document.querySelector('.nav'),tw=document.querySelector('.top-wrap'),y0=window.scrollY,n0=nav?nav.getBoundingClientRect().top:0;
+    window.scrollTo(0,0);
+    if(nav&&y0>0&&!RM){
+      var dy=n0-nav.getBoundingClientRect().top;
+      if(Math.abs(dy)>2){
+        var ez='cubic-bezier(.2,.8,.25,1)';
+        nav.animate([{transform:'translateY('+dy+'px)'},{transform:'none'}],{duration:480,easing:ez});
+        if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
+      }
+    }
+    render({chunk:true,dealChunk:true});
+    document.documentElement.style.removeProperty('--bg');
+    grid.style.transition='none';grid.style.opacity='';
+  };
+  var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
+  grid.addEventListener('transitionend',onEnd);
+  grid.style.transition='opacity .15s ease';grid.style.opacity='0';
+  swT=setTimeout(swap,300);
+}
+var swSeq=0;
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});

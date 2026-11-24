@@ -1719,3 +1719,7 @@ html{scrollbar-gutter:stable}
 html.lite .card .sheen,html.lite .card .shade{display:none}
 html.lite .card .card-in{transform:none!important}
 html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* bölüm değişimi: kartlar yerinde belirip hafifçe yükselerek gelir (açılıştaki dönerek dağıtılma yalnız ilk girişte) */
+.card.rise{animation:riseIn .42s cubic-bezier(.2,.8,.25,1) backwards;animation-delay:calc(min(var(--i),6)*45ms)}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px)}}
+@media(prefers-reduced-motion:reduce){.card.rise{animation:none}}
