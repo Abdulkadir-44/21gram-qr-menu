@@ -460,14 +460,16 @@ function initGL(){
     /* kademeler: 0…DPRS.length-1 çözünürlük adımları, DPRS.length = yarım hız (menüde 3D sahne 30 fps) */
     var acc=0,frameN=0;
     function halfOn(){return Q.lvl>=DPRS.length}
-    var Q={lvl:0,max:DPRS.length,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,get log(){return /[?&]perf/.test(location.search)}};
+    /* kademe 3 (sade arka plan): menüde bölüm figürlerinin yarısı yumuşakça söner (karşılama ekranı etkilenmez) */
+    function fewOn(){return Q.lvl>=DPRS.length+1}
+    var Q={lvl:0,max:DPRS.length+1,sum:0,n:0,t0:0,good:0,hold:performance.now()+2500,get log(){return /[?&]perf/.test(location.search)}};
     gl.q=Q;
     if(Q.log&&window.console)console.info('[kalite] açık — piksel oranı kademeleri:',DPRS.join(' → '),'(ilk 2,5 sn ölçülmez)');
     function dprNow(){return DPRS[Math.min(Q.lvl,DPRS.length-1)]}
     function setLvl(l){
       l=Math.max(0,Math.min(Q.max,l));if(l===Q.lvl)return;Q.lvl=l;
       renderer.setPixelRatio(dprNow());renderer.setSize(window.innerWidth,window.innerHeight,false);
-      if(Q.log&&window.console)console.info('[kalite] kademe',l,'piksel oranı',dprNow(),halfOn()?'· menüde 3D yarım hız':'');
+      if(Q.log&&window.console)console.info('[kalite] kademe',l,'piksel oranı',dprNow(),halfOn()?'· menüde 3D yarım hız':'',fewOn()?'· menüde figürler yarıya indi':'');
     }
     function qualityTick(now,raw){
       if(raw>250||document.hidden||now<Q.hold){Q.sum=0;Q.n=0;Q.t0=now;return}  /* sekme dönüşü, açılış, kademe değişimi sonrası: ölçme */
@@ -535,7 +537,7 @@ function initGL(){
         stepFigs(dt,wv);
         for(var fi=0;fi<figs.length;fi++){
           var fg=figs[fi],grp=fg.grp;
-          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g?1:0);
+          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&!(fewOn()&&fi%2)?1:0);
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
           var ra=Math.min(texA(fg.front.material.map),fg.pivot?texA(fg.armF.material.map):1);
           if(fg.cur<.01||ra<=0){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
