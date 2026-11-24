@@ -1748,7 +1748,7 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .panel[data-kind="beer"] .price.big{display:none}
 /* kart: bilet aşağı iner, alt çizgiye (fiyat satırının üst çizgisi) değer; detay bardağı bir tık daha küçük */
 .card--beer.v2 .vol-g .ticket{align-self:flex-end}
-.pint2.big{width:min(26vw,96px)}
-.sheet.pop .pint2.big{width:min(20vw,80px)}
-.pint2.big{width:min(30vw,116px)}
-.sheet.pop .pint2.big{width:min(24vw,96px)}
+/* bira (25.11, son): detay bardağı küçük (dosyanın sonunda: önceki boyut kurallarını ezer); kart bileti biraz sola */
+.pint2.big{width:min(22vw,84px)}
+.sheet.pop .pint2.big{width:min(18vw,68px)}
+.card--beer.v2 .vol-g .ticket{margin-left:-8px}
