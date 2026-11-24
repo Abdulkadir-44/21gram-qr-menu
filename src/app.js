@@ -202,7 +202,8 @@ var gl={ok:false};
 function initGL(){
   try{
     var canvas=$('#gl');
-    var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true,powerPreference:'high-performance'});
+    /* telefonda (yoğun pikselli ekran) arka plan sahnesinde kenar yumuşatma kapalı: fark görünmez, ekran kartı rahatlar */
+    var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:!(LITE&&(window.devicePixelRatio||1)>=2),alpha:true,powerPreference:'high-performance'});
     renderer.setClearColor(0x000000,0);
     renderer.outputEncoding=THREE.sRGBEncoding;
     var scene=new THREE.Scene();
