@@ -76,6 +76,7 @@ function isPop(p){return isV2(p)||p.kind==='dessert'||p.kind==='beer'||p.kind===
    Yerleşim kart çizildikten sonra ölçülerek yapılır: ürün görseli, ad, fiyat bileti,
    malzemeler ve alt satırın kutuları engel sayılır; yazılar ne bunlara ne birbirine değer.
    Rastgelelik ürün kimliğinden tohumlanır → her açılışta aynı dağılım. */
+/* kullanılmıyor: kartlardaki 21GRAM deseni artık kâğıt dokusundan (img/paper.png) geliyor */
 function wmHTML(p){return '<span class="wm" aria-hidden="true" data-seed="'+esc(p.id)+'"></span>'}
 function boxIn(el,root){var x=0,y=0,e=el;while(e&&e!==root){x+=e.offsetLeft;y+=e.offsetTop;e=e.offsetParent}return {x:x,y:y,w:el.offsetWidth,h:el.offsetHeight}}
 function layoutWM(root){
@@ -1207,7 +1208,7 @@ function spiritCardV3(p,i){
   var badge='<span class="spirit sp2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5C8 1.5 3 7.2 3 10.2a5 5 0 0 0 10 0C13 7.2 8 1.5 8 1.5z"/></svg>'
    +'<b>'+esc(sp||p.category.toLocaleUpperCase('tr'))+'</b>'+(sz?'<span>'+esc(sz.n+' '+sz.u)+'</span>':'')+'</span>';
   return '<article class="card card--bar fit'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
-   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><span class="spot" aria-hidden="true"></span>'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><span class="spot" aria-hidden="true"></span><div class="sheen"></div></div>'
    +'<div class="stage">'+prodHTML(p)+'</div>'
    +'<div class="meta"><p class="cat">'+badge+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
@@ -1275,7 +1276,7 @@ function cocktailCardFit(p,i){
   var parts=(p.desc||'').split(',').map(function(s){return s.trim()}).filter(Boolean);
   var recipe=parts.length?parts.map(function(s){return '<span>'+esc(s)+'</span>'}).join('<i aria-hidden="true">✦</i>'):'<span class="classic">Klasik reçete</span>';
   return '<article class="card card--cocktail v2 fit'+(mascot?' has-mascot':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+', '+money(p.price)+'. Detayı aç')+'">'
-   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
    +'<div class="stage">'+prodHTML(p)+'</div>'
    +'<div class="meta"><p class="cat">'+(sp?spiritBadge(sp):'')+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
@@ -1372,7 +1373,7 @@ function burgerCardV2(p,i){
   var shown=fit?parts:parts.slice(0,5),rest=parts.length-shown.length;
   var layers=shown.map(function(s){return '<li style="--c:'+layerColor(s)+'">'+esc(s)+'</li>'}).join('')+(rest>0?'<li class="more-l">+'+rest+'</li>':'');
   return '<article class="card card--burger v2'+(mascot?' has-mascot':'')+(fit?' fit':'')+'" role="button" tabindex="0" data-id="'+p.id+'" data-cat="'+p.catKey+'" style="--i:'+i+';--mcd:'+mcd+'s" aria-label="'+esc(p.name+(p.size?' '+p.size:'')+', '+money(p.price)+'. Detayı aç')+'">'
-   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper">'+wmHTML(p)+'<div class="sheen"></div></div>'
+   +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div></div>'
    +'<div class="stage">'+vis+'</div>'
    +'<div class="meta"><p class="cat"><span>'+esc(p.category)+'</span></p>'
    +'<div class="name-row"><h3 class="name">'+esc(p.name)+(p.size?' <small>'+esc(p.size)+'</small>':'')+'</h3>'
