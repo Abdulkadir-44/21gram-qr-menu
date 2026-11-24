@@ -1712,15 +1712,10 @@ html.fonts-ready .layers[data-max2]{opacity:1}
 /* masaüstü: kaydırma çubuğunun yeri baştan ayrılır; menü açılınca sayfa daralmaz (kartlar/içindekiler kaymaz) */
 html{scrollbar-gutter:stable}
 /* ==========================================================
-   TEST AYARLARI (geçici, ?fx=…): yalnız adreste istenince etkili, normal görünüme dokunmaz
+   HAFİF SÜRÜM (html.lite = telefon/tablet, ana giriş parmak)
+   kapalı: parıltı, kart eğilmesi, kart altı bulanık gölge, başlık camı
+   açık: maskot/kar, kart içi 3D katmanlar, arka plan 3D, ürün gölgesi
    ========================================================== */
-html.fx-golge .card .shade{display:none}
-html.fx-cam .nav-in,html.fx-cam .icon-btn,html.fx-cam .top-wrap,html.fx-cam .nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-html.fx-urun .card .prod{filter:none!important}
-html.fx-egim .card .card-in{transform:none!important}
-html.fx-maskot .mascot-lane,html.fx-maskot .snow{display:none!important}
-html.fx-arka #gl{visibility:hidden}
-/* düz: kart içinde 3D katman yok (görsel ve yazılar aynı düzlemde) · parıltı: renk karıştırma katmanı yok */
-html.fx-duz .card .card-in{transform-style:flat!important;will-change:auto!important}
-html.fx-duz .card .prod,html.fx-duz .card .meta{transform:none!important}
-html.fx-parilti .card .sheen{display:none!important}
+html.lite .card .sheen,html.lite .card .shade{display:none}
+html.lite .card .card-in{transform:none!important}
+html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}

@@ -51,6 +51,9 @@ const groupColor = key => cssVar('--g-' + key) || cssVar('--red') || '#E4032D';
 (function(){
 'use strict';
 var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* telefon/tablet (ana giriş parmak): hafif sürüm — parıltı, kart eğilmesi, kart altı bulanık gölge ve başlık camı kapalı; kar 4, menüde bölüm başına 3 figür */
+var LITE=!!(window.matchMedia&&matchMedia('(hover: none) and (pointer: coarse)').matches);
+if(LITE)document.documentElement.classList.add('lite');
 var $=function(s){return document.querySelector(s)};
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 var ss=function(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
@@ -188,20 +191,6 @@ var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTim
 })();
 /* yazı tipi menü çizildikten sonra yüklenirse etiket genişlikleri değişir → yeniden ölç */
 if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',function(){layoutCards(grid)});
-
-/* ——— TEST AYARLARI (geçici) — performans karşılaştırması
-   ?perf&fx=hepsi            → temel: bütün görsel efektler kapalı
-   ?perf&fx=hepsi&ac=maskot  → temel + yalnız sayılanlar geri açık (virgülle: ac=maskot,golge…)
-   kapatılabilenler: golge, cam, urun, egim, maskot, arka, duz, parilti */
-var FX=(function(){
-  var q=location.search,o={};
-  if(/[?&]fx=hepsi(?:&|$)/.test(q)){
-    ['golge','cam','urun','egim','maskot','arka','duz','parilti'].forEach(function(k){o[k]=1});
-    var a=/[?&]ac=([^&#]*)/.exec(q);
-    if(a)decodeURIComponent(a[1]).split(',').forEach(function(k){delete o[k.trim()]});
-    if(o.duz)o.egim=1;
-  }
-  Object.keys(o).forEach(function(k){document.documentElement.classList.add('fx-'+k)});return o})();
 
 /* ——— durum ——— */
 var state={mode:'welcome',group:GROUPS[0].key,q:'',order:[],sheetId:null,pushed:false};
@@ -544,7 +533,6 @@ function initGL(){
       if(gl.render){
         /* kademe 2 (yarım hız): menüdeyken 3D sahne iki karede bir çizilir; geçen süre biriktirilir,
            böylece figürler aynı hızda hareket eder (yalnız kare sayısı yarıya iner). Kartlar her karede çalışır. */
-        if(FX.arka&&P>.99)return;                         /* test: menüde arka plan 3D hiç çizilmez */
         acc+=dt;
         if(halfOn()&&P>.99&&(++frameN&1))return;
         dt=Math.min(.1,acc);acc=0;
@@ -570,7 +558,7 @@ function initGL(){
         stepFigs(dt,wv);
         for(var fi=0;fi<figs.length;fi++){
           var fg=figs[fi],grp=fg.grp;
-          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&(fewOn()?fi%3===0:fi%2===0)?1:0);   /* menüde bölüm başına 3 figür (zorlanırsa 2) */
+          var tg=wv*(fg.welOn&&fg.dead<0?.8:0)+(1-wv)*(gi===fg.g&&(LITE?(fewOn()?fi%3===0:fi%2===0):!(fewOn()&&fi%2))?1:0);   /* menüde bölüm başına figür: masaüstü 6 (zorlanırsa 3), telefon 3 (zorlanırsa 2) */
           fg.cur+=(tg-fg.cur)*(1-Math.exp(-dt*3));
           var ra=Math.min(texA(fg.front.material.map),fg.pivot?texA(fg.armF.material.map):1);
           if(fg.cur<.01||ra<=0){grp.visible=false;fg.hov=0;fg.inside=false;fg.sx=-9999;continue}
@@ -784,7 +772,7 @@ function mocktailSVG(col){
 function snowHTML(p){
   var h=0;for(var k=0;k<p.id.length;k++)h=(h*31+p.id.charCodeAt(k))>>>0;
   var rnd=function(){h=(h*1664525+1013904223)>>>0;return h/4294967296},out='';
-  for(var n=0;n<4;n++){var d=6+rnd()*6;
+  for(var n=0,nn=LITE?4:7;n<nn;n++){var d=6+rnd()*6;   /* kar: masaüstü 7, telefon 4 */
     out+='<i style="--x:'+(4+rnd()*88).toFixed(1)+'%;--s:'+(7+rnd()*8).toFixed(1)+'px;--d:'+d.toFixed(1)+'s;--dl:'+(-rnd()*d).toFixed(1)+'s;--dx:'+(rnd()*40-20).toFixed(0)+'px;--r:'+(rnd()<.5?-1:1)*(90+rnd()*180|0)+'deg"></i>'}
   return '<span class="snow" aria-hidden="true">'+out+'</span>';
 }
@@ -1580,7 +1568,7 @@ function collectCards(){
   io=new IntersectionObserver(function(es){es.forEach(function(e){var c=cards.find(function(x){return x.el===e.target});if(c){c.vis=e.isIntersecting;c.el.classList.toggle('in-view',e.isIntersecting)}})},{rootMargin:'160px 0px'});
   cards=[].map.call(grid.querySelectorAll('.card'),function(el){
     var c={el:el,inner:el.querySelector('.card-in'),sheen:el.querySelector('.sheen'),px:0,py:0,on:false,rx:0,ry:0,vis:false};
-    el.addEventListener('pointermove',function(e){
+    if(!LITE)el.addEventListener('pointermove',function(e){   /* parıltı/eğilme yalnız masaüstünde */
       var r=el.getBoundingClientRect();c.px=clamp((e.clientX-r.left)/r.width*2-1,-1,1);c.py=clamp((e.clientY-r.top)/r.height*2-1,-1,1);c.on=true;
       c.sheen.style.setProperty('--mx',((c.px+1)*50)+'%');c.sheen.style.setProperty('--my',((c.py+1)*50)+'%');c.sheen.style.setProperty('--so','1');
     });
@@ -1597,12 +1585,11 @@ function dealCards(){
   setTimeout(function(){grid.querySelectorAll('.card.deal').forEach(function(el){el.classList.remove('deal')})},1600);
 }
 function tickCards(dt){
-  if(FX.egim)return;
   var vh=window.innerHeight,k=1-Math.exp(-dt*10),vis=[],i,c;
   /* 1) okuma: yalnız görünür kartlar (layout thrashing yok) */
   for(i=0;i<cards.length;i++){c=cards[i];if(c.vis){c.r=c.el.getBoundingClientRect();vis.push(c)}}
-  /* 2) yazma */
-  for(i=0;i<vis.length;i++){
+  /* 2) yazma (telefonda kartlar eğilmez) */
+  for(i=0;i<vis.length&&!LITE;i++){
     c=vis[i];var r=c.r;
     var s=RM?0:clamp(((r.top+r.height/2)-vh/2)/(vh*.6),-1,1);
     var trx=-s*6+(c.on?-c.py*12:-aim.y*2.5),try_=c.on?c.px*15:aim.x*4.5;
