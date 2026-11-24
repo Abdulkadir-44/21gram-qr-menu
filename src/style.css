@@ -1712,3 +1712,12 @@ html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome 
 html.fonts-ready .layers[data-max2]{opacity:1}
 /* masaüstü: kaydırma çubuğunun yeri baştan ayrılır; menü açılınca sayfa daralmaz (kartlar/içindekiler kaymaz) */
 html{scrollbar-gutter:stable}
+/* ==========================================================
+   TEST AYARLARI (geçici, ?fx=…): yalnız adreste istenince etkili, normal görünüme dokunmaz
+   ========================================================== */
+html.fx-golge .card .shade{display:none}
+html.fx-cam .nav-in,html.fx-cam .icon-btn,html.fx-cam .top-wrap,html.fx-cam .nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.fx-urun .card .prod{filter:none!important}
+html.fx-egim .card .card-in{transform:none!important}
+html.fx-maskot .mascot-lane,html.fx-maskot .snow{display:none!important}
+html.fx-arka #gl{visibility:hidden}

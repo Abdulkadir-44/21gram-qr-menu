@@ -189,6 +189,12 @@ var wmT;window.addEventListener('resize',function(){clearTimeout(wmT);wmT=setTim
 /* yazı tipi menü çizildikten sonra yüklenirse etiket genişlikleri değişir → yeniden ölç */
 if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',function(){layoutCards(grid)});
 
+/* ——— TEST AYARLARI (geçici) — ?fx=golge,cam,urun,egim,maskot,arka,hepsi
+   ilgili görsel efekti kapatır; telefonda ?perf göstergesiyle hangisinin kaydırmayı yavaşlattığını bulmak için */
+var FX=(function(){var m=/[?&]fx=([^&#]*)/.exec(location.search),o={};if(m)decodeURIComponent(m[1]).split(',').forEach(function(k){if(k)o[k]=1});
+  if(o.hepsi)['golge','cam','urun','egim','maskot','arka'].forEach(function(k){o[k]=1});
+  Object.keys(o).forEach(function(k){document.documentElement.classList.add('fx-'+k)});return o})();
+
 /* ——— durum ——— */
 var state={mode:'welcome',group:GROUPS[0].key,q:'',order:[],sheetId:null,pushed:false};
 var aim={x:0,y:0},aimT={x:0,y:0},gyroOn=false,drag={x:0,y:0,on:false};
@@ -495,7 +501,7 @@ function initGL(){
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
       if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':''].filter(Boolean).join(String.fromCharCode(10)));
-      if(avg>22){Q.good=0;setLvl(Q.lvl+1);Q.hold=now+800}
+      if(avg>22){Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;
     }
@@ -530,6 +536,7 @@ function initGL(){
       if(gl.render){
         /* kademe 2 (yarım hız): menüdeyken 3D sahne iki karede bir çizilir; geçen süre biriktirilir,
            böylece figürler aynı hızda hareket eder (yalnız kare sayısı yarıya iner). Kartlar her karede çalışır. */
+        if(FX.arka&&P>.99)return;                         /* test: menüde arka plan 3D hiç çizilmez */
         acc+=dt;
         if(halfOn()&&P>.99&&(++frameN&1))return;
         dt=Math.min(.1,acc);acc=0;
@@ -1582,6 +1589,7 @@ function dealCards(){
   setTimeout(function(){grid.querySelectorAll('.card.deal').forEach(function(el){el.classList.remove('deal')})},1600);
 }
 function tickCards(dt){
+  if(FX.egim)return;
   var vh=window.innerHeight,k=1-Math.exp(-dt*10),vis=[],i,c;
   /* 1) okuma: yalnız görünür kartlar (layout thrashing yok) */
   for(i=0;i<cards.length;i++){c=cards[i];if(c.vis){c.r=c.el.getBoundingClientRect();vis.push(c)}}
