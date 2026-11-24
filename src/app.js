@@ -1235,8 +1235,9 @@ function beerCardHTML(p,i){
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +(sz&&!v2?'<p class="vol"><b>'+esc(sz.n)+'</b><span>'+esc(sz.u)+'</span></p>':'')
    +(p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')
-   +(v2&&sz?'<div class="vol-g"><span class="cl">'+esc(sz.n)+'<small>'+esc(sz.u.toLocaleLowerCase('tr'))+'</small></span>'+pintLayersSVG(parseFloat(sz.n),false)+'</div>':'')
-   +'<div class="foot">'+(v2?ticketHTML(p):'<span class="price">'+money(p.price)+'</span>')+ARROW+'</div>'
+   /* v2: fiyat bileti solda, bardakla aynı satırda; hacim bardağın sol üst köşesinde küçük gri yazı; alt satırda yalnız ok */
+   +(v2?'<div class="vol-g">'+ticketHTML(p)+(sz?'<span class="pint-box"><span class="cl">'+esc(sz.n)+' '+esc(sz.u.toLocaleLowerCase('tr'))+'</span>'+pintLayersSVG(parseFloat(sz.n),false)+'</span>':'')+'</div>':'')
+   +'<div class="foot">'+(v2?'':'<span class="price">'+money(p.price)+'</span>')+ARROW+'</div>'
    +'</div></div></article>';
 }
 
