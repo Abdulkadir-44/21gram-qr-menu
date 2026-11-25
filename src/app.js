@@ -955,10 +955,10 @@ function dessertCardHTML(p,i){
    +'<span class="ribbon-v" aria-hidden="true"></span><span class="ribbon-h" aria-hidden="true"></span></div>'
    +'<span class="bow" aria-hidden="true"><i></i><i></i><b></b></span>'
    +'<div class="stage">'+(p.img?prodHTML(p):tiramisuSVG())+'</div>'
-   +'<div class="meta"><p class="cat"><span>TATLI KÖŞESİ</span><span class="no">'+noHTML(p)+'</span></p>'
+   +'<div class="meta"><p class="cat"><span>TATLI KÖŞESİ</span></p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +'<p class="sub">Günün tatlı finali</p>'
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 
