@@ -18,6 +18,13 @@ export const MODELS = {
    (arka plandaki sıcak ışık lekesi CSS'te: .m3d-bg). Martini kendi arka planıyla kalır. */
 const STAGED = new Set(['/models/hamburger-v1.glb']);
 
+/* dosya boyları (bayt): sunucu boyu bildirmezse (sıkıştırılmış aktarım) yükleme yüzdesi bununla hesaplanır.
+   Model dosyası değişince burayı da güncelle: stat -c %s public/models/*.glb */
+const MODEL_BYTES = {
+  '/models/hamburger-v1.glb': 1249320,
+  '/models/haspresso-martini-v1.glb': 1162856,
+};
+
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -42,7 +49,11 @@ function loadModel(url, onProgress) {
   if (!modelP[url]) modelP[url] = ensureLib().then(() => new Promise((res, rej) => {
     const ld = new THREE.GLTFLoader();
     ld.setMeshoptDecoder(window.MeshoptDecoder);
-    ld.load(url, (g) => res(g.scene), (e) => { if (e.total && onProgress) onProgress(e.loaded / e.total) }, rej);
+    ld.load(url, (g) => res(g.scene), (e) => {
+      if (!onProgress) return;
+      const tot = e.total || MODEL_BYTES[url];
+      if (tot) onProgress(Math.min(.98, e.loaded / tot));
+    }, rej);
   }));
   return modelP[url];
 }
@@ -213,6 +224,8 @@ export function createViewer(opts) {
         requestAnimationFrame(() => onState && onState('ready'));
       }).catch((err) => { delete modelP[modelUrl]; if (url === my) onState && onState('error', err); });
     },
+    /** yükleme göstergesi bittikten sonra girişi baştan oynat (model gizliyken giriş boşa geçmesin) */
+    replay() { if (!RM && pivot) { v.introAt = 1; v.introStart = 0; pivot.scale.setScalar(.94); } },
     hide() { url = null; active = false; cancelAnimationFrame(raf); },
     resize() { if (active) size(); },
   };

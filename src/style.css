@@ -1791,3 +1791,23 @@ html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;backgr
    sağ üstteki damgaya değmesin; öne çıkma (translateZ) azaltıldı, perspektifte büyüyüp taşmasın */
 .card--hot .stage{padding:0 14px 14px}
 .card--hot .prod{max-width:62%;max-height:104px;transform:translateZ(20px)}
+/* ==========================================================
+   3D YÜKLEME GÖSTERGESİ: burger katman katman kurulur, martini bardağı dolar (app.js LOADER_SVG)
+   ========================================================== */
+.m3d-load{position:absolute;inset:0;z-index:3;display:grid;place-items:center;align-content:center;gap:6px;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.hero.m3d-wait .m3d-load{opacity:1;transition:opacity .25s ease .25s}   /* model önbellekteyse hiç görünmez */
+.hero.m3d-wait.m3d-done .m3d-load{opacity:0;transform:scale(1.05);transition:opacity .3s ease,transform .3s ease}
+.hero.m3d-wait #hp,.hero.m3d-wait .hero-hint{opacity:0;transition:none}   /* beklerken fotoğraf yok */
+.m3d-load svg{width:min(58%,230px);height:auto;overflow:visible}
+.m3d-load .ld-burger{width:min(80%,320px)}   /* gelecek modelle aynı boyda */
+.m3d-load .ld-martini{width:min(54%,215px)}   /* bardak ağzı üst kenara değmesin */
+.m3d-load .ly{opacity:0;transform:translateY(-30px);transition:transform .5s cubic-bezier(.3,1.5,.5,1),opacity .2s ease}
+.m3d-load .ly.on{opacity:1;transform:none}
+.ld-burger .ly path,.ld-burger .ly ellipse[fill]{stroke:rgba(60,8,12,.28);stroke-width:2}
+.ld-burger{filter:drop-shadow(0 10px 10px rgba(60,6,16,.28))}
+.ld-plate{fill:#FFF6E2;opacity:.9}
+.ld-martini{filter:drop-shadow(0 10px 12px rgba(20,0,6,.35))}
+.ld-martini .ld-liq{transform:translateY(calc((1 - var(--p,0)) * 70px));transition:transform .15s linear}
+.ld-martini .ly{transform:translateY(-10px)}
+.m3d-pct{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px;letter-spacing:.04em;color:var(--cream);text-shadow:0 2px 6px rgba(40,0,8,.35);font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.m3d-load .ly{transition:opacity .2s ease;transform:none}}

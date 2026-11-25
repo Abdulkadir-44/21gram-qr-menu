@@ -1917,6 +1917,67 @@ m3dBar.innerHTML='<button type="button" data-m="3d" aria-pressed="true">3D<small
 hero.appendChild(m3dBar);
 /* stüdyo arka planı (yalnız hamburger 3D'de görünür, CSS): sıcak ışık lekesi — süslü zeminin yerine */
 var m3dBg=document.createElement('span');m3dBg.className='m3d-bg';m3dBg.setAttribute('aria-hidden','true');hero.insertBefore(m3dBg,hero.querySelector('.plate'));
+/* ——— 3D YÜKLEME GÖSTERGESİ ———
+   Model inerken fotoğraf yerine ürünün kendini "kurduğu" çizim: burger katman katman düşer, martini bardağı dolar.
+   Gerçek indirme oranına bağlı (bilinmiyorsa zamanla yavaşça ilerler, %90'da bekler); hazır olunca %100'e tamamlanır,
+   çizim söner ve model girişini oynar. Model önbellekteyse gösterge hiç görünmez (CSS'te 0,25 sn gecikmeli belirir).
+   Yalnız SVG + transform/opacity: ek dosya yok. Çizimi olmayan modelde eski davranış (fotoğraf) sürer. */
+var LOADER_OF={'aci-gercek-smash':'burger','haspresso-martini':'martini'};
+var LOADER_SVG={
+  burger:'<svg class="ld-burger" viewBox="0 0 220 170">'
+    +'<ellipse class="ld-plate" cx="110" cy="150" rx="96" ry="13"/>'
+    +'<g class="ly" data-at=".06"><path d="M42 118h136a9 9 0 0 1 9 9v3a12 12 0 0 1-12 12H45a12 12 0 0 1-12-12v-3a9 9 0 0 1 9-9z" fill="#F2C47E"/></g>'
+    +'<g class="ly" data-at=".28"><path d="M38 103c6-5 14-4 20-1 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-3 21 1 5 3 6 9 3 13H35c-3-4-2-10 3-13z" fill="#6A3320"/></g>'
+    +'<g class="ly" data-at=".5"><path d="M36 96h148l-6 9h-12l-5 11-6-11h-38l-6 13-6-13H70l-5 9-5-9H42z" fill="#F7C548"/></g>'
+    +'<g class="ly" data-at=".68"><ellipse cx="82" cy="92" rx="26" ry="5" fill="none" stroke="#B4508A" stroke-width="5"/><ellipse cx="140" cy="91" rx="24" ry="5" fill="none" stroke="#B4508A" stroke-width="5"/></g>'
+    +'<g class="ly" data-at=".86"><path d="M38 88c0-40 34-60 72-60s72 20 72 60z" fill="#F0BD72"/>'
+    +'<g fill="#FFF3D6"><ellipse cx="86" cy="50" rx="4" ry="2.2" transform="rotate(-20 86 50)"/><ellipse cx="112" cy="42" rx="4" ry="2.2"/><ellipse cx="138" cy="52" rx="4" ry="2.2" transform="rotate(20 138 52)"/><ellipse cx="100" cy="64" rx="4" ry="2.2" transform="rotate(10 100 64)"/><ellipse cx="126" cy="66" rx="4" ry="2.2" transform="rotate(-12 126 66)"/></g></g>'
+    +'</svg>',
+  /* martini: dolgulu cam (yarı saydam gövde, parlama, krem ayak) — çizgi bardak değil; içi kahveyle dolar */
+  martini:'<svg class="ld-martini" viewBox="0 0 220 214">'
+    +'<defs><clipPath id="ldBowl"><path d="M46 40q64 7 128 0q-4 64-64 70q-60-6-64-70z"/></clipPath>'
+    +'<linearGradient id="ldCof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A4620"/><stop offset=".55" stop-color="#4A2210"/><stop offset="1" stop-color="#2A1108"/></linearGradient>'
+    +'<linearGradient id="ldGlass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".45" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".26"/></linearGradient>'
+    +'<linearGradient id="ldStem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9D6AE"/><stop offset=".5" stop-color="#FFF8E6"/><stop offset="1" stop-color="#D9C091"/></linearGradient>'
+    +'<radialGradient id="ldFoam" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#F3D7A8"/><stop offset="1" stop-color="#C9945A"/></radialGradient></defs>'
+    +'<ellipse class="ld-plate" cx="110" cy="196" rx="74" ry="11"/>'
+    +'<ellipse cx="110" cy="186" rx="40" ry="8" fill="url(#ldStem)"/>'
+    +'<path d="M105 106h10l-1.5 76h-7z" fill="url(#ldStem)"/>'
+    +'<path d="M46 40q64 7 128 0q-4 64-64 70q-60-6-64-70z" fill="url(#ldGlass)"/>'
+    +'<g clip-path="url(#ldBowl)"><rect class="ld-liq" x="40" y="40" width="140" height="72" fill="url(#ldCof)"/>'
+    +'<g class="ly" data-at=".93"><rect x="40" y="38" width="140" height="11" fill="url(#ldFoam)"/>'
+    +'<g fill="#FBE8C6" opacity=".7"><circle cx="70" cy="44" r="1.6"/><circle cx="92" cy="45" r="1.2"/><circle cx="128" cy="44" r="1.4"/><circle cx="150" cy="45" r="1.2"/></g></g></g>'
+    +'<ellipse cx="110" cy="40" rx="64" ry="5" fill="#fff" fill-opacity=".16"/>'
+    +'<path d="M58 50q4 30 28 48" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>'
+    +'<path d="M160 52q-3 16-12 28" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="3" stroke-linecap="round"/>'
+    +'<g class="ly" data-at=".98" fill="#3A1A0A"><ellipse cx="97" cy="43" rx="5.5" ry="3.4" transform="rotate(-14 97 43)"/><ellipse cx="110" cy="41" rx="5.5" ry="3.4"/><ellipse cx="123" cy="43" rx="5.5" ry="3.4" transform="rotate(14 123 43)"/></g>'
+    +'</svg>'
+};
+var m3dLoad=document.createElement('div');m3dLoad.className='m3d-load';m3dLoad.setAttribute('aria-hidden','true');hero.appendChild(m3dLoad);
+var ld={on:false,p:0,real:0,t0:0,raf:0,t:0,finish:null,lys:[],pctEl:null};
+function loaderSet(p){
+  m3dLoad.style.setProperty('--p',p.toFixed(3));
+  if(ld.pctEl)ld.pctEl.textContent='%'+Math.round(p*100);
+  for(var i=0;i<ld.lys.length;i++)ld.lys[i].classList.toggle('on',p>=ld.lys[i]._at);
+}
+function loaderTick(now){
+  if(!ld.on)return;
+  var t=(now-ld.t0)/1000,fake=.85*(1-Math.exp(-t/5));               /* gerçek oran gelmezse yavaşça ilerler (yedek) */
+  var target=ld.finish?1:Math.max(fake,ld.real);
+  ld.p+=(target-ld.p)*(ld.finish?.22:.15);if(ld.finish&&ld.p>.99)ld.p=1;
+  loaderSet(ld.p);
+  if(ld.finish&&ld.p>=1){var cb=ld.finish;ld.finish=null;ld.on=false;cb();return}
+  ld.raf=requestAnimationFrame(loaderTick);
+}
+function loaderStart(kind){
+  m3dLoad.innerHTML=LOADER_SVG[kind]+'<span class="m3d-pct">%0</span>';m3dLoad.dataset.kind=kind;
+  ld.lys=[].slice.call(m3dLoad.querySelectorAll('.ly'));ld.lys.forEach(function(el){el._at=parseFloat(el.dataset.at)});
+  ld.pctEl=m3dLoad.querySelector('.m3d-pct');
+  ld.on=true;ld.p=0;ld.real=0;ld.finish=null;ld.t0=performance.now();loaderSet(0);
+  hero.classList.remove('m3d-done');hero.classList.add('m3d-wait');
+  cancelAnimationFrame(ld.raf);ld.raf=requestAnimationFrame(loaderTick);
+}
+function loaderStop(){ld.on=false;ld.finish=null;cancelAnimationFrame(ld.raf);clearTimeout(ld.t);hero.classList.remove('m3d-wait','m3d-done')}
 m3dBar.addEventListener('pointerdown',function(e){e.stopPropagation()});
 m3dBar.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b||!m3d.url)return;setMode3D(b.dataset.m)});
 function setMode3D(m){
@@ -1924,15 +1985,27 @@ function setMode3D(m){
   [].forEach.call(m3dBar.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.m===m))});
   if(m==='3d'){
     var my=m3d.url,pct=m3dBar.querySelector('small');
+    var lk=null;for(var id in MODELS)if(MODELS[id]===my&&LOADER_OF[id])lk=LOADER_OF[id];
+    if(lk&&!hero.classList.contains('is-3d'))loaderStart(lk);
     viewer3d.show(hero,my,function(st,f){
       if(m3d.url!==my||m3d.mode!=='3d')return;
-      if(st==='loading'){hero.classList.add('m3d-loading');pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
+      if(st==='loading'){hero.classList.add('m3d-loading');
+        if(ld.on){ld.real=f||0;pct.textContent=''}else pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
       else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';
-        /* model kart açılırken (ilk ~0,6 sn) hazırsa fotoğraf solmaz, anında çekilir: yarı saydam fotoğraf hiç görünmez */
-        hero.classList.toggle('m3d-quick',performance.now()-(m3d.t0||0)<600);hero.classList.add('is-3d')}
-      else{hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
+        var now=performance.now();
+        if(ld.on&&now-ld.t0>250){
+          /* gösterge görünüyordu: %100'e tamamla, kısa bekle, sonra çizim söner ve model girişini baştan oynar */
+          ld.finish=function(){ld.t=setTimeout(function(){
+            if(m3d.url!==my||m3d.mode!=='3d')return;
+            hero.classList.add('m3d-done');hero.classList.remove('m3d-quick');hero.classList.add('is-3d');viewer3d.replay();
+            ld.t=setTimeout(function(){hero.classList.remove('m3d-wait','m3d-done')},450);
+          },180)};
+        }else{
+          /* model kart açılırken (ilk ~0,6 sn) hazırsa fotoğraf solmaz, anında çekilir: yarı saydam fotoğraf hiç görünmez */
+          loaderStop();hero.classList.toggle('m3d-quick',now-(m3d.t0||0)<600);hero.classList.add('is-3d')}}
+      else{loaderStop();hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
     });
-  }else{viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
+  }else{loaderStop();viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
 }
 function setup3D(p){
   var u=MODELS[p.id]||null;
@@ -1946,7 +2019,7 @@ function setup3D(p){
 /* keepLook: detay kapanırken model son karesinde donar ve kart kapanana kadar görünür kalır
    (fotoğraf araya girmez); görünüm kart kapandıktan sonra sıfırlanır */
 function stop3D(keepLook){
-  viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);
+  viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);loaderStop();
   var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d','m3d-quick')};
   if(keepLook)m3d.t=setTimeout(function(){if(!state.sheetId)reset()},900);else reset();
 }
