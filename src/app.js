@@ -9,7 +9,7 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 import { MODELS, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 12;
+const IMG_V = 13;
 /* menü verisi pakete gömülü (ayrı istek ve bekleme yok); src/data/menu.json değişince build yeniden alır */
 import menu from './data/menu.json';
 
@@ -23,7 +23,7 @@ const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-koktey
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
-  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
+  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h, cx: it.cx || 0,
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
@@ -54,6 +54,13 @@ var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches
 /* telefon/tablet (ana giriş parmak): hafif sürüm — parıltı, kart eğilmesi, kart altı bulanık gölge ve başlık camı kapalı; kar 4, menüde bölüm başına 3 figür */
 var LITE=!!(window.matchMedia&&matchMedia('(hover: none) and (pointer: coarse)').matches);
 if(LITE)document.documentElement.classList.add('lite');
+/* ZAYIF CİHAZ — bölüm geçişinde 21GRAM yükleyicisi yalnız zayıf cihazda kullanılır; güçlü cihaz eski akışla (beklemesiz) geçer.
+   Sinyaller: (1) kalite sistemi zorlandı (ortalama kare > 22 ms), (2) bir bölüm geçişinin kurulumu 0,3 sn'yi aştı,
+   (3) ilk tahmin: tarayıcı bildiriyorsa ≤4 çekirdek ve ≤4 GB bellek (yalnız Android Chrome bildirir).
+   Bir kez "zayıf" denen cihaz oturum boyunca zayıf kalır (yükleyici bir görünüp bir kaybolmasın). ?perf göstergesinde yazar. */
+var WEAK={on:false,why:''};
+function markWeak(why){if(WEAK.on)return;WEAK.on=true;WEAK.why=why;if(/[?&]perf/.test(location.search)&&window.console)console.info('[cihaz] zayıf: '+why)}
+(function(){var hc=navigator.hardwareConcurrency,dm=navigator.deviceMemory;if(hc&&dm&&hc<=4&&dm<=4)markWeak('donanım '+hc+' çekirdek / '+dm+' GB')})();
 var $=function(s){return document.querySelector(s)};
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 var ss=function(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
@@ -498,8 +505,8 @@ function initGL(){
       if(now-Q.t0<1500)return;
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
-      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':''].filter(Boolean).join(String.fromCharCode(10)));
-      if(avg>22){Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
+      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':'','cihaz: '+(WEAK.on?'zayıf ('+WEAK.why+') · bölüm yükleyicisi açık':'güçlü · yükleyici yok')].filter(Boolean).join(String.fromCharCode(10)));
+      if(avg>22){markWeak('kare '+avg.toFixed(0)+' ms');Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;
     }
@@ -812,7 +819,8 @@ function hotCardHTML(p,i){
    +'<path d="M30 88 C18 70 42 58 30 40 C20 26 36 14 30 2"/><path d="M60 88 C48 70 72 58 60 40 C50 26 66 14 60 2"/><path d="M90 88 C78 70 102 58 90 40 C80 26 96 14 90 2"/></svg>';
   return cardOpen(p,i,'card--hot')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div><span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span></div>'
-   +'<div class="stage">'+steam+(p.img?prodHTML(p):cupSVG())
+   /* fotoğraflı fincan: gövde kartın ortasına alınır (kulp yüzünden görsel merkezi kayık, --cx), duman fincan ağzının hemen üstünden çıkar */
+   +'<div class="stage">'+(p.img?'<span class="cup-w" style="--cx:'+p.cx+';--ar:'+(p.w/p.h).toFixed(3)+'">'+steam+prodHTML(p)+'</span>':steam+cupSVG())
    +'</div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
@@ -1537,6 +1545,7 @@ function render(opts){
       if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
     };
     var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
+      if(opts.onDone)opts.onDone();
       if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
@@ -1637,6 +1646,34 @@ function switchGroup(tab){
   var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
   if(RM){window.scrollTo(0,0);render();H.style.removeProperty('--bg');return}
   clearTimeout(swT);var my=++swSeq,done=false;
+  /* BÖLÜM YÜKLEYİCİSİ — kartlar görünmezken kurulur ve ilk ekranın görselleri iner; iş 0,2 sn'de bitmezse ortada
+     21GRAM logosu belirir (yalnız CSS transform: telefon meşgulken de akar). Hazır olunca logo söner, kartlar birlikte yükselir.
+     Bir kez belirirse en az 0,4 sn kalır (yanıp sönmesin). Güçlü cihazda çoğu zaman hiç görünmez. */
+  var weak=WEAK.on;
+  clearTimeout(grpLd.t);grpLd.shown=0;el_on(false);
+  if(weak){
+    grpLdInit();
+    var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
+    grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();el_on(true)},200);
+  }
+  var reveal=function(){
+    if(my!==swSeq)return;
+    var wait=grpLd.shown?Math.max(0,grpLd.shown+400-performance.now()):0;
+    setTimeout(function(){
+      if(my!==swSeq)return;
+      clearTimeout(grpLd.t);el_on(false);
+      var cs=grid.querySelectorAll('.card');
+      for(var k=0;k<cs.length&&k<12;k++)cs[k].classList.add('rise');      /* yalnız ilk ekranlar yükselir */
+      grid.style.transition='opacity .2s ease';grid.style.opacity='';
+      setTimeout(function(){if(my===swSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600);
+    },wait);
+  };
+  /* ilk ekranın görselleri inip çözülünce (en fazla 2,5 sn beklenir) */
+  var waitEager=function(){
+    var ims=[].slice.call(grid.querySelectorAll('img.prod[fetchpriority="high"]'));
+    var ps=ims.map(function(im){return im.decode?im.decode().catch(function(){}):Promise.resolve()});
+    Promise.race([Promise.all(ps),new Promise(function(r){setTimeout(r,2500)})]).then(reveal);
+  };
   /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
   var swap=function(){
     if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
@@ -1652,9 +1689,17 @@ function switchGroup(tab){
         if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
       }
     }
-    render({chunk:true,dealChunk:true});
+    if(weak){
+      /* ZAYIF CİHAZ: kartlar görünmez (opacity 0) kurulur; bitince görseller beklenir, sonra birlikte açılır */
+      render({chunk:true,onDone:waitEager});
+    }else{
+      /* GÜÇLÜ CİHAZ: beklemesiz eski akış — kartlar parça parça kurulurken yükselerek gelir. Kurulum 0,3 sn'yi
+         aşarsa cihaz zayıf sayılır, sonraki geçişlerde yükleyici devreye girer. */
+      var tB=performance.now();
+      render({chunk:true,dealChunk:true,onDone:function(){var d=performance.now()-tB;if(d>300)markWeak('bölüm geçişi '+Math.round(d)+' ms')}});
+      grid.style.transition='none';grid.style.opacity='';
+    }
     document.documentElement.style.removeProperty('--bg');
-    grid.style.transition='none';grid.style.opacity='';
   };
   var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
   grid.addEventListener('transitionend',onEnd);
@@ -1662,6 +1707,17 @@ function switchGroup(tab){
   swT=setTimeout(swap,300);
 }
 var swSeq=0;
+function el_on(on){if(!grpLd.el)return;grpLd.el.style.opacity=on?'':'0';grpLd.el.classList.toggle('on',on)}
+/* bölüm yükleyicisi: sayfa açılırken OLUŞTURULMAZ (ana sayfaya hiçbir şey eklenmez); menüde ilk bölüm değişiminde kurulur */
+var grpLd={el:null,cap:null,t:0,shown:0};
+function grpLdInit(){
+  if(grpLd.el)return;
+  var el=document.createElement('div');el.className='grp-load';el.setAttribute('aria-hidden','true');
+  el.style.cssText='position:fixed;opacity:0;pointer-events:none';   /* stil gelmeden bir an bile görünmesin */
+  el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="grpl-win"><span class="grpl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
+  document.body.appendChild(el);
+  grpLd.el=el;grpLd.cap=el.querySelector('.gl-cap');
+}
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});
@@ -1903,7 +1959,11 @@ hero.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')hpT.on=
 /* ——— 3D MODEL (detay) ———
    Modeli olan üründe detay 3D ile açılır; üstte "3D | Foto" anahtarı. Model inerken fotoğraf görünür,
    anahtarda yüzde yazar; hazır olunca 3D yumuşakça fotoğrafın yerini alır. */
+/* hamburger 3D sahnesi: varsayılan A (sıcak stüdyo); ?sahne=b → B (marka sahnesi) — müşteri seçene kadar ikisi de duruyor */
+var SAHNE=(/[?&]sahne=([ab])/.exec(location.search)||[])[1]||'a';
+document.documentElement.dataset.sahne=SAHNE;
 var viewer3d=createViewer({
+  look:SAHNE,
   getDpr:function(){var d=Math.min(window.devicePixelRatio||1,2);return gl.q&&gl.q.lvl>0?Math.min(d,1):d},
   fitRect:function(){return hp&&hp.tagName==='IMG'&&hp.offsetWidth?{w:hp.offsetWidth,h:hp.offsetHeight}:null}
 });
@@ -1911,6 +1971,69 @@ var m3d={mode:'3d',url:null};
 var m3dBar=document.createElement('div');m3dBar.className='m3d-toggle';m3dBar.setAttribute('role','group');m3dBar.setAttribute('aria-label','Görünüm');
 m3dBar.innerHTML='<button type="button" data-m="3d" aria-pressed="true">3D<small></small></button><button type="button" data-m="foto" aria-pressed="false">Foto</button>';
 hero.appendChild(m3dBar);
+/* stüdyo arka planı (yalnız hamburger 3D'de görünür, CSS): sıcak ışık lekesi — süslü zeminin yerine */
+var m3dBg=document.createElement('span');m3dBg.className='m3d-bg';m3dBg.setAttribute('aria-hidden','true');hero.insertBefore(m3dBg,hero.querySelector('.plate'));
+/* ——— 3D YÜKLEME GÖSTERGESİ ———
+   Model inerken fotoğraf yerine ürünün kendini "kurduğu" çizim: burger katman katman düşer, martini bardağı dolar.
+   Gerçek indirme oranına bağlı (bilinmiyorsa zamanla yavaşça ilerler, %90'da bekler); hazır olunca %100'e tamamlanır,
+   çizim söner ve model girişini oynar. Model önbellekteyse gösterge hiç görünmez (CSS'te 0,25 sn gecikmeli belirir).
+   Yalnız SVG + transform/opacity: ek dosya yok. Çizimi olmayan modelde eski davranış (fotoğraf) sürer. */
+var LOADER_OF={'aci-gercek-smash':'burger','haspresso-martini':'martini'};
+var LOADER_SVG={
+  burger:'<svg class="ld-burger" viewBox="0 0 220 170">'
+    +'<ellipse class="ld-plate" cx="110" cy="150" rx="96" ry="13"/>'
+    +'<g class="ly" data-at=".06"><path d="M42 118h136a9 9 0 0 1 9 9v3a12 12 0 0 1-12 12H45a12 12 0 0 1-12-12v-3a9 9 0 0 1 9-9z" fill="#F2C47E"/></g>'
+    +'<g class="ly" data-at=".28"><path d="M38 103c6-5 14-4 20-1 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-4 22 0 7-4 15-3 21 1 5 3 6 9 3 13H35c-3-4-2-10 3-13z" fill="#6A3320"/></g>'
+    +'<g class="ly" data-at=".5"><path d="M36 96h148l-6 9h-12l-5 11-6-11h-38l-6 13-6-13H70l-5 9-5-9H42z" fill="#F7C548"/></g>'
+    +'<g class="ly" data-at=".68"><ellipse cx="82" cy="92" rx="26" ry="5" fill="none" stroke="#B4508A" stroke-width="5"/><ellipse cx="140" cy="91" rx="24" ry="5" fill="none" stroke="#B4508A" stroke-width="5"/></g>'
+    +'<g class="ly" data-at=".86"><path d="M38 88c0-40 34-60 72-60s72 20 72 60z" fill="#F0BD72"/>'
+    +'<g fill="#FFF3D6"><ellipse cx="86" cy="50" rx="4" ry="2.2" transform="rotate(-20 86 50)"/><ellipse cx="112" cy="42" rx="4" ry="2.2"/><ellipse cx="138" cy="52" rx="4" ry="2.2" transform="rotate(20 138 52)"/><ellipse cx="100" cy="64" rx="4" ry="2.2" transform="rotate(10 100 64)"/><ellipse cx="126" cy="66" rx="4" ry="2.2" transform="rotate(-12 126 66)"/></g></g>'
+    +'</svg>',
+  /* martini: dolgulu cam (yarı saydam gövde, parlama, krem ayak) — çizgi bardak değil; içi kahveyle dolar */
+  martini:'<svg class="ld-martini" viewBox="0 0 220 214">'
+    +'<defs><clipPath id="ldBowl"><path d="M46 40q64 7 128 0q-4 64-64 70q-60-6-64-70z"/></clipPath>'
+    +'<linearGradient id="ldCof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A4620"/><stop offset=".55" stop-color="#4A2210"/><stop offset="1" stop-color="#2A1108"/></linearGradient>'
+    +'<linearGradient id="ldGlass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".45" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".26"/></linearGradient>'
+    +'<linearGradient id="ldStem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9D6AE"/><stop offset=".5" stop-color="#FFF8E6"/><stop offset="1" stop-color="#D9C091"/></linearGradient>'
+    +'<radialGradient id="ldFoam" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#F3D7A8"/><stop offset="1" stop-color="#C9945A"/></radialGradient></defs>'
+    +'<ellipse class="ld-plate" cx="110" cy="196" rx="74" ry="11"/>'
+    +'<ellipse cx="110" cy="186" rx="40" ry="8" fill="url(#ldStem)"/>'
+    +'<path d="M105 106h10l-1.5 76h-7z" fill="url(#ldStem)"/>'
+    +'<path d="M46 40q64 7 128 0q-4 64-64 70q-60-6-64-70z" fill="url(#ldGlass)"/>'
+    +'<g clip-path="url(#ldBowl)"><rect class="ld-liq" x="40" y="40" width="140" height="72" fill="url(#ldCof)"/>'
+    +'<g class="ly" data-at=".93"><rect x="40" y="38" width="140" height="11" fill="url(#ldFoam)"/>'
+    +'<g fill="#FBE8C6" opacity=".7"><circle cx="70" cy="44" r="1.6"/><circle cx="92" cy="45" r="1.2"/><circle cx="128" cy="44" r="1.4"/><circle cx="150" cy="45" r="1.2"/></g></g></g>'
+    +'<ellipse cx="110" cy="40" rx="64" ry="5" fill="#fff" fill-opacity=".16"/>'
+    +'<path d="M58 50q4 30 28 48" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>'
+    +'<path d="M160 52q-3 16-12 28" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="3" stroke-linecap="round"/>'
+    +'<g class="ly" data-at=".98" fill="#3A1A0A"><ellipse cx="97" cy="43" rx="5.5" ry="3.4" transform="rotate(-14 97 43)"/><ellipse cx="110" cy="41" rx="5.5" ry="3.4"/><ellipse cx="123" cy="43" rx="5.5" ry="3.4" transform="rotate(14 123 43)"/></g>'
+    +'</svg>'
+};
+var m3dLoad=document.createElement('div');m3dLoad.className='m3d-load';m3dLoad.setAttribute('aria-hidden','true');hero.appendChild(m3dLoad);
+var ld={on:false,p:0,real:0,t0:0,raf:0,t:0,finish:null,lys:[],pctEl:null};
+function loaderSet(p){
+  m3dLoad.style.setProperty('--p',p.toFixed(3));
+  if(ld.pctEl)ld.pctEl.textContent='%'+Math.round(p*100);
+  for(var i=0;i<ld.lys.length;i++)ld.lys[i].classList.toggle('on',p>=ld.lys[i]._at);
+}
+function loaderTick(now){
+  if(!ld.on)return;
+  var t=(now-ld.t0)/1000,fake=.85*(1-Math.exp(-t/5));               /* gerçek oran gelmezse yavaşça ilerler (yedek) */
+  var target=ld.finish?1:Math.max(fake,ld.real);
+  ld.p+=(target-ld.p)*(ld.finish?.22:.15);if(ld.finish&&ld.p>.99)ld.p=1;
+  loaderSet(ld.p);
+  if(ld.finish&&ld.p>=1){var cb=ld.finish;ld.finish=null;ld.on=false;cb();return}
+  ld.raf=requestAnimationFrame(loaderTick);
+}
+function loaderStart(kind){
+  m3dLoad.innerHTML=LOADER_SVG[kind]+'<span class="m3d-pct">%0</span>';m3dLoad.dataset.kind=kind;
+  ld.lys=[].slice.call(m3dLoad.querySelectorAll('.ly'));ld.lys.forEach(function(el){el._at=parseFloat(el.dataset.at)});
+  ld.pctEl=m3dLoad.querySelector('.m3d-pct');
+  ld.on=true;ld.p=0;ld.real=0;ld.finish=null;ld.t0=performance.now();loaderSet(0);
+  hero.classList.remove('m3d-done');hero.classList.add('m3d-wait');
+  cancelAnimationFrame(ld.raf);ld.raf=requestAnimationFrame(loaderTick);
+}
+function loaderStop(){ld.on=false;ld.finish=null;cancelAnimationFrame(ld.raf);clearTimeout(ld.t);hero.classList.remove('m3d-wait','m3d-done')}
 m3dBar.addEventListener('pointerdown',function(e){e.stopPropagation()});
 m3dBar.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b||!m3d.url)return;setMode3D(b.dataset.m)});
 function setMode3D(m){
@@ -1918,18 +2041,32 @@ function setMode3D(m){
   [].forEach.call(m3dBar.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.m===m))});
   if(m==='3d'){
     var my=m3d.url,pct=m3dBar.querySelector('small');
+    var lk=null;for(var id in MODELS)if(MODELS[id]===my&&LOADER_OF[id])lk=LOADER_OF[id];
+    if(lk&&!hero.classList.contains('is-3d'))loaderStart(lk);
     viewer3d.show(hero,my,function(st,f){
       if(m3d.url!==my||m3d.mode!=='3d')return;
-      if(st==='loading'){hero.classList.add('m3d-loading');pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
-      else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';hero.classList.add('is-3d')}
-      else{hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
+      if(st==='loading'){hero.classList.add('m3d-loading');
+        if(ld.on){ld.real=f||0;pct.textContent=''}else pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
+      else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';
+        var now=performance.now();
+        if(ld.on&&now-ld.t0>250){
+          /* gösterge görünüyordu: %100'e tamamla, kısa bekle, sonra çizim söner ve model girişini baştan oynar */
+          ld.finish=function(){ld.t=setTimeout(function(){
+            if(m3d.url!==my||m3d.mode!=='3d')return;
+            hero.classList.add('m3d-done');hero.classList.remove('m3d-quick');hero.classList.add('is-3d');viewer3d.replay();
+            ld.t=setTimeout(function(){hero.classList.remove('m3d-wait','m3d-done')},450);
+          },180)};
+        }else{
+          /* model kart açılırken (ilk ~0,6 sn) hazırsa fotoğraf solmaz, anında çekilir: yarı saydam fotoğraf hiç görünmez */
+          loaderStop();hero.classList.toggle('m3d-quick',now-(m3d.t0||0)<600);hero.classList.add('is-3d')}}
+      else{loaderStop();hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
     });
-  }else{viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
+  }else{loaderStop();viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
 }
 function setup3D(p){
   var u=MODELS[p.id]||null;
   if(u===m3d.url&&u)return;            /* aynı ürün: durumu koru */
-  stop3D();m3d.url=u;
+  stop3D();m3d.url=u;m3d.t0=performance.now();
   hero.classList.toggle('has-3d',!!u);
   if(u){prefetchModel(u);setMode3D('3d');
     /* fotoğraf sonradan yüklenirse model boyunu ona göre yeniden ayarla */
@@ -1938,8 +2075,8 @@ function setup3D(p){
 /* keepLook: detay kapanırken model son karesinde donar ve kart kapanana kadar görünür kalır
    (fotoğraf araya girmez); görünüm kart kapandıktan sonra sıfırlanır */
 function stop3D(keepLook){
-  viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);
-  var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d')};
+  viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);loaderStop();
+  var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d','m3d-quick')};
   if(keepLook)m3d.t=setTimeout(function(){if(!state.sheetId)reset()},900);else reset();
 }
 window.addEventListener('resize',function(){viewer3d.resize()});

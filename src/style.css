@@ -1693,10 +1693,15 @@ html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome 
 /* ==========================================================
    3D MODEL (detay kartı) — "3D | Foto" anahtarı + görüntüleyici tuvali
    ========================================================== */
-.m3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;opacity:0;transition:opacity .5s ease;touch-action:none;cursor:grab}
+.m3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;opacity:0;transition:opacity .15s ease;touch-action:none;cursor:grab}
 .m3d-canvas:active{cursor:grabbing}
 .hero.is-3d .m3d-canvas{opacity:1}
 .hero.is-3d #hp,.hero.is-3d .hero-hint,.hero.is-3d .plate{opacity:0;pointer-events:none;transition:opacity .4s ease}
+/* geçiş sırayla: önce fotoğraf hızla söner, sonra model belirir — ikisi hiç üst üste görünmez (hayalet burger yok) */
+.hero.is-3d .m3d-canvas{transition:opacity .3s ease .16s}
+.hero.is-3d #hp,.hero.is-3d .hero-hint,.hero.is-3d .plate{transition-duration:.16s}
+.hero.m3d-quick.is-3d #hp,.hero.m3d-quick.is-3d .hero-hint,.hero.m3d-quick.is-3d .plate{transition:none}
+.hero.m3d-quick.is-3d .m3d-canvas{transition:opacity .25s ease}
 .m3d-toggle{display:none;position:absolute;z-index:4;top:14px;left:14px;gap:2px;padding:3px;border-radius:999px;
   background:rgba(29,10,14,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(20,0,6,.2)}
 .hero.has-3d .m3d-toggle{display:flex}
@@ -1763,3 +1768,70 @@ html[data-group="yiyecek"] .grid>.card--sauce+.card:not(.card--sauce){grid-colum
 .card--dessert .ticket{color:var(--red);margin-top:0;height:38px;font-size:23px;padding:0 18px 0 24px}
 .card--dessert .ticket small{font-size:15px}
 .card--dessert .ticket::before{left:12px}
+/* ==========================================================
+   HAMBURGER 3D — SICAK STÜDYO (A): 3D modunda süslü zemin (kareli örtü, yıldız) çekilir; yerine
+   ortası krem-sarı ışık, kenarlara doğru bordoya koyulaşan sade zemin. Tabla ve ışık model3d.js'te.
+   Fotoğraf modu ve diğer ürünler (martini) değişmez.
+   ========================================================== */
+.m3d-bg{position:absolute;inset:0;z-index:1;opacity:0;pointer-events:none;transition:opacity .35s ease;
+  background:radial-gradient(ellipse 62% 58% at 50% 44%,#FFF1D2 0%,#FFD98F 24%,#F4A93A 48%,#D9472B 76%,#8E1424 100%)}
+.panel[data-kind="burger"] .hero.has-3d .m3d-bg{opacity:1}   /* foto modunda da aynı zemin (3D ile foto arasında arka plan değişmez) */
+.panel[data-kind="burger"] .hero.has-3d .hero-deco{opacity:0;transition:opacity .3s ease}
+.panel[data-kind="burger"] .hero.m3d-quick.is-3d .m3d-bg,.panel[data-kind="burger"] .hero.m3d-quick.is-3d .hero-deco{transition:none}
+/* modeli olan hamburgerde üst alan biraz daha yüksek: model ve tabla sıkışmasın (açılmadan önce belli → kayma yok) */
+.sheet.pop .panel[data-kind="burger"] .hero.has-3d{height:min(320px,42dvh)}
+@media(min-width:860px){.sheet.pop .panel[data-kind="burger"] .hero.has-3d{height:340px}}
+/* hamburger 3D sahnesi B (?sahne=b) — A yukarıdaki varsayılan; müşteri seçince biri kalkacak */
+/* B) marka sahnesi: düz marka kırmızısı, arkada büyük soluk 21GRAM logosu */
+html[data-sahne="b"] .m3d-bg{background:radial-gradient(ellipse 75% 65% at 50% 55%,#F01E3C 0%,#E4032D 55%,#A80223 100%)}
+html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;background:url(/img/logo.png) center 34%/86% auto no-repeat;opacity:.16}
+/* foto modunda fotoğraf zeminin (.m3d-bg, z 1) önünde kalsın; 3D tuvali (z 2) yine en önde */
+.panel[data-kind="burger"] .hero.has-3d #hp{position:relative;z-index:1}
+/* sıcak içecek: yeni fincan fotoğrafları (kulplu, geniş) tamamen kartın içinde kalsın — kenarlardan pay,
+   sağ üstteki damgaya değmesin; öne çıkma (translateZ) azaltıldı, perspektifte büyüyüp taşmasın */
+.card--hot .stage{padding:0 14px 14px}
+.card--hot .prod{max-width:62%;max-height:104px;transform:translateZ(20px)}
+/* ==========================================================
+   3D YÜKLEME GÖSTERGESİ: burger katman katman kurulur, martini bardağı dolar (app.js LOADER_SVG)
+   ========================================================== */
+.m3d-load{position:absolute;inset:0;z-index:3;display:grid;place-items:center;align-content:center;gap:6px;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.hero.m3d-wait .m3d-load{opacity:1;transition:opacity .25s ease .25s}   /* model önbellekteyse hiç görünmez */
+.hero.m3d-wait.m3d-done .m3d-load{opacity:0;transform:scale(1.05);transition:opacity .3s ease,transform .3s ease}
+.hero.m3d-wait #hp,.hero.m3d-wait .hero-hint{opacity:0;transition:none}   /* beklerken fotoğraf yok */
+.m3d-load svg{width:min(58%,230px);height:auto;overflow:visible}
+.m3d-load .ld-burger{width:min(80%,320px)}   /* gelecek modelle aynı boyda */
+.m3d-load .ld-martini{width:min(54%,215px)}   /* bardak ağzı üst kenara değmesin */
+.m3d-load .ly{opacity:0;transform:translateY(-30px);transition:transform .5s cubic-bezier(.3,1.5,.5,1),opacity .2s ease}
+.m3d-load .ly.on{opacity:1;transform:none}
+.ld-burger .ly path,.ld-burger .ly ellipse[fill]{stroke:rgba(60,8,12,.28);stroke-width:2}
+.ld-burger{filter:drop-shadow(0 10px 10px rgba(60,6,16,.28))}
+.ld-plate{fill:#FFF6E2;opacity:.9}
+.ld-martini{filter:drop-shadow(0 10px 12px rgba(20,0,6,.35))}
+.ld-martini .ld-liq{transform:translateY(calc((1 - var(--p,0)) * 70px));transition:transform .15s linear}
+.ld-martini .ly{transform:translateY(-10px)}
+.m3d-pct{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px;letter-spacing:.04em;color:var(--cream);text-shadow:0 2px 6px rgba(40,0,8,.35);font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.m3d-load .ly{transition:opacity .2s ease;transform:none}}
+/* ==========================================================
+   BÖLÜM YÜKLEYİCİSİ (bölüm değişiminde, app.js grpLd): 21GRAM logosu soldan sağa dolar ve boşalır.
+   Yalnız transform/opacity → ana iş parçacığı meşgulken de akar (kasmanın yerine sakin bir bekleme).
+   ========================================================== */
+.grp-load{position:fixed;left:50%;top:52%;z-index:15;display:grid;justify-items:center;gap:12px;pointer-events:none;
+  opacity:0;transform:translate(-50%,-50%) scale(.96);transition:opacity .2s ease,transform .2s ease}
+.grp-load.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.gl-logo{position:relative;display:block;width:min(46vw,200px);line-height:0}
+.gl-logo img{width:100%;height:auto;display:block}
+.gl-base{opacity:.22}
+/* sınıf adları benzersiz: "gl-in" sayfanın açılış sınıfıydı (html.gl-in) → bütün sayfa sağdan sola kayıyordu */
+.grpl-win{position:absolute;inset:0;overflow:hidden;animation:grplWin 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+.grpl-in{position:absolute;inset:0;animation:grplIn 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+@keyframes grplWin{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes grplIn{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.gl-cap{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);opacity:.7}
+.grp-load:not(.on) .grpl-win,.grp-load:not(.on) .grpl-in{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.grpl-win,.grpl-in{animation:none}.grpl-win{transform:none}.grpl-in{transform:none}}
+/* sıcak içecek: fincan gövdesi kartın ortasında, duman ağzın hemen üstünde.
+   Kutu görselle aynı genişlikte (en fazla %62, yükseklik 104 px'i geçmez: --ar = en/boy) → kaydırma (--cx, görsel
+   genişliğine oran) her kart boyunda doğru. */
+.card--hot .cup-w{position:relative;display:block;width:min(62%,calc(104px * var(--ar,1)));line-height:0;transform-style:preserve-3d;transform:translateX(calc(var(--cx,0) * -100%))}
+.card--hot .cup-w .prod{width:100%;height:auto;max-width:none;max-height:none}
+.card--hot .cup-w .steam{top:auto;bottom:calc(100% - 14px);left:calc(50% + var(--cx,0) * 100%);width:64px;margin-left:-32px}
