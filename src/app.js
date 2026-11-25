@@ -54,6 +54,13 @@ var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches
 /* telefon/tablet (ana giriş parmak): hafif sürüm — parıltı, kart eğilmesi, kart altı bulanık gölge ve başlık camı kapalı; kar 4, menüde bölüm başına 3 figür */
 var LITE=!!(window.matchMedia&&matchMedia('(hover: none) and (pointer: coarse)').matches);
 if(LITE)document.documentElement.classList.add('lite');
+/* ZAYIF CİHAZ — bölüm geçişinde 21GRAM yükleyicisi yalnız zayıf cihazda kullanılır; güçlü cihaz eski akışla (beklemesiz) geçer.
+   Sinyaller: (1) kalite sistemi zorlandı (ortalama kare > 22 ms), (2) bir bölüm geçişinin kurulumu 0,3 sn'yi aştı,
+   (3) ilk tahmin: tarayıcı bildiriyorsa ≤4 çekirdek ve ≤4 GB bellek (yalnız Android Chrome bildirir).
+   Bir kez "zayıf" denen cihaz oturum boyunca zayıf kalır (yükleyici bir görünüp bir kaybolmasın). ?perf göstergesinde yazar. */
+var WEAK={on:false,why:''};
+function markWeak(why){if(WEAK.on)return;WEAK.on=true;WEAK.why=why;if(/[?&]perf/.test(location.search)&&window.console)console.info('[cihaz] zayıf: '+why)}
+(function(){var hc=navigator.hardwareConcurrency,dm=navigator.deviceMemory;if(hc&&dm&&hc<=4&&dm<=4)markWeak('donanım '+hc+' çekirdek / '+dm+' GB')})();
 var $=function(s){return document.querySelector(s)};
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 var ss=function(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
@@ -498,8 +505,8 @@ function initGL(){
       if(now-Q.t0<1500)return;
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
-      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':''].filter(Boolean).join(String.fromCharCode(10)));
-      if(avg>22){Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
+      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':'','cihaz: '+(WEAK.on?'zayıf ('+WEAK.why+') · bölüm yükleyicisi açık':'güçlü · yükleyici yok')].filter(Boolean).join(String.fromCharCode(10)));
+      if(avg>22){markWeak('kare '+avg.toFixed(0)+' ms');Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;
     }
@@ -1642,10 +1649,13 @@ function switchGroup(tab){
   /* BÖLÜM YÜKLEYİCİSİ — kartlar görünmezken kurulur ve ilk ekranın görselleri iner; iş 0,2 sn'de bitmezse ortada
      21GRAM logosu belirir (yalnız CSS transform: telefon meşgulken de akar). Hazır olunca logo söner, kartlar birlikte yükselir.
      Bir kez belirirse en az 0,4 sn kalır (yanıp sönmesin). Güçlü cihazda çoğu zaman hiç görünmez. */
-  grpLdInit();el_on(false);
-  clearTimeout(grpLd.t);grpLd.shown=0;
-  var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
-  grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();el_on(true)},200);
+  var weak=WEAK.on;
+  clearTimeout(grpLd.t);grpLd.shown=0;el_on(false);
+  if(weak){
+    grpLdInit();
+    var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
+    grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();el_on(true)},200);
+  }
   var reveal=function(){
     if(my!==swSeq)return;
     var wait=grpLd.shown?Math.max(0,grpLd.shown+400-performance.now()):0;
@@ -1679,8 +1689,16 @@ function switchGroup(tab){
         if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
       }
     }
-    /* kartlar görünmez (opacity 0) kurulur; bitince görseller beklenir, sonra birlikte açılır */
-    render({chunk:true,onDone:waitEager});
+    if(weak){
+      /* ZAYIF CİHAZ: kartlar görünmez (opacity 0) kurulur; bitince görseller beklenir, sonra birlikte açılır */
+      render({chunk:true,onDone:waitEager});
+    }else{
+      /* GÜÇLÜ CİHAZ: beklemesiz eski akış — kartlar parça parça kurulurken yükselerek gelir. Kurulum 0,3 sn'yi
+         aşarsa cihaz zayıf sayılır, sonraki geçişlerde yükleyici devreye girer. */
+      var tB=performance.now();
+      render({chunk:true,dealChunk:true,onDone:function(){var d=performance.now()-tB;if(d>300)markWeak('bölüm geçişi '+Math.round(d)+' ms')}});
+      grid.style.transition='none';grid.style.opacity='';
+    }
     document.documentElement.style.removeProperty('--bg');
   };
   var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
