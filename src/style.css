@@ -1787,3 +1787,7 @@ html[data-sahne="b"] .m3d-bg{background:radial-gradient(ellipse 75% 65% at 50% 5
 html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;background:url(/img/logo.png) center 34%/86% auto no-repeat;opacity:.16}
 /* foto modunda fotoğraf zeminin (.m3d-bg, z 1) önünde kalsın; 3D tuvali (z 2) yine en önde */
 .panel[data-kind="burger"] .hero.has-3d #hp{position:relative;z-index:1}
+/* sıcak içecek: yeni fincan fotoğrafları (kulplu, geniş) tamamen kartın içinde kalsın — kenarlardan pay,
+   sağ üstteki damgaya değmesin; öne çıkma (translateZ) azaltıldı, perspektifte büyüyüp taşmasın */
+.card--hot .stage{padding:0 14px 14px}
+.card--hot .prod{max-width:62%;max-height:104px;transform:translateZ(20px)}
