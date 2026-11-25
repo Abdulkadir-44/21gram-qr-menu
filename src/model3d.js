@@ -13,16 +13,24 @@ export const MODELS = {
   'aci-gercek-smash': '/models/hamburger-v1.glb',
   'haspresso-martini': '/models/haspresso-martini-v1.glb',
 };
+/* YÜKSEK DETAYLI sürümler (güçlü cihaz): renk dokusu 4096 px, yüzey ve pürüzlülük 2048 px, ~310 bin üçgen (~3,2-3,5 MB).
+   Zayıf cihaz (app.js WEAK) hafif sürümü (yukarıdaki MODELS) alır: 4K doku ekran kartında ~85 MB yer kaplar. */
+export const MODELS_HD = {
+  'aci-gercek-smash': '/models/hamburger-hd-v1.glb',
+  'haspresso-martini': '/models/haspresso-martini-hd-v1.glb',
+};
 
 /* "stüdyo sahnesi" olan modeller: altında krem tabla, tablada ve zeminde gölge, güçlü kenar ışığı.
    (arka plandaki sıcak ışık lekesi CSS'te: .m3d-bg). Martini kendi arka planıyla kalır. */
-const STAGED = new Set(['/models/hamburger-v1.glb']);
+const STAGED = new Set(['/models/hamburger-v1.glb', '/models/hamburger-hd-v1.glb']);
 
 /* dosya boyları (bayt): sunucu boyu bildirmezse (sıkıştırılmış aktarım) yükleme yüzdesi bununla hesaplanır.
    Model dosyası değişince burayı da güncelle: stat -c %s public/models/*.glb */
 const MODEL_BYTES = {
   '/models/hamburger-v1.glb': 1249320,
   '/models/haspresso-martini-v1.glb': 1162856,
+  '/models/hamburger-hd-v1.glb': 3545620,
+  '/models/haspresso-martini-hd-v1.glb': 3248532,
 };
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

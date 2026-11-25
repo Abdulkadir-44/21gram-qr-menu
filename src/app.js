@@ -6,7 +6,7 @@
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
 import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
-import { MODELS, createViewer, prefetchModel } from './model3d.js';
+import { MODELS, MODELS_HD, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 13;
@@ -2041,7 +2041,7 @@ function setMode3D(m){
   [].forEach.call(m3dBar.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.m===m))});
   if(m==='3d'){
     var my=m3d.url,pct=m3dBar.querySelector('small');
-    var lk=null;for(var id in MODELS)if(MODELS[id]===my&&LOADER_OF[id])lk=LOADER_OF[id];
+    var lk=null;for(var id in MODELS)if((MODELS[id]===my||MODELS_HD[id]===my)&&LOADER_OF[id])lk=LOADER_OF[id];
     if(lk&&!hero.classList.contains('is-3d'))loaderStart(lk);
     viewer3d.show(hero,my,function(st,f){
       if(m3d.url!==my||m3d.mode!=='3d')return;
@@ -2064,7 +2064,8 @@ function setMode3D(m){
   }else{loaderStop();viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
 }
 function setup3D(p){
-  var u=MODELS[p.id]||null;
+  /* güçlü cihaz yüksek detaylı modeli, zayıf cihaz hafifini alır */
+  var u=(!WEAK.on&&MODELS_HD[p.id])||MODELS[p.id]||null;
   if(u===m3d.url&&u)return;            /* aynı ürün: durumu koru */
   stop3D();m3d.url=u;m3d.t0=performance.now();
   hero.classList.toggle('has-3d',!!u);
