@@ -14,3 +14,8 @@ reference/
 
 # proje durumu notu (yalnız yerel; compact sonrası hatırlamak için)
 docs/PROJE-DURUMU.md
+
+test-metrics/
+
+# gelen hazır şeffaf PNG orijinalleri (büyük; scripts/prep-realistic.py ile img/new içine işlenir), GitHub'a gitmez
+public/img/new-realistic/

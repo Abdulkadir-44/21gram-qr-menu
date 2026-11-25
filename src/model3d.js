@@ -9,7 +9,10 @@
    ========================================================== */
 
 /* modeli olan ürünler (demo: yalnız Acı Gerçek Smash). Dosya değişirse adındaki -v1 artırılır (önbellek). */
-export const MODELS = { 'aci-gercek-smash': '/models/hamburger-v1.glb' };
+export const MODELS = {
+  'aci-gercek-smash': '/models/hamburger-v1.glb',
+  'haspresso-martini': '/models/haspresso-martini-v1.glb',
+};
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function loadScript(src) {

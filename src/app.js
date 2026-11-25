@@ -9,7 +9,7 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 import { MODELS, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 10;
+const IMG_V = 12;
 /* menü verisi pakete gömülü (ayrı istek ve bekleme yok); src/data/menu.json değişince build yeniden alır */
 import menu from './data/menu.json';
 
@@ -925,7 +925,7 @@ function sauceCardHTML(p,i){
   return cardOpen(p,i,'card--sauce').replace('style="','style="--sauce:'+col+';')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
    +'<svg class="drip" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg></div>'
-   +'<div class="stage">'+ramekinSVG(p)+'</div>'
+   +'<div class="stage">'+(p.img?prodHTML(p):ramekinSVG(p))+'</div>'   /* fotoğrafı gelen sos fotoğrafla, diğerleri çizim kâseyle */
    +'<div class="meta"><p class="cat">EKSTRA SOS</p>'
    +'<h3 class="name">'+esc(nm)+'</h3>'
    +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
@@ -955,10 +955,10 @@ function dessertCardHTML(p,i){
    +'<span class="ribbon-v" aria-hidden="true"></span><span class="ribbon-h" aria-hidden="true"></span></div>'
    +'<span class="bow" aria-hidden="true"><i></i><i></i><b></b></span>'
    +'<div class="stage">'+(p.img?prodHTML(p):tiramisuSVG())+'</div>'
-   +'<div class="meta"><p class="cat"><span>TATLI KÖŞESİ</span><span class="no">'+noHTML(p)+'</span></p>'
+   +'<div class="meta"><p class="cat"><span>TATLI KÖŞESİ</span></p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
    +'<p class="sub">Günün tatlı finali</p>'
-   +'<div class="foot"><span class="price">'+money(p.price)+'</span>'+ARROW+'</div>'
+   +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'
    +'</div></div></article>';
 }
 

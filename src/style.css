@@ -1752,3 +1752,14 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .pint2.big{width:min(22vw,84px)}
 .sheet.pop .pint2.big{width:min(18vw,68px)}
 .card--beer.v2 .vol-g .ticket{margin-left:-8px}
+/* soslardan sonra gelen kart (ör. tek ürünlü Tatlı: başlığı yok) yeni satırdan başlar; tablette son sos onun yanına düşüp onun boyuna uzamaz */
+html[data-group="yiyecek"] .grid>.card--sauce+.card:not(.card--sauce){grid-column:1 / span 2}
+/* sos kartı: fotoğraflı sos, çizim kâse ile aynı boyda ve yerde */
+.card--sauce .prod{max-width:58%;max-height:84px;transform:translateZ(46px);filter:drop-shadow(0 10px 10px rgba(40,0,8,.28))}
+/* tatlı kartı: yeni (yatay) tiramisu fotoğrafı biraz küçük ve hafif sağda */
+.card--dessert .prod{max-width:64%;max-height:150px;translate:16px 0}
+/* tatlı kartı: fiyat diğer kartlardaki gibi bilet */
+.card--dessert .foot{align-items:center}
+.card--dessert .ticket{color:var(--red);margin-top:0;height:38px;font-size:23px;padding:0 18px 0 24px}
+.card--dessert .ticket small{font-size:15px}
+.card--dessert .ticket::before{left:12px}
