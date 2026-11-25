@@ -60,6 +60,38 @@ function loadModel(url, onProgress) {
 /** Detay açılınca arka planda indirmeye başla (gösterme). */
 export function prefetchModel(url) { loadModel(url).catch(() => { delete modelP[url]; }); }
 
+/* tabak: krem sır üstünde çok ince, seyrek benekler (el yapımı taş seramik); kodla üretilir */
+function speckleTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, 256, 256);
+  let h = 7; const rnd = () => ((h = (h * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 260; i++) {
+    const r = rnd() < .8 ? .7 + rnd() * .8 : 1.4 + rnd() * 1.2;
+    x.fillStyle = 'rgba(' + (110 + rnd() * 40 | 0) + ',' + (80 + rnd() * 30 | 0) + ',50,' + (.3 + rnd() * .35).toFixed(2) + ')';
+    x.beginPath(); x.arc(rnd() * 256, rnd() * 256, r, 0, Math.PI * 2); x.fill();
+  }
+  for (let i = 0; i < 40; i++) {                       /* sırda hafif ton dalgası */
+    x.fillStyle = 'rgba(214,190,150,' + (.03 + rnd() * .04).toFixed(3) + ')';
+    x.beginPath(); x.arc(rnd() * 256, rnd() * 256, 18 + rnd() * 30, 0, Math.PI * 2); x.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 1.5);
+  t.encoding = THREE.sRGBEncoding; t.anisotropy = 4;
+  return t;
+}
+/* tabağın sırında görünen sıcak ortam: üstte yumuşak krem ışık, ufukta bir ışık şeridi, altta koyu bordo */
+let envTex = null;
+function glazeEnv() {
+  return envTex || (envTex = (() => {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 128;
+    const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 128);
+    g.addColorStop(0, '#e2c08c'); g.addColorStop(.38, '#d9a565'); g.addColorStop(.5, '#e07a3c'); g.addColorStop(.62, '#8e2a1e'); g.addColorStop(1, '#2a0a0e');
+    x.fillStyle = g; x.fillRect(0, 0, 256, 128);
+    x.fillStyle = 'rgba(255,246,225,.7)'; x.fillRect(150, 30, 40, 12);   /* pencere ışığı: kenarda parlama */
+    const t = new THREE.CanvasTexture(c); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+    return t;
+  })());
+}
 /* yumuşak temas gölgesi (radyal degrade doku) */
 function shadowTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
@@ -89,6 +121,8 @@ export function createViewer(opts) {
     renderer.setClearColor(0x000000, 0);
     renderer.outputEncoding = THREE.sRGBEncoding;
     scene = new THREE.Scene();
+    /* tabak yansıması: düz ortam dokusu pürüzlülüğe göre bulanıklaşsın diye PMREM'den geçirilir (bir kez, çok küçük) */
+    try { const pm = new THREE.PMREMGenerator(renderer); envTex = pm.fromEquirectangular(glazeEnv()).texture; pm.dispose(); } catch (e) { /* olmazsa düz doku kalır */ }
     camera = new THREE.PerspectiveCamera(32, 1, .01, 50);
     /* sıcak, iştah açıcı ışık */
     hemi = new THREE.HemisphereLight(0xfff3e4, 0x3a0e0a, .8); scene.add(hemi);
@@ -99,14 +133,19 @@ export function createViewer(opts) {
     shadow.rotation.x = -Math.PI / 2; scene.add(shadow);
     /* tabla: krem üst yüz + biraz koyu kenar şeridi; altında zemine düşen geniş yumuşak gölge */
     stage = new THREE.Group();
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 96), [
-      new THREE.MeshStandardMaterial({ color: 0xF1DDB6, roughness: .7, metalness: 0 }),   /* yan */
-      new THREE.MeshStandardMaterial({ color: 0xFFF6E2, roughness: .55, metalness: 0 }),  /* üst */
-      new THREE.MeshStandardMaterial({ color: 0xF1DDB6, roughness: .7, metalness: 0 }),   /* alt */
-    ]);
-    top.name = 'top'; stage.add(top);
-    const lip = new THREE.Mesh(new THREE.TorusGeometry(1, .018, 10, 120), new THREE.MeshStandardMaterial({ color: 0xE7C995, roughness: .6 }));
-    lip.rotation.x = Math.PI / 2; lip.name = 'lip'; stage.add(lip);
+    /* SERAMİK TABAK — gerçek tabak kesiti etrafında döndürülür (LatheGeometry, yarıçap 1):
+       ortada burgerin oturduğu sığ çukur, yükselen yuvarlak kenar, altta ince ayak. Krem sır, hafif benekli
+       taş seramik dokusu ve yalnız tabağa uygulanan sıcak ortam yansıması (burger etkilenmez). Dosya inmez. */
+    const prof = [[0, 0], [.4, 0], [.58, .004], [.66, .016], [.74, .045], [.82, .082], [.89, .108], [.94, .12],
+      [.975, .121], [.997, .112], [1.004, .096], [.995, .082], [.96, .074], [.86, .05], [.74, .016], [.62, -.008],
+      [.575, -.022], [.56, -.044], [.53, -.05], [.505, -.042], [.49, -.022], [.3, -.022], [0, -.022]]
+      .map(([x, y]) => new THREE.Vector2(x, y));
+    const plateGeo = new THREE.LatheGeometry(prof, 128);
+    plateGeo.computeVertexNormals();
+    const plate = new THREE.Mesh(plateGeo, new THREE.MeshStandardMaterial({
+      color: 0xDDC79F, roughness: .55, metalness: 0, map: speckleTexture(), envMap: glazeEnv(), envMapIntensity: .2, side: THREE.DoubleSide,
+    }));
+    plate.name = 'plate'; stage.add(plate);
     floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false, opacity: .9 }));
     floorShadow.rotation.x = -Math.PI / 2; stage.add(floorShadow);
     stage.visible = false; scene.add(stage);
@@ -165,10 +204,9 @@ export function createViewer(opts) {
     const w = v.sw, h = v.sh;
     stage.visible = staged; v.staged = staged;
     if (staged) {
-      const R = w * .62, T = h * .07;                    /* tabla yarıçapı ve kalınlığı */
-      const top = stage.getObjectByName('top'); top.scale.set(R, T, R); top.position.y = -T / 2;
-      const lip = stage.getObjectByName('lip'); lip.scale.set(R, R, R * 1.4); lip.position.y = -.001;
-      floorShadow.scale.set(R * 3, R * 3, 1); floorShadow.position.y = -T - .002;
+      const R = w * .66, T = R * .17;                    /* tabak yarıçapı; T: kenar yüksekliği + ayak (kesitten) */
+      stage.getObjectByName('plate').scale.set(R, R, R);   /* çukurun tabanı y=0: burger tam oturur */
+      floorShadow.scale.set(R * 3, R * 3, 1); floorShadow.position.y = -R * .05 - .002;
       shadow.scale.set(w * 1.2, w * 1.2, 1); shadow.material.opacity = 1;
       v.mw = R * 2; v.mh = h + T;                         /* sığdırma: tabla dahil */
       v.target = new THREE.Vector3(0, (h - T) * .5, 0);
