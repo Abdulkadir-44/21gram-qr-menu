@@ -60,7 +60,8 @@ if(LITE)document.documentElement.classList.add('lite');
    (3) ilk tahmin: tarayıcı bildiriyorsa ≤4 çekirdek ve ≤4 GB bellek (yalnız Android Chrome bildirir).
    Bir kez "zayıf" denen cihaz oturum boyunca zayıf kalır (yükleyici bir görünüp bir kaybolmasın). ?perf göstergesinde yazar. */
 var WEAK={on:false,why:''};
-function markWeak(why){if(WEAK.on)return;WEAK.on=true;WEAK.why=why;if(/[?&]perf/.test(location.search)&&window.console)console.info('[cihaz] zayıf: '+why)}
+/* yalnız dokunmatik cihaz (LITE) zayıf sayılabilir: fareli bilgisayar her zaman güçlü yoldan gider (anlık yük yanlış alarm veriyordu) */
+function markWeak(why){if(WEAK.on||!LITE)return;WEAK.on=true;WEAK.why=why;if(/[?&]perf/.test(location.search)&&window.console)console.info('[cihaz] zayıf: '+why)}
 (function(){var hc=navigator.hardwareConcurrency,dm=navigator.deviceMemory;if(hc&&dm&&hc<=4&&dm<=4)markWeak('donanım '+hc+' çekirdek / '+dm+' GB')})();
 var $=function(s){return document.querySelector(s)};
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
@@ -507,7 +508,8 @@ function initGL(){
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
       if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':'','cihaz: '+(WEAK.on?'zayıf ('+WEAK.why+') · bölüm yükleyicisi açık':'güçlü · yükleyici yok')].filter(Boolean).join(String.fromCharCode(10)));
-      if(avg>22){markWeak('kare '+avg.toFixed(0)+' ms');Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
+      Q.bad=avg>22?(Q.bad||0)+1:0;
+      if(avg>22){if(Q.bad>=2)markWeak('kare '+avg.toFixed(0)+' ms (art arda 2 ölçüm)');Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;
     }
@@ -1536,7 +1538,9 @@ function render(opts){
     var tpl=document.createElement('template');tpl.innerHTML=html;
     var nodes=[].slice.call(tpl.content.childNodes);
     grid.textContent='';armLazy(grid);
+    var work=0;                                   /* kurulumun gerçek iş süresi (kareler arası bekleme hariç) */
     var addChunk=function(n){
+      var t0=performance.now();
       var part=nodes.splice(0,n);if(!part.length)return;
       var frag=document.createDocumentFragment();part.forEach(function(x){frag.appendChild(x)});grid.appendChild(frag);
       var els=part.filter(function(x){return x.nodeType===1}),uls=[];
@@ -1544,9 +1548,10 @@ function render(opts){
       uls.forEach(function(ul){if(layersRO&&!ul._ro){ul._ro=1;layersRO.observe(ul)}});
       fitBatch(uls);observeLazy(els);
       if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
+      work+=performance.now()-t0;
     };
-    var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
-      if(opts.onDone)opts.onDone();
+    var done=function(){var t0=performance.now();chunkFlush=null;layoutWM(grid);collectCards();moveInd();work+=performance.now()-t0;
+      if(opts.onDone)opts.onDone(work);
       if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
@@ -1637,7 +1642,9 @@ tabsEl.addEventListener('click',function(e){
    Şimdi: sekme anında seçili görünür → mevcut kartlar 150 ms'de solar → sayfa görünmezken en üste alınır →
    yeni kartlar parça parça (ilk 3 hemen, gerisi kare kare) eklenir ve her biri "dağıtılma" animasyonuyla gelir. */
 var swT=0;
+function qualityPause(ms){if(gl.q)gl.q.hold=Math.max(gl.q.hold,performance.now()+ms)}
 function switchGroup(tab){
+  qualityPause(2000);
   tabsEl.querySelectorAll('.tab').forEach(function(t){var on=t===tab;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1});
   /* seçim balonu, sayfa rengi ve 3D arka plan rengi sekmeye basıldığı an değişir (kartların solmasıyla eş zamanlı) */
   moveInd();
@@ -1696,8 +1703,7 @@ function switchGroup(tab){
     }else{
       /* GÜÇLÜ CİHAZ: beklemesiz eski akış — kartlar parça parça kurulurken yükselerek gelir. Kurulum 0,3 sn'yi
          aşarsa cihaz zayıf sayılır, sonraki geçişlerde yükleyici devreye girer. */
-      var tB=performance.now();
-      render({chunk:true,dealChunk:true,onDone:function(){var d=performance.now()-tB;if(d>300)markWeak('bölüm geçişi '+Math.round(d)+' ms')}});
+      render({chunk:true,dealChunk:true,onDone:function(w){if(w>150)markWeak('bölüm kurulumu '+Math.round(w)+' ms iş')}});
       grid.style.transition='none';grid.style.opacity='';
     }
     document.documentElement.style.removeProperty('--bg');
@@ -1866,6 +1872,7 @@ function popFlipOut(card){
 }
 function openSheet(id,fromEl,fromHash){
   var p=BYID[id];if(!p)return;
+  qualityPause(1800);
   lastFocus=fromEl||document.activeElement;
   $('#panel').getAnimations().forEach(function(a){a.cancel()});
   if(popCard){popCard.style.visibility='';popCard=null}
