@@ -1714,7 +1714,7 @@ function grpLdInit(){
   if(grpLd.el)return;
   var el=document.createElement('div');el.className='grp-load';el.setAttribute('aria-hidden','true');
   el.style.cssText='position:fixed;opacity:0;pointer-events:none';   /* stil gelmeden bir an bile görünmesin */
-  el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="gl-win"><span class="gl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
+  el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="grpl-win"><span class="grpl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
   document.body.appendChild(el);
   grpLd.el=el;grpLd.cap=el.querySelector('.gl-cap');
 }

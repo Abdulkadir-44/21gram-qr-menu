@@ -1821,13 +1821,14 @@ html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;backgr
 .gl-logo{position:relative;display:block;width:min(46vw,200px);line-height:0}
 .gl-logo img{width:100%;height:auto;display:block}
 .gl-base{opacity:.22}
-.gl-win{position:absolute;inset:0;overflow:hidden;animation:glWin 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
-.gl-in{position:absolute;inset:0;animation:glIn 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
-@keyframes glWin{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-@keyframes glIn{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+/* sınıf adları benzersiz: "gl-in" sayfanın açılış sınıfıydı (html.gl-in) → bütün sayfa sağdan sola kayıyordu */
+.grpl-win{position:absolute;inset:0;overflow:hidden;animation:grplWin 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+.grpl-in{position:absolute;inset:0;animation:grplIn 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+@keyframes grplWin{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes grplIn{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
 .gl-cap{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);opacity:.7}
-.grp-load:not(.on) .gl-win,.grp-load:not(.on) .gl-in{animation-play-state:paused}
-@media(prefers-reduced-motion:reduce){.gl-win,.gl-in{animation:none}.gl-win{transform:none}.gl-in{transform:none}}
+.grp-load:not(.on) .grpl-win,.grp-load:not(.on) .grpl-in{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.grpl-win,.grpl-in{animation:none}.grpl-win{transform:none}.grpl-in{transform:none}}
 /* sıcak içecek: fincan gövdesi kartın ortasında, duman ağzın hemen üstünde.
    Kutu görselle aynı genişlikte (en fazla %62, yükseklik 104 px'i geçmez: --ar = en/boy) → kaydırma (--cx, görsel
    genişliğine oran) her kart boyunda doğru. */
