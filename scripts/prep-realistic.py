@@ -27,13 +27,23 @@ def walk(o):
     elif isinstance(o, list):
         for v in o: yield from walk(v)
 
+# dosya adı menü adıyla uyuşmayanlar: gelen dosya adı → menüdeki ürün adı (kullanıcı onaylı)
+ALIAS = {
+    'Soslu çıtır tavuk ve patates tabağı': 'HOLY CHICK',
+    'Çıtır tavuk ve patates sunumu': 'Golden Chıck',
+    'Soslu peynirli patates kızartması tepsisi': 'Trüflü Parmesanlı Patates Kızartması',
+    'Beyaz tabakta gerçekçi tiramisu dilimi': 'TİRAMİSU',
+    'Mercan tonlu acılı sos kâsesi': 'DYNAMITE SOS',      # soslarda henüz img yok → şimdilik atlanır
+}
+ALIAS = {key(k): key(v) for k, v in ALIAS.items()}
+
 menu = json.load(open(os.path.join(ROOT, 'src/data/menu.json'), encoding='utf-8'))
 byname = {key(p['name']): p for p in walk(menu) if p.get('img')}
 
 os.makedirs(BAK, exist_ok=True)
 for f in sorted(os.listdir(SRC)):
     if not f.lower().endswith('.png'): continue
-    p = byname.get(key(os.path.splitext(f)[0]))
+    k = key(os.path.splitext(f)[0]); p = byname.get(ALIAS.get(k, k))
     if not p: print('EŞLEŞMEDİ:', f); continue
     im = Image.open(os.path.join(SRC, f)).convert('RGBA')
     r, g, b, a = im.split()
