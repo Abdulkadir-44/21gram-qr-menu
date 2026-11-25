@@ -1537,6 +1537,7 @@ function render(opts){
       if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
     };
     var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
+      if(opts.onDone)opts.onDone();
       if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
@@ -1637,6 +1638,30 @@ function switchGroup(tab){
   var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
   if(RM){window.scrollTo(0,0);render();H.style.removeProperty('--bg');return}
   clearTimeout(swT);var my=++swSeq,done=false;
+  /* BÖLÜM YÜKLEYİCİSİ — kartlar görünmezken kurulur ve ilk ekranın görselleri iner; iş 0,2 sn'de bitmezse ortada
+     21GRAM logosu belirir (yalnız CSS transform: telefon meşgulken de akar). Hazır olunca logo söner, kartlar birlikte yükselir.
+     Bir kez belirirse en az 0,4 sn kalır (yanıp sönmesin). Güçlü cihazda çoğu zaman hiç görünmez. */
+  clearTimeout(grpLd.t);grpLd.shown=0;grpLd.el.classList.remove('on');
+  var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
+  grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();grpLd.el.classList.add('on')},200);
+  var reveal=function(){
+    if(my!==swSeq)return;
+    var wait=grpLd.shown?Math.max(0,grpLd.shown+400-performance.now()):0;
+    setTimeout(function(){
+      if(my!==swSeq)return;
+      clearTimeout(grpLd.t);grpLd.el.classList.remove('on');
+      var cs=grid.querySelectorAll('.card');
+      for(var k=0;k<cs.length&&k<12;k++)cs[k].classList.add('rise');      /* yalnız ilk ekranlar yükselir */
+      grid.style.transition='opacity .2s ease';grid.style.opacity='';
+      setTimeout(function(){if(my===swSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600);
+    },wait);
+  };
+  /* ilk ekranın görselleri inip çözülünce (en fazla 2,5 sn beklenir) */
+  var waitEager=function(){
+    var ims=[].slice.call(grid.querySelectorAll('img.prod[fetchpriority="high"]'));
+    var ps=ims.map(function(im){return im.decode?im.decode().catch(function(){}):Promise.resolve()});
+    Promise.race([Promise.all(ps),new Promise(function(r){setTimeout(r,2500)})]).then(reveal);
+  };
   /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
   var swap=function(){
     if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
@@ -1652,9 +1677,9 @@ function switchGroup(tab){
         if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
       }
     }
-    render({chunk:true,dealChunk:true});
+    /* kartlar görünmez (opacity 0) kurulur; bitince görseller beklenir, sonra birlikte açılır */
+    render({chunk:true,onDone:waitEager});
     document.documentElement.style.removeProperty('--bg');
-    grid.style.transition='none';grid.style.opacity='';
   };
   var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
   grid.addEventListener('transitionend',onEnd);
@@ -1662,6 +1687,12 @@ function switchGroup(tab){
   swT=setTimeout(swap,300);
 }
 var swSeq=0;
+var grpLd=(function(){
+  var el=document.createElement('div');el.className='grp-load';el.setAttribute('aria-hidden','true');
+  el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="gl-win"><span class="gl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
+  document.body.appendChild(el);
+  return {el:el,cap:el.querySelector('.gl-cap'),t:0,shown:0};
+})();
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});
