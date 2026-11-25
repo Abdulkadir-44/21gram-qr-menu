@@ -1754,3 +1754,5 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .card--beer.v2 .vol-g .ticket{margin-left:-8px}
 /* soslardan sonra gelen kart (ör. tek ürünlü Tatlı: başlığı yok) yeni satırdan başlar; tablette son sos onun yanına düşüp onun boyuna uzamaz */
 html[data-group="yiyecek"] .grid>.card--sauce+.card:not(.card--sauce){grid-column:1 / span 2}
+/* sos kartı: fotoğraflı sos, çizim kâse ile aynı boyda ve yerde */
+.card--sauce .prod{max-width:84%;max-height:128px;transform:translateZ(46px);filter:drop-shadow(0 10px 10px rgba(40,0,8,.28))}

@@ -925,7 +925,7 @@ function sauceCardHTML(p,i){
   return cardOpen(p,i,'card--sauce').replace('style="','style="--sauce:'+col+';')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div>'
    +'<svg class="drip" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0 H200 V22 Q192 22 190 30 Q188 46 182 46 Q176 46 175 30 Q174 20 164 22 Q150 24 146 34 Q143 54 135 54 Q127 54 126 36 Q125 22 112 22 Q98 22 96 28 Q94 38 88 38 Q82 38 81 28 Q80 20 66 22 Q52 24 50 36 Q48 58 39 58 Q30 58 29 38 Q28 22 16 22 Q4 22 0 26 Z"/></svg></div>'
-   +'<div class="stage">'+ramekinSVG(p)+'</div>'
+   +'<div class="stage">'+(p.img?prodHTML(p):ramekinSVG(p))+'</div>'   /* fotoğrafı gelen sos fotoğrafla, diğerleri çizim kâseyle */
    +'<div class="meta"><p class="cat">EKSTRA SOS</p>'
    +'<h3 class="name">'+esc(nm)+'</h3>'
    +'<div class="foot">'+ticketHTML(p)+ARROW+'</div>'

@@ -219,7 +219,10 @@
        "name": "DYNAMITE SOS",
        "size": "",
        "price": 35,
-       "desc": ""
+       "desc": "",
+       "img": "dynamite-sos.webp",
+       "w": 640,
+       "h": 508
       },
       {
        "id": "truffle-sos",
