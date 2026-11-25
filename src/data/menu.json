@@ -17,7 +17,7 @@
        "desc": "smash et, american cheese, ketçap, patates kızartması",
        "img": "kid-s-smash.webp",
        "w": 640,
-       "h": 466
+       "h": 469
       },
       {
        "id": "local-smash",
@@ -27,7 +27,7 @@
        "desc": "smash et, american cheese, local sos, gürkens, mor soğan, patates kızartması",
        "img": "local-smash.webp",
        "w": 640,
-       "h": 410
+       "h": 450
       },
       {
        "id": "acisiyla-tatlisiyla-smash",
@@ -37,7 +37,7 @@
        "desc": "smash et, american cheese, baş biber mayo, baş biber reçeli, gürkens, patates kızartması",
        "img": "acisiyla-tatlisiyla-smash.webp",
        "w": 640,
-       "h": 498
+       "h": 537
       },
       {
        "id": "fake-mac-smash",
@@ -47,7 +47,7 @@
        "desc": "smash et, american cheese, fake mac sos, gürkens, marul, domates, mor soğan, patates kızartması",
        "img": "fake-mac-smash.webp",
        "w": 640,
-       "h": 507
+       "h": 502
       },
       {
        "id": "truffle-smash",
@@ -57,7 +57,7 @@
        "desc": "smash et, american cheese, truffle sos, gürkens, mor soğan turşusu, patates kızartması",
        "img": "truffle-smash.webp",
        "w": 640,
-       "h": 402
+       "h": 429
       },
       {
        "id": "aci-gercek-smash",
@@ -67,7 +67,7 @@
        "desc": "smash et, american cheese, köz biber sos, mor soğan, gürkens, patates kızartması",
        "img": "aci-gercek-smash.webp",
        "w": 640,
-       "h": 517
+       "h": 532
       }
      ]
     },
@@ -84,7 +84,7 @@
        "desc": "altın çıtır tavuk, dinamite sos, gürkens, mor soğan turşusu, patates kızartması",
        "img": "dynamite-chicken-burger.webp",
        "w": 640,
-       "h": 465
+       "h": 469
       },
       {
        "id": "just-chicken-burger",
@@ -94,7 +94,7 @@
        "desc": "altın çıtır tavuk, gürkens, mayonez, mor soğan turşusu, mor soğan, patates kızartması",
        "img": "just-chicken-burger.webp",
        "w": 640,
-       "h": 549
+       "h": 565
       }
      ]
     },
@@ -110,7 +110,7 @@
        "price": 340,
        "desc": "",
        "img": "truflu-parmesanli-patates-kizartmasi.webp",
-       "w": 447,
+       "w": 388,
        "h": 640
       },
       {
@@ -121,7 +121,7 @@
        "desc": "",
        "img": "tursu-tabagi.webp",
        "w": 640,
-       "h": 632
+       "h": 614
       },
       {
        "id": "patates-kizartmasi",
@@ -130,7 +130,7 @@
        "price": 280,
        "desc": "",
        "img": "patates-kizartmasi.webp",
-       "w": 467,
+       "w": 463,
        "h": 640
       },
       {
@@ -140,7 +140,7 @@
        "price": 320,
        "desc": "tuzlu yoğurt, labne, taze zahter, kuru zahter, lavaş cipsi",
        "img": "zahter-dip.webp",
-       "w": 601,
+       "w": 610,
        "h": 640
       },
       {
@@ -160,7 +160,7 @@
        "price": 520,
        "desc": "altın çıtır tavuk, baş biber mayo, frenk soğan, patates kızartması, baş biber reçeli ile",
        "img": "holy-chick.webp",
-       "w": 492,
+       "w": 449,
        "h": 640
       },
       {
@@ -170,7 +170,7 @@
        "price": 480,
        "desc": "altın çıtır tavuk, patates kızartması",
        "img": "golden-chick.webp",
-       "w": 479,
+       "w": 402,
        "h": 640
       },
       {
@@ -253,7 +253,7 @@
        "desc": "",
        "img": "tiramisu.webp",
        "w": 640,
-       "h": 476
+       "h": 344
       }
      ]
     }
@@ -788,7 +788,8 @@
        "desc": "",
        "img": "turk-kahvesi.webp",
        "w": 640,
-       "h": 416
+       "h": 521,
+       "cx": 0.062
       },
       {
        "id": "americano",
@@ -798,7 +799,8 @@
        "desc": "",
        "img": "americano.webp",
        "w": 640,
-       "h": 518
+       "h": 570,
+       "cx": -0.117
       },
       {
        "id": "double-espresso",
@@ -808,7 +810,8 @@
        "desc": "",
        "img": "double-espresso.webp",
        "w": 640,
-       "h": 382
+       "h": 558,
+       "cx": -0.126
       },
       {
        "id": "filtre-kahve",
@@ -818,7 +821,8 @@
        "desc": "",
        "img": "filtre-kahve.webp",
        "w": 640,
-       "h": 510
+       "h": 544,
+       "cx": -0.116
       }
      ]
     }

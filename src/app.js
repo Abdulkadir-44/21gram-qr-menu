@@ -23,7 +23,7 @@ const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-koktey
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
-  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
+  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h, cx: it.cx || 0,
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
@@ -812,7 +812,8 @@ function hotCardHTML(p,i){
    +'<path d="M30 88 C18 70 42 58 30 40 C20 26 36 14 30 2"/><path d="M60 88 C48 70 72 58 60 40 C50 26 66 14 60 2"/><path d="M90 88 C78 70 102 58 90 40 C80 26 96 14 90 2"/></svg>';
   return cardOpen(p,i,'card--hot')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div><span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span></div>'
-   +'<div class="stage">'+steam+(p.img?prodHTML(p):cupSVG())
+   /* fotoğraflı fincan: gövde kartın ortasına alınır (kulp yüzünden görsel merkezi kayık, --cx), duman fincan ağzının hemen üstünden çıkar */
+   +'<div class="stage">'+(p.img?'<span class="cup-w" style="--cx:'+p.cx+';--ar:'+(p.w/p.h).toFixed(3)+'">'+steam+prodHTML(p)+'</span>':steam+cupSVG())
    +'</div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'

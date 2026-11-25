@@ -1828,3 +1828,9 @@ html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;backgr
 .gl-cap{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);opacity:.7}
 .grp-load:not(.on) .gl-win,.grp-load:not(.on) .gl-in{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.gl-win,.gl-in{animation:none}.gl-win{transform:none}.gl-in{transform:none}}
+/* sıcak içecek: fincan gövdesi kartın ortasında, duman ağzın hemen üstünde.
+   Kutu görselle aynı genişlikte (en fazla %62, yükseklik 104 px'i geçmez: --ar = en/boy) → kaydırma (--cx, görsel
+   genişliğine oran) her kart boyunda doğru. */
+.card--hot .cup-w{position:relative;display:block;width:min(62%,calc(104px * var(--ar,1)));line-height:0;transform-style:preserve-3d;transform:translateX(calc(var(--cx,0) * -100%))}
+.card--hot .cup-w .prod{width:100%;height:auto;max-width:none;max-height:none}
+.card--hot .cup-w .steam{top:auto;bottom:calc(100% - 14px);left:calc(50% + var(--cx,0) * 100%);width:64px;margin-left:-32px}
