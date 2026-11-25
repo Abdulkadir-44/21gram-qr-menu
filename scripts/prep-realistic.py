@@ -33,7 +33,14 @@ ALIAS = {
     'Çıtır tavuk ve patates sunumu': 'Golden Chıck',
     'Soslu peynirli patates kızartması tepsisi': 'Trüflü Parmesanlı Patates Kızartması',
     'Beyaz tabakta gerçekçi tiramisu dilimi': 'TİRAMİSU',
-    'Mercan tonlu acılı sos kâsesi': 'DYNAMITE SOS',      # soslarda henüz img yok → şimdilik atlanır
+    'Mercan tonlu acılı sos kâsesi': 'DYNAMITE SOS',
+    'Beyaz fincanda altın kremalı çift espresso': 'Double Espresso',
+    'Beyaz fincanda geleneksel Türk kahvesi': 'TÜRK KAHVESİ',
+    'Beyaz fincanda koyu Americano': 'Amerıcano',
+    'Beyaz porselen kupada sıcak filtre kahve': 'Filtre Kahve',
+    'Metal kapta pembe lahana ve karışık turşu': 'Turşu Tabağı',
+    'Metal tepside çıtır patates ve dip sos': 'Patates Kızartması',
+    'Çıtır ekmekli kremalı dip sunumu': 'Zahter Dıp',
 }
 ALIAS = {key(k): key(v) for k, v in ALIAS.items()}
 
