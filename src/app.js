@@ -9,7 +9,7 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 import { MODELS, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 12;
+const IMG_V = 13;
 /* menü verisi pakete gömülü (ayrı istek ve bekleme yok); src/data/menu.json değişince build yeniden alır */
 import menu from './data/menu.json';
 
@@ -1903,7 +1903,11 @@ hero.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')hpT.on=
 /* ——— 3D MODEL (detay) ———
    Modeli olan üründe detay 3D ile açılır; üstte "3D | Foto" anahtarı. Model inerken fotoğraf görünür,
    anahtarda yüzde yazar; hazır olunca 3D yumuşakça fotoğrafın yerini alır. */
+/* hamburger 3D sahnesi: varsayılan A (sıcak stüdyo); ?sahne=b → B (marka sahnesi) — müşteri seçene kadar ikisi de duruyor */
+var SAHNE=(/[?&]sahne=([ab])/.exec(location.search)||[])[1]||'a';
+document.documentElement.dataset.sahne=SAHNE;
 var viewer3d=createViewer({
+  look:SAHNE,
   getDpr:function(){var d=Math.min(window.devicePixelRatio||1,2);return gl.q&&gl.q.lvl>0?Math.min(d,1):d},
   fitRect:function(){return hp&&hp.tagName==='IMG'&&hp.offsetWidth?{w:hp.offsetWidth,h:hp.offsetHeight}:null}
 });
@@ -1911,6 +1915,8 @@ var m3d={mode:'3d',url:null};
 var m3dBar=document.createElement('div');m3dBar.className='m3d-toggle';m3dBar.setAttribute('role','group');m3dBar.setAttribute('aria-label','Görünüm');
 m3dBar.innerHTML='<button type="button" data-m="3d" aria-pressed="true">3D<small></small></button><button type="button" data-m="foto" aria-pressed="false">Foto</button>';
 hero.appendChild(m3dBar);
+/* stüdyo arka planı (yalnız hamburger 3D'de görünür, CSS): sıcak ışık lekesi — süslü zeminin yerine */
+var m3dBg=document.createElement('span');m3dBg.className='m3d-bg';m3dBg.setAttribute('aria-hidden','true');hero.insertBefore(m3dBg,hero.querySelector('.plate'));
 m3dBar.addEventListener('pointerdown',function(e){e.stopPropagation()});
 m3dBar.addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b||!m3d.url)return;setMode3D(b.dataset.m)});
 function setMode3D(m){
@@ -1921,7 +1927,9 @@ function setMode3D(m){
     viewer3d.show(hero,my,function(st,f){
       if(m3d.url!==my||m3d.mode!=='3d')return;
       if(st==='loading'){hero.classList.add('m3d-loading');pct.textContent=f>0&&f<1?' %'+Math.round(f*100):''}
-      else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';hero.classList.add('is-3d')}
+      else if(st==='ready'){hero.classList.remove('m3d-loading');pct.textContent='';
+        /* model kart açılırken (ilk ~0,6 sn) hazırsa fotoğraf solmaz, anında çekilir: yarı saydam fotoğraf hiç görünmez */
+        hero.classList.toggle('m3d-quick',performance.now()-(m3d.t0||0)<600);hero.classList.add('is-3d')}
       else{hero.classList.remove('m3d-loading','is-3d');pct.textContent='';setMode3D('foto')}
     });
   }else{viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
@@ -1929,7 +1937,7 @@ function setMode3D(m){
 function setup3D(p){
   var u=MODELS[p.id]||null;
   if(u===m3d.url&&u)return;            /* aynı ürün: durumu koru */
-  stop3D();m3d.url=u;
+  stop3D();m3d.url=u;m3d.t0=performance.now();
   hero.classList.toggle('has-3d',!!u);
   if(u){prefetchModel(u);setMode3D('3d');
     /* fotoğraf sonradan yüklenirse model boyunu ona göre yeniden ayarla */
@@ -1939,7 +1947,7 @@ function setup3D(p){
    (fotoğraf araya girmez); görünüm kart kapandıktan sonra sıfırlanır */
 function stop3D(keepLook){
   viewer3d.hide();m3d.url=null;clearTimeout(m3d.t);
-  var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d')};
+  var reset=function(){hero.classList.remove('is-3d','m3d-loading','has-3d','m3d-quick')};
   if(keepLook)m3d.t=setTimeout(function(){if(!state.sheetId)reset()},900);else reset();
 }
 window.addEventListener('resize',function(){viewer3d.resize()});

@@ -1693,10 +1693,15 @@ html.gl-wait #welcome .w-sub,html.gl-wait #welcome .enter,html.gl-wait #welcome 
 /* ==========================================================
    3D MODEL (detay kartı) — "3D | Foto" anahtarı + görüntüleyici tuvali
    ========================================================== */
-.m3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;opacity:0;transition:opacity .5s ease;touch-action:none;cursor:grab}
+.m3d-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;opacity:0;transition:opacity .15s ease;touch-action:none;cursor:grab}
 .m3d-canvas:active{cursor:grabbing}
 .hero.is-3d .m3d-canvas{opacity:1}
 .hero.is-3d #hp,.hero.is-3d .hero-hint,.hero.is-3d .plate{opacity:0;pointer-events:none;transition:opacity .4s ease}
+/* geçiş sırayla: önce fotoğraf hızla söner, sonra model belirir — ikisi hiç üst üste görünmez (hayalet burger yok) */
+.hero.is-3d .m3d-canvas{transition:opacity .3s ease .16s}
+.hero.is-3d #hp,.hero.is-3d .hero-hint,.hero.is-3d .plate{transition-duration:.16s}
+.hero.m3d-quick.is-3d #hp,.hero.m3d-quick.is-3d .hero-hint,.hero.m3d-quick.is-3d .plate{transition:none}
+.hero.m3d-quick.is-3d .m3d-canvas{transition:opacity .25s ease}
 .m3d-toggle{display:none;position:absolute;z-index:4;top:14px;left:14px;gap:2px;padding:3px;border-radius:999px;
   background:rgba(29,10,14,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(20,0,6,.2)}
 .hero.has-3d .m3d-toggle{display:flex}
@@ -1763,3 +1768,22 @@ html[data-group="yiyecek"] .grid>.card--sauce+.card:not(.card--sauce){grid-colum
 .card--dessert .ticket{color:var(--red);margin-top:0;height:38px;font-size:23px;padding:0 18px 0 24px}
 .card--dessert .ticket small{font-size:15px}
 .card--dessert .ticket::before{left:12px}
+/* ==========================================================
+   HAMBURGER 3D — SICAK STÜDYO (A): 3D modunda süslü zemin (kareli örtü, yıldız) çekilir; yerine
+   ortası krem-sarı ışık, kenarlara doğru bordoya koyulaşan sade zemin. Tabla ve ışık model3d.js'te.
+   Fotoğraf modu ve diğer ürünler (martini) değişmez.
+   ========================================================== */
+.m3d-bg{position:absolute;inset:0;z-index:1;opacity:0;pointer-events:none;transition:opacity .35s ease;
+  background:radial-gradient(ellipse 62% 58% at 50% 44%,#FFF1D2 0%,#FFD98F 24%,#F4A93A 48%,#D9472B 76%,#8E1424 100%)}
+.panel[data-kind="burger"] .hero.has-3d .m3d-bg{opacity:1}   /* foto modunda da aynı zemin (3D ile foto arasında arka plan değişmez) */
+.panel[data-kind="burger"] .hero.has-3d .hero-deco{opacity:0;transition:opacity .3s ease}
+.panel[data-kind="burger"] .hero.m3d-quick.is-3d .m3d-bg,.panel[data-kind="burger"] .hero.m3d-quick.is-3d .hero-deco{transition:none}
+/* modeli olan hamburgerde üst alan biraz daha yüksek: model ve tabla sıkışmasın (açılmadan önce belli → kayma yok) */
+.sheet.pop .panel[data-kind="burger"] .hero.has-3d{height:min(320px,42dvh)}
+@media(min-width:860px){.sheet.pop .panel[data-kind="burger"] .hero.has-3d{height:340px}}
+/* hamburger 3D sahnesi B (?sahne=b) — A yukarıdaki varsayılan; müşteri seçince biri kalkacak */
+/* B) marka sahnesi: düz marka kırmızısı, arkada büyük soluk 21GRAM logosu */
+html[data-sahne="b"] .m3d-bg{background:radial-gradient(ellipse 75% 65% at 50% 55%,#F01E3C 0%,#E4032D 55%,#A80223 100%)}
+html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;background:url(/img/logo.png) center 34%/86% auto no-repeat;opacity:.16}
+/* foto modunda fotoğraf zeminin (.m3d-bg, z 1) önünde kalsın; 3D tuvali (z 2) yine en önde */
+.panel[data-kind="burger"] .hero.has-3d #hp{position:relative;z-index:1}

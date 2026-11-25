@@ -14,6 +14,10 @@ export const MODELS = {
   'haspresso-martini': '/models/haspresso-martini-v1.glb',
 };
 
+/* "stüdyo sahnesi" olan modeller: altında krem tabla, tablada ve zeminde gölge, güçlü kenar ışığı.
+   (arka plandaki sıcak ışık lekesi CSS'te: .m3d-bg). Martini kendi arka planıyla kalır. */
+const STAGED = new Set(['/models/hamburger-v1.glb']);
+
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -58,8 +62,14 @@ export function createViewer(opts) {
   const getDpr = (opts && opts.getDpr) || (() => Math.min(window.devicePixelRatio || 1, 2));
   /* fotoğrafın kartta kapladığı kutu (piksel); model aynı büyüklükte görünsün diye */
   const fitRect = (opts && opts.fitRect) || (() => null);
+  const look = (opts && opts.look) || 'a';
   let renderer = null, scene, camera, pivot, shadow, canvas, host = null, url = null, raf = 0, active = false;
+  let rim, key, hemi, stage, floorShadow;
   const v = { yaw: .5, pitch: .32, dist: 2, base: 2, auto: true, idleAt: 0, spin: 0 };
+  /* giriş: model hafif aşağıdan yükselir, %94'ten tam boya gelir ve yarım tur dönerek yerine oturur */
+  const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const INTRO_MS = 1100, INTRO_TURN = Math.PI;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
   const ptrs = new Map(); let pinch0 = 0, dist0 = 0;
 
   function init() {
@@ -70,12 +80,25 @@ export function createViewer(opts) {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(32, 1, .01, 50);
     /* sıcak, iştah açıcı ışık */
-    scene.add(new THREE.HemisphereLight(0xfff3e4, 0x3a0e0a, .8));
-    const key = new THREE.DirectionalLight(0xffeedd, 1.2); key.position.set(1.6, 2.6, 2.2); scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc4b0, .45); rim.position.set(-2.2, 1.2, -1.8); scene.add(rim);
+    hemi = new THREE.HemisphereLight(0xfff3e4, 0x3a0e0a, .8); scene.add(hemi);
+    key = new THREE.DirectionalLight(0xffeedd, 1.2); key.position.set(1.6, 2.6, 2.2); scene.add(key);
+    rim = new THREE.DirectionalLight(0xffc4b0, .45); rim.position.set(-2.2, 1.2, -1.8); scene.add(rim);
     pivot = new THREE.Group(); scene.add(pivot);
     shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false }));
     shadow.rotation.x = -Math.PI / 2; scene.add(shadow);
+    /* tabla: krem üst yüz + biraz koyu kenar şeridi; altında zemine düşen geniş yumuşak gölge */
+    stage = new THREE.Group();
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 96), [
+      new THREE.MeshStandardMaterial({ color: 0xF1DDB6, roughness: .7, metalness: 0 }),   /* yan */
+      new THREE.MeshStandardMaterial({ color: 0xFFF6E2, roughness: .55, metalness: 0 }),  /* üst */
+      new THREE.MeshStandardMaterial({ color: 0xF1DDB6, roughness: .7, metalness: 0 }),   /* alt */
+    ]);
+    top.name = 'top'; stage.add(top);
+    const lip = new THREE.Mesh(new THREE.TorusGeometry(1, .018, 10, 120), new THREE.MeshStandardMaterial({ color: 0xE7C995, roughness: .6 }));
+    lip.rotation.x = Math.PI / 2; lip.name = 'lip'; stage.add(lip);
+    floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false, opacity: .9 }));
+    floorShadow.rotation.x = -Math.PI / 2; stage.add(floorShadow);
+    stage.visible = false; scene.add(stage);
 
     /* etkileşim: tek parmak çevir, iki parmak/tekerlek yakınlaştır. Detay kartının eğme etkisine geçmesin. */
     canvas.addEventListener('pointerdown', (e) => {
@@ -98,7 +121,9 @@ export function createViewer(opts) {
 
   function size() {
     if (!host) return;
-    const r = host.getBoundingClientRect(); if (!r.width) return;
+    /* offsetWidth/Height: detay kartı açılırken küçükten büyür (transform); getBoundingClientRect o anki
+       küçük boyu verir ve model aşırı yakın kalırdı. offset* dönüşümden etkilenmez → gerçek boy. */
+    const r = { width: host.offsetWidth, height: host.offsetHeight }; if (!r.width) return;
     renderer.setPixelRatio(getDpr()); renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
     /* dar ekranda modeli sığdır (yatay görüş açısı dikeyden darsa uzaklaş) */
@@ -120,10 +145,33 @@ export function createViewer(opts) {
     const box = new THREE.Box3().setFromObject(model), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
     model.position.set(-c.x, -box.min.y, -c.z);                  /* tabana otur, ortala */
     const rad = Math.max(s.x, s.y, s.z) * .5;
-    v.mw = Math.max(s.x, s.z); v.mh = s.y;
-    v.rad = rad; v.base = rad / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.52; v.dist = v.base;
-    v.target = new THREE.Vector3(0, s.y * .5, 0);           /* fotoğrafla aynı merkez */
-    shadow.scale.set(Math.max(s.x, s.z) * 1.35, Math.max(s.x, s.z) * 1.35, 1); shadow.position.y = .002;
+    v.sw = Math.max(s.x, s.z); v.sh = s.y;
+    v.rad = rad;
+  }
+
+  /* sahne ayarı (her gösterimde; aynı görüntüleyici iki modelde de kullanılıyor) */
+  function applyStage(staged) {
+    const w = v.sw, h = v.sh;
+    stage.visible = staged; v.staged = staged;
+    if (staged) {
+      const R = w * .62, T = h * .07;                    /* tabla yarıçapı ve kalınlığı */
+      const top = stage.getObjectByName('top'); top.scale.set(R, T, R); top.position.y = -T / 2;
+      const lip = stage.getObjectByName('lip'); lip.scale.set(R, R, R * 1.4); lip.position.y = -.001;
+      floorShadow.scale.set(R * 3, R * 3, 1); floorShadow.position.y = -T - .002;
+      shadow.scale.set(w * 1.2, w * 1.2, 1); shadow.material.opacity = 1;
+      v.mw = R * 2; v.mh = h + T;                         /* sığdırma: tabla dahil */
+      v.target = new THREE.Vector3(0, (h - T) * .5, 0);
+      /* ışık: A sıcak stüdyo (varsayılan) · B marka sahnesi (kırmızı zemin) — biraz kısık, ekmek parlamasın */
+      hemi.intensity = look === 'b' ? .6 : .52; key.intensity = look === 'b' ? .72 : .66; key.position.set(1.6, 2.6, 2.2);
+      rim.intensity = look === 'b' ? .42 : .55; rim.color.set(0xffd2a8); rim.position.set(-2.4, 1.6, -2.2);
+    } else {
+      shadow.scale.set(w * 1.35, w * 1.35, 1); shadow.material.opacity = 1;
+      v.mw = w; v.mh = h;
+      v.target = new THREE.Vector3(0, h * .5, 0);          /* fotoğrafla aynı merkez */
+      hemi.intensity = .8; key.intensity = 1.2; key.position.set(1.6, 2.6, 2.2); rim.intensity = .45; rim.color.set(0xffc4b0); rim.position.set(-2.2, 1.2, -1.8);
+    }
+    shadow.position.y = .002;
+    v.base = Math.max(v.mw, v.mh) * .5 / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.52; v.dist = v.base;
   }
 
   function frame(now) {
@@ -133,8 +181,17 @@ export function createViewer(opts) {
     if (!v.auto && !ptrs.size && now - v.idleAt > 3000) v.auto = true;   /* bırakınca ~3 sn sonra yine döner */
     v.spin += ((v.auto ? .45 : 0) - v.spin) * (1 - Math.exp(-dt * 2.5));
     v.yaw += v.spin * dt;
-    const d = v.dist * (v.fitMul || 1);
-    camera.position.set(Math.sin(v.yaw) * Math.cos(v.pitch) * d, v.target.y + Math.sin(v.pitch) * d, Math.cos(v.yaw) * Math.cos(v.pitch) * d);
+    /* giriş animasyonu (dokununca hemen biter) */
+    let yawOff = 0;
+    if (v.introAt) {
+      if (!v.introStart) v.introStart = now;
+      const k = Math.min(1, (now - v.introStart) / INTRO_MS), e = easeOut(k);
+      yawOff = -INTRO_TURN * (1 - e);
+      pivot.position.y = (v.staged ? 1 : -1) * v.sh * .06 * (1 - e);   /* tablada: yukarıdan tablaya iner */ pivot.scale.setScalar(.94 + .06 * e);
+      if (k >= 1 || ptrs.size) { v.introAt = 0; pivot.position.y = 0; pivot.scale.setScalar(1); yawOff = 0; }
+    }
+    const d = v.dist * (v.fitMul || 1), yw = v.yaw + yawOff;
+    camera.position.set(Math.sin(yw) * Math.cos(v.pitch) * d, v.target.y + Math.sin(v.pitch) * d, Math.cos(yw) * Math.cos(v.pitch) * d);
     camera.lookAt(v.target);
     renderer.render(scene, camera);
   }
@@ -149,7 +206,9 @@ export function createViewer(opts) {
         if (!renderer) init();
         if (canvas.parentNode !== host) host.appendChild(canvas);
         if (!scn.parent || scn.parent !== pivot) place(scn);
+        applyStage(STAGED.has(modelUrl));
         v.yaw = .5; v.pitch = .32; v.auto = true; v.spin = .45; v.last = 0;
+        v.introAt = RM ? 0 : 1; v.introStart = 0; pivot.position.y = 0; pivot.scale.setScalar(RM ? 1 : .94);
         size(); active = true; cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
         requestAnimationFrame(() => onState && onState('ready'));
       }).catch((err) => { delete modelP[modelUrl]; if (url === my) onState && onState('error', err); });
