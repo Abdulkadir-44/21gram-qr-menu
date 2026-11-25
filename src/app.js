@@ -1642,15 +1642,16 @@ function switchGroup(tab){
   /* BÖLÜM YÜKLEYİCİSİ — kartlar görünmezken kurulur ve ilk ekranın görselleri iner; iş 0,2 sn'de bitmezse ortada
      21GRAM logosu belirir (yalnız CSS transform: telefon meşgulken de akar). Hazır olunca logo söner, kartlar birlikte yükselir.
      Bir kez belirirse en az 0,4 sn kalır (yanıp sönmesin). Güçlü cihazda çoğu zaman hiç görünmez. */
-  clearTimeout(grpLd.t);grpLd.shown=0;grpLd.el.classList.remove('on');
+  grpLdInit();el_on(false);
+  clearTimeout(grpLd.t);grpLd.shown=0;
   var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
-  grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();grpLd.el.classList.add('on')},200);
+  grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();el_on(true)},200);
   var reveal=function(){
     if(my!==swSeq)return;
     var wait=grpLd.shown?Math.max(0,grpLd.shown+400-performance.now()):0;
     setTimeout(function(){
       if(my!==swSeq)return;
-      clearTimeout(grpLd.t);grpLd.el.classList.remove('on');
+      clearTimeout(grpLd.t);el_on(false);
       var cs=grid.querySelectorAll('.card');
       for(var k=0;k<cs.length&&k<12;k++)cs[k].classList.add('rise');      /* yalnız ilk ekranlar yükselir */
       grid.style.transition='opacity .2s ease';grid.style.opacity='';
@@ -1688,12 +1689,17 @@ function switchGroup(tab){
   swT=setTimeout(swap,300);
 }
 var swSeq=0;
-var grpLd=(function(){
+function el_on(on){if(!grpLd.el)return;grpLd.el.style.opacity=on?'':'0';grpLd.el.classList.toggle('on',on)}
+/* bölüm yükleyicisi: sayfa açılırken OLUŞTURULMAZ (ana sayfaya hiçbir şey eklenmez); menüde ilk bölüm değişiminde kurulur */
+var grpLd={el:null,cap:null,t:0,shown:0};
+function grpLdInit(){
+  if(grpLd.el)return;
   var el=document.createElement('div');el.className='grp-load';el.setAttribute('aria-hidden','true');
+  el.style.cssText='position:fixed;opacity:0;pointer-events:none';   /* stil gelmeden bir an bile görünmesin */
   el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="gl-win"><span class="gl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
   document.body.appendChild(el);
-  return {el:el,cap:el.querySelector('.gl-cap'),t:0,shown:0};
-})();
+  grpLd.el=el;grpLd.cap=el.querySelector('.gl-cap');
+}
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});
