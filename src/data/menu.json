@@ -67,7 +67,8 @@
        "desc": "smash et, american cheese, köz biber sos, mor soğan, gürkens, patates kızartması",
        "img": "aci-gercek-smash.webp",
        "w": 640,
-       "h": 532
+       "h": 532,
+       "imgDetail": "aci-gercek-smash-detay.webp"
       }
      ]
     },

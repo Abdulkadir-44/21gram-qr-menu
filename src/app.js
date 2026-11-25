@@ -6,7 +6,7 @@
 import LOGO_SHAPES from './data/logo-shapes.json';
 import FIGS_DATA from './data/figs.json';
 import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
-import { MODELS, createViewer, prefetchModel } from './model3d.js';
+import { MODELS, MODELS_HD, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
 const IMG_V = 13;
@@ -24,6 +24,7 @@ menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
   img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h, cx: it.cx || 0,
+  imgD: it.imgDetail ? '/img/new/' + it.imgDetail + '?v=' + IMG_V : '',   /* yalnız detayda gösterilen fotoğraf (kart kendi img'sini kullanır) */
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
@@ -1740,7 +1741,9 @@ var sheet=$('#sheet'),hpHost=$('#hpHost'),hero=$('#hero'),hp=null,hpT={rx:0,ry:0
 var lastFocus=null;
 function fillSheet(p){
   var D0=DETAIL[p.kind];
-  var vis=p.img?'<img id="hp" src="'+p.img+'" alt="'+esc(p.name)+'" draggable="false">'+skHTML(p)
+  /* detay fotoğrafı: ürünün ayrı bir detay fotoğrafı varsa o (ör. Acı Gerçek Smash: tepside patates ve sosla) */
+  m3d.fit=p.imgD?{w:p.w,h:p.h}:null;
+  var vis=p.img?'<img id="hp" src="'+(p.imgD||p.img)+'" alt="'+esc(p.name)+'" draggable="false">'+skHTML(p)
     :(D0&&D0.art?'<div id="hp" class="art" role="img" aria-label="'+esc(p.name)+'">'+D0.art(p)+'</div>'
     :'<div id="hp" class="ph" role="img" aria-label="'+esc(p.name)+'"><img src="'+LOGO_IMG+'" alt=""></div>');
   hpHost.innerHTML=vis;hp=$('#hp');armImgs(hpHost);
@@ -1808,7 +1811,7 @@ function prefetchNeighbors(i){
   var n=state.order.length;
   [1,-1].forEach(function(d){
     var q=BYID[state.order[(i+d+n)%n]];
-    if(q)prefetchImg(q.img);
+    if(q)prefetchImg(q.imgD||q.img);   /* detayda hangi fotoğraf görünecekse o */
   });
 }
 /* ——— KART ÇEVİRME (v2 pop-up) ———
@@ -1965,7 +1968,15 @@ document.documentElement.dataset.sahne=SAHNE;
 var viewer3d=createViewer({
   look:SAHNE,
   getDpr:function(){var d=Math.min(window.devicePixelRatio||1,2);return gl.q&&gl.q.lvl>0?Math.min(d,1):d},
-  fitRect:function(){return hp&&hp.tagName==='IMG'&&hp.offsetWidth?{w:hp.offsetWidth,h:hp.offsetHeight}:null}
+  /* 3D modeli fotoğrafla aynı boyda göster. Ürünün ayrı (geniş) detay fotoğrafı varsa model yine KART fotoğrafının
+     o kutudaki boyuna göre ölçülür: sahne ve model boyu detay fotoğrafından etkilenmez. */
+  fitRect:function(){
+    if(!hp||hp.tagName!=='IMG'||!hp.offsetWidth)return null;
+    if(!m3d.fit)return {w:hp.offsetWidth,h:hp.offsetHeight};
+    var cs=getComputedStyle(hp),px=function(v,b){return /%$/.test(v)?parseFloat(v)*b/100:(parseFloat(v)||Infinity)};
+    var s=Math.min(px(cs.maxWidth,hero.clientWidth)/m3d.fit.w,px(cs.maxHeight,hero.clientHeight)/m3d.fit.h,1);
+    return {w:m3d.fit.w*s,h:m3d.fit.h*s};
+  }
 });
 var m3d={mode:'3d',url:null};
 var m3dBar=document.createElement('div');m3dBar.className='m3d-toggle';m3dBar.setAttribute('role','group');m3dBar.setAttribute('aria-label','Görünüm');
@@ -2041,7 +2052,7 @@ function setMode3D(m){
   [].forEach.call(m3dBar.querySelectorAll('[data-m]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.m===m))});
   if(m==='3d'){
     var my=m3d.url,pct=m3dBar.querySelector('small');
-    var lk=null;for(var id in MODELS)if(MODELS[id]===my&&LOADER_OF[id])lk=LOADER_OF[id];
+    var lk=null;for(var id in MODELS)if((MODELS[id]===my||MODELS_HD[id]===my)&&LOADER_OF[id])lk=LOADER_OF[id];
     if(lk&&!hero.classList.contains('is-3d'))loaderStart(lk);
     viewer3d.show(hero,my,function(st,f){
       if(m3d.url!==my||m3d.mode!=='3d')return;
@@ -2064,7 +2075,8 @@ function setMode3D(m){
   }else{loaderStop();viewer3d.hide();hero.classList.remove('is-3d','m3d-loading')}
 }
 function setup3D(p){
-  var u=MODELS[p.id]||null;
+  /* güçlü cihaz yüksek detaylı modeli, zayıf cihaz hafifini alır */
+  var u=(!WEAK.on&&MODELS_HD[p.id])||MODELS[p.id]||null;
   if(u===m3d.url&&u)return;            /* aynı ürün: durumu koru */
   stop3D();m3d.url=u;m3d.t0=performance.now();
   hero.classList.toggle('has-3d',!!u);
