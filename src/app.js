@@ -23,7 +23,7 @@ const KIND = { 'smash-burger': 'burger', 'tavuk-burger': 'burger', 'house-koktey
 menu.groups.forEach(g => g.cats.forEach(c => c.items.forEach((it, n) => PRODUCTS.push({
   group: g.name, groupKey: g.key, category: c.name, catKey: c.key,
   id: it.id, price: it.price, desc: it.desc, name: it.name, size: it.size,
-  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h,
+  img: it.img ? '/img/new/' + it.img + '?v=' + IMG_V : '', w: it.w, h: it.h, cx: it.cx || 0,
   kind: KIND[c.key] || 'classic', no: n + 1,
 }))));
 
@@ -54,6 +54,13 @@ var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches
 /* telefon/tablet (ana giriş parmak): hafif sürüm — parıltı, kart eğilmesi, kart altı bulanık gölge ve başlık camı kapalı; kar 4, menüde bölüm başına 3 figür */
 var LITE=!!(window.matchMedia&&matchMedia('(hover: none) and (pointer: coarse)').matches);
 if(LITE)document.documentElement.classList.add('lite');
+/* ZAYIF CİHAZ — bölüm geçişinde 21GRAM yükleyicisi yalnız zayıf cihazda kullanılır; güçlü cihaz eski akışla (beklemesiz) geçer.
+   Sinyaller: (1) kalite sistemi zorlandı (ortalama kare > 22 ms), (2) bir bölüm geçişinin kurulumu 0,3 sn'yi aştı,
+   (3) ilk tahmin: tarayıcı bildiriyorsa ≤4 çekirdek ve ≤4 GB bellek (yalnız Android Chrome bildirir).
+   Bir kez "zayıf" denen cihaz oturum boyunca zayıf kalır (yükleyici bir görünüp bir kaybolmasın). ?perf göstergesinde yazar. */
+var WEAK={on:false,why:''};
+function markWeak(why){if(WEAK.on)return;WEAK.on=true;WEAK.why=why;if(/[?&]perf/.test(location.search)&&window.console)console.info('[cihaz] zayıf: '+why)}
+(function(){var hc=navigator.hardwareConcurrency,dm=navigator.deviceMemory;if(hc&&dm&&hc<=4&&dm<=4)markWeak('donanım '+hc+' çekirdek / '+dm+' GB')})();
 var $=function(s){return document.querySelector(s)};
 var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
 var ss=function(a,b,x){x=clamp((x-a)/(b-a),0,1);return x*x*(3-2*x)};
@@ -498,8 +505,8 @@ function initGL(){
       if(now-Q.t0<1500)return;
       var avg=Q.sum/Q.n;Q.sum=0;Q.n=0;Q.t0=now;
       if(Q.log&&window.console)console.info('[kalite] ölçüm: ortalama kare '+avg.toFixed(1)+' ms (≈'+Math.round(1000/avg)+' fps), kademe '+Q.lvl+', piksel oranı '+dprNow());
-      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':''].filter(Boolean).join(String.fromCharCode(10)));
-      if(avg>22){Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
+      if(Q.log)perfHud(['kademe '+Q.lvl+' / '+Q.max,Math.round(1000/avg)+' fps (kare '+avg.toFixed(1)+' ms)','çözünürlük '+dprNow()+'x',halfOn()?'menüde yarım hız':'',fewOn()?'figürler yarıda':'','cihaz: '+(WEAK.on?'zayıf ('+WEAK.why+') · bölüm yükleyicisi açık':'güçlü · yükleyici yok')].filter(Boolean).join(String.fromCharCode(10)));
+      if(avg>22){markWeak('kare '+avg.toFixed(0)+' ms');Q.good=0;if(P<.5||Q.lvl<1)setLvl(Q.lvl+1);Q.hold=now+800}   /* menüde en fazla 1. kademe */
       else if(avg<18&&Q.lvl>0){if(++Q.good>=2){Q.good=0;setLvl(Q.lvl-1);Q.hold=now+800}}
       else Q.good=0;
     }
@@ -812,7 +819,8 @@ function hotCardHTML(p,i){
    +'<path d="M30 88 C18 70 42 58 30 40 C20 26 36 14 30 2"/><path d="M60 88 C48 70 72 58 60 40 C50 26 66 14 60 2"/><path d="M90 88 C78 70 102 58 90 40 C80 26 96 14 90 2"/></svg>';
   return cardOpen(p,i,'card--hot')
    +'<div class="card-in"><div class="shade" aria-hidden="true"></div><div class="paper"><div class="sheen"></div><span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span></div>'
-   +'<div class="stage">'+steam+(p.img?prodHTML(p):cupSVG())
+   /* fotoğraflı fincan: gövde kartın ortasına alınır (kulp yüzünden görsel merkezi kayık, --cx), duman fincan ağzının hemen üstünden çıkar */
+   +'<div class="stage">'+(p.img?'<span class="cup-w" style="--cx:'+p.cx+';--ar:'+(p.w/p.h).toFixed(3)+'">'+steam+prodHTML(p)+'</span>':steam+cupSVG())
    +'</div>'
    +'<div class="meta"><p class="cat">'+esc(hotType(p))+'</p>'
    +'<h3 class="name">'+esc(p.name)+'</h3>'
@@ -1537,6 +1545,7 @@ function render(opts){
       if(opts.dealChunk)els.forEach(function(el){if(el.classList&&el.classList.contains('card'))el.classList.add('rise')});
     };
     var done=function(){chunkFlush=null;layoutWM(grid);collectCards();moveInd();
+      if(opts.onDone)opts.onDone();
       if(opts.dealChunk)setTimeout(function(){if(seq===renderSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600)};
     var step=function(){if(seq!==renderSeq)return;addChunk(3);if(nodes.length)afterPaint(step);else done()};
     chunkFlush=function(){if(seq!==renderSeq)return;addChunk(nodes.length);done()};
@@ -1637,6 +1646,34 @@ function switchGroup(tab){
   var hx=groupColor(state.group);if(gl.setGroup)gl.setGroup(hx,state.group);
   if(RM){window.scrollTo(0,0);render();H.style.removeProperty('--bg');return}
   clearTimeout(swT);var my=++swSeq,done=false;
+  /* BÖLÜM YÜKLEYİCİSİ — kartlar görünmezken kurulur ve ilk ekranın görselleri iner; iş 0,2 sn'de bitmezse ortada
+     21GRAM logosu belirir (yalnız CSS transform: telefon meşgulken de akar). Hazır olunca logo söner, kartlar birlikte yükselir.
+     Bir kez belirirse en az 0,4 sn kalır (yanıp sönmesin). Güçlü cihazda çoğu zaman hiç görünmez. */
+  var weak=WEAK.on;
+  clearTimeout(grpLd.t);grpLd.shown=0;el_on(false);
+  if(weak){
+    grpLdInit();
+    var gNow=GROUPS.find(function(g){return g.key===state.group});grpLd.cap.textContent=gNow?gNow.name:'';
+    grpLd.t=setTimeout(function(){if(my!==swSeq)return;grpLd.shown=performance.now();el_on(true)},200);
+  }
+  var reveal=function(){
+    if(my!==swSeq)return;
+    var wait=grpLd.shown?Math.max(0,grpLd.shown+400-performance.now()):0;
+    setTimeout(function(){
+      if(my!==swSeq)return;
+      clearTimeout(grpLd.t);el_on(false);
+      var cs=grid.querySelectorAll('.card');
+      for(var k=0;k<cs.length&&k<12;k++)cs[k].classList.add('rise');      /* yalnız ilk ekranlar yükselir */
+      grid.style.transition='opacity .2s ease';grid.style.opacity='';
+      setTimeout(function(){if(my===swSeq)grid.querySelectorAll('.card.rise').forEach(function(el){el.classList.remove('rise')})},1600);
+    },wait);
+  };
+  /* ilk ekranın görselleri inip çözülünce (en fazla 2,5 sn beklenir) */
+  var waitEager=function(){
+    var ims=[].slice.call(grid.querySelectorAll('img.prod[fetchpriority="high"]'));
+    var ps=ims.map(function(im){return im.decode?im.decode().catch(function(){}):Promise.resolve()});
+    Promise.race([Promise.all(ps),new Promise(function(r){setTimeout(r,2500)})]).then(reveal);
+  };
   /* yeni kartlar solma GERÇEKTEN bitince gelir (tarayıcı meşgulse sabit süre eski kartları yarıda keserdi); yedek 300 ms */
   var swap=function(){
     if(done||my!==swSeq)return;done=true;grid.removeEventListener('transitionend',onEnd);clearTimeout(swT);
@@ -1652,9 +1689,17 @@ function switchGroup(tab){
         if(tw)tw.animate([{opacity:0,transform:'translateY(-16px)'},{opacity:1,transform:'none'}],{duration:420,delay:60,easing:ez,fill:'backwards'});
       }
     }
-    render({chunk:true,dealChunk:true});
+    if(weak){
+      /* ZAYIF CİHAZ: kartlar görünmez (opacity 0) kurulur; bitince görseller beklenir, sonra birlikte açılır */
+      render({chunk:true,onDone:waitEager});
+    }else{
+      /* GÜÇLÜ CİHAZ: beklemesiz eski akış — kartlar parça parça kurulurken yükselerek gelir. Kurulum 0,3 sn'yi
+         aşarsa cihaz zayıf sayılır, sonraki geçişlerde yükleyici devreye girer. */
+      var tB=performance.now();
+      render({chunk:true,dealChunk:true,onDone:function(){var d=performance.now()-tB;if(d>300)markWeak('bölüm geçişi '+Math.round(d)+' ms')}});
+      grid.style.transition='none';grid.style.opacity='';
+    }
     document.documentElement.style.removeProperty('--bg');
-    grid.style.transition='none';grid.style.opacity='';
   };
   var onEnd=function(e){if(e.target===grid&&e.propertyName==='opacity')swap()};
   grid.addEventListener('transitionend',onEnd);
@@ -1662,6 +1707,17 @@ function switchGroup(tab){
   swT=setTimeout(swap,300);
 }
 var swSeq=0;
+function el_on(on){if(!grpLd.el)return;grpLd.el.style.opacity=on?'':'0';grpLd.el.classList.toggle('on',on)}
+/* bölüm yükleyicisi: sayfa açılırken OLUŞTURULMAZ (ana sayfaya hiçbir şey eklenmez); menüde ilk bölüm değişiminde kurulur */
+var grpLd={el:null,cap:null,t:0,shown:0};
+function grpLdInit(){
+  if(grpLd.el)return;
+  var el=document.createElement('div');el.className='grp-load';el.setAttribute('aria-hidden','true');
+  el.style.cssText='position:fixed;opacity:0;pointer-events:none';   /* stil gelmeden bir an bile görünmesin */
+  el.innerHTML='<span class="gl-logo"><img src="'+LOGO_IMG+'" alt="" class="gl-base"><span class="grpl-win"><span class="grpl-in"><img src="'+LOGO_IMG+'" alt=""></span></span></span><span class="gl-cap"></span>';
+  document.body.appendChild(el);
+  grpLd.el=el;grpLd.cap=el.querySelector('.gl-cap');
+}
 tabsEl.addEventListener('keydown',function(e){
   if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
   var tabs=[].slice.call(tabsEl.querySelectorAll('.tab')),i=tabs.findIndex(function(t){return t.getAttribute('aria-selected')==='true'});

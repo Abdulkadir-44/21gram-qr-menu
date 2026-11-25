@@ -1811,3 +1811,27 @@ html[data-sahne="b"] .m3d-bg::before{content:"";position:absolute;inset:0;backgr
 .ld-martini .ly{transform:translateY(-10px)}
 .m3d-pct{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:15px;letter-spacing:.04em;color:var(--cream);text-shadow:0 2px 6px rgba(40,0,8,.35);font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){.m3d-load .ly{transition:opacity .2s ease;transform:none}}
+/* ==========================================================
+   BÖLÜM YÜKLEYİCİSİ (bölüm değişiminde, app.js grpLd): 21GRAM logosu soldan sağa dolar ve boşalır.
+   Yalnız transform/opacity → ana iş parçacığı meşgulken de akar (kasmanın yerine sakin bir bekleme).
+   ========================================================== */
+.grp-load{position:fixed;left:50%;top:52%;z-index:15;display:grid;justify-items:center;gap:12px;pointer-events:none;
+  opacity:0;transform:translate(-50%,-50%) scale(.96);transition:opacity .2s ease,transform .2s ease}
+.grp-load.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.gl-logo{position:relative;display:block;width:min(46vw,200px);line-height:0}
+.gl-logo img{width:100%;height:auto;display:block}
+.gl-base{opacity:.22}
+/* sınıf adları benzersiz: "gl-in" sayfanın açılış sınıfıydı (html.gl-in) → bütün sayfa sağdan sola kayıyordu */
+.grpl-win{position:absolute;inset:0;overflow:hidden;animation:grplWin 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+.grpl-in{position:absolute;inset:0;animation:grplIn 1.5s cubic-bezier(.65,0,.35,1) infinite;will-change:transform}
+@keyframes grplWin{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes grplIn{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.gl-cap{font-family:var(--display);font-stretch:var(--display-stretch);font-weight:800;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);opacity:.7}
+.grp-load:not(.on) .grpl-win,.grp-load:not(.on) .grpl-in{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.grpl-win,.grpl-in{animation:none}.grpl-win{transform:none}.grpl-in{transform:none}}
+/* sıcak içecek: fincan gövdesi kartın ortasında, duman ağzın hemen üstünde.
+   Kutu görselle aynı genişlikte (en fazla %62, yükseklik 104 px'i geçmez: --ar = en/boy) → kaydırma (--cx, görsel
+   genişliğine oran) her kart boyunda doğru. */
+.card--hot .cup-w{position:relative;display:block;width:min(62%,calc(104px * var(--ar,1)));line-height:0;transform-style:preserve-3d;transform:translateX(calc(var(--cx,0) * -100%))}
+.card--hot .cup-w .prod{width:100%;height:auto;max-width:none;max-height:none}
+.card--hot .cup-w .steam{top:auto;bottom:calc(100% - 14px);left:calc(50% + var(--cx,0) * 100%);width:64px;margin-left:-32px}
