@@ -9,7 +9,7 @@ import { ARMY_SVG, ARMY_KIND } from './data/army-figs.js';
 import { MODELS, createViewer, prefetchModel } from './model3d.js';
 
 /* fotoğraflar yeniden kesildiğinde artır (tarayıcı önbelleğini kırar) */
-const IMG_V = 10;
+const IMG_V = 11;
 /* menü verisi pakete gömülü (ayrı istek ve bekleme yok); src/data/menu.json değişince build yeniden alır */
 import menu from './data/menu.json';
 
