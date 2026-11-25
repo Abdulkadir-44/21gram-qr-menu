@@ -113,7 +113,6 @@ export function createViewer(opts) {
   const getDpr = (opts && opts.getDpr) || (() => Math.min(window.devicePixelRatio || 1, 2));
   /* fotoğrafın kartta kapladığı kutu (piksel); model aynı büyüklükte görünsün diye */
   const fitRect = (opts && opts.fitRect) || (() => null);
-  const look = (opts && opts.look) || 'a';
   let renderer = null, scene, camera, pivot, shadow, canvas, host = null, url = null, raf = 0, active = false;
   let rim, key, hemi, stage, floorShadow;
   const v = { yaw: .5, pitch: .32, dist: 2, base: 2, auto: true, idleAt: 0, spin: 0 };
@@ -218,9 +217,9 @@ export function createViewer(opts) {
       shadow.scale.set(w * 1.2, w * 1.2, 1); shadow.material.opacity = 1;
       v.mw = R * 2; v.mh = h + T;                         /* sığdırma: tabla dahil */
       v.target = new THREE.Vector3(0, (h - T) * .5, 0);
-      /* ışık: A sıcak stüdyo (varsayılan) · B marka sahnesi (kırmızı zemin) — biraz kısık, ekmek parlamasın */
-      hemi.intensity = look === 'b' ? .6 : .52; key.intensity = look === 'b' ? .72 : .66; key.position.set(1.6, 2.6, 2.2);
-      rim.intensity = look === 'b' ? .42 : .55; rim.color.set(0xffd2a8); rim.position.set(-2.4, 1.6, -2.2);
+      /* ışık: sıcak stüdyo — biraz kısık, ekmek parlamasın */
+      hemi.intensity = .52; key.intensity = .66; key.position.set(1.6, 2.6, 2.2);
+      rim.intensity = .55; rim.color.set(0xffd2a8); rim.position.set(-2.4, 1.6, -2.2);
     } else {
       shadow.scale.set(w * 1.35, w * 1.35, 1); shadow.material.opacity = 1;
       v.mw = w; v.mh = h;

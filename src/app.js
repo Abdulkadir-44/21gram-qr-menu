@@ -1969,11 +1969,7 @@ hero.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')hpT.on=
 /* ——— 3D MODEL (detay) ———
    Modeli olan üründe detay 3D ile açılır; üstte "3D | Foto" anahtarı. Model inerken fotoğraf görünür,
    anahtarda yüzde yazar; hazır olunca 3D yumuşakça fotoğrafın yerini alır. */
-/* hamburger 3D sahnesi: varsayılan A (sıcak stüdyo); ?sahne=b → B (marka sahnesi) — müşteri seçene kadar ikisi de duruyor */
-var SAHNE=(/[?&]sahne=([ab])/.exec(location.search)||[])[1]||'a';
-document.documentElement.dataset.sahne=SAHNE;
 var viewer3d=createViewer({
-  look:SAHNE,
   getDpr:function(){var d=Math.min(window.devicePixelRatio||1,2);return gl.q&&gl.q.lvl>0?Math.min(d,1):d},
   /* 3D modeli fotoğrafla aynı boyda göster. Ürünün ayrı (geniş) detay fotoğrafı varsa model yine KART fotoğrafının
      o kutudaki boyuna göre ölçülür: sahne ve model boyu detay fotoğrafından etkilenmez. */
