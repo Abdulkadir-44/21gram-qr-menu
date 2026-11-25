@@ -1752,3 +1752,5 @@ html.lite .nav-in,html.lite .icon-btn,html.lite .top-wrap,html.lite .nav{-webkit
 .pint2.big{width:min(22vw,84px)}
 .sheet.pop .pint2.big{width:min(18vw,68px)}
 .card--beer.v2 .vol-g .ticket{margin-left:-8px}
+/* soslardan sonra gelen kart (ör. tek ürünlü Tatlı: başlığı yok) yeni satırdan başlar; tablette son sos onun yanına düşüp onun boyuna uzamaz */
+html[data-group="yiyecek"] .grid>.card--sauce+.card:not(.card--sauce){grid-column:1 / span 2}
